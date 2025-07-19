@@ -2,9 +2,9 @@ import { COZE_CN_BASE_URL } from '@coze/api'
 
 // Coze 配置
 export const COZE_CONFIG = {
-    ACCESS_TOKEN: import.meta.env.VITE_COZE_ACCESS_TOKEN || 'pat_NAmlfNhjjLyDFw1hEUWbpStVxIae0c0ZU9rELA2YVfFmd5lMex2G8oYFkLpfOwlW',
-    DEFAULT_BOT_ID: import.meta.env.VITE_COZE_BOT_ID || '7518634256067969061',
-    ANALYSIS_BOT_ID: import.meta.env.VITE_COZE_ANALYSIS_BOT_ID || '7518634256067969061',
+    ACCESS_TOKEN: import.meta.env.VITE_COZE_ACCESS_TOKEN || '',
+    DEFAULT_BOT_ID: import.meta.env.VITE_COZE_BOT_ID || '',
+    ANALYSIS_BOT_ID: import.meta.env.VITE_COZE_ANALYSIS_BOT_ID || '',
     DEFAULT_VOICE_ID: import.meta.env.VITE_COZE_VOICE_ID || '',
     BASE_URL: COZE_CN_BASE_URL,
 
