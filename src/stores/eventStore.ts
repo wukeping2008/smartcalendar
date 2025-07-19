@@ -106,6 +106,22 @@ export const useEventStore = defineStore('events', () => {
     })
   }
 
+  const getEventsByDate = (date: Date) => {
+    const startOfDay = new Date(date)
+    startOfDay.setHours(0, 0, 0, 0)
+    const endOfDay = new Date(date)
+    endOfDay.setHours(23, 59, 59, 999)
+    
+    return events.value.filter(event => {
+      const eventStart = new Date(event.startTime)
+      return eventStart >= startOfDay && eventStart <= endOfDay
+    })
+  }
+
+  const getAllEvents = () => {
+    return events.value
+  }
+
   // 辅助函数
   const generateId = () => {
     return Date.now().toString(36) + Math.random().toString(36).substr(2)
@@ -125,6 +141,8 @@ export const useEventStore = defineStore('events', () => {
     addEvent,
     updateEvent,
     deleteEvent,
-    getEventsByDateRange
+    getEventsByDateRange,
+    getEventsByDate,
+    getAllEvents
   }
 })
