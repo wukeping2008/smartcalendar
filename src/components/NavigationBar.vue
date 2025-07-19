@@ -139,9 +139,9 @@ const route = useRoute()
 
 // Navigation items
 const navItems = [
-  { path: '/calendar', label: '日历', icon: CalendarIcon },
+  { path: '/', label: '日历', icon: CalendarIcon },
   { path: '/schedule', label: '日程', icon: ClockIcon },
-  { path: '/timeflow', label: 'TimeFlow', icon: FlowIcon },
+  { path: '/time-flow', label: 'TimeFlow', icon: FlowIcon },
   { path: '/ai-assistant', label: 'AI助手', icon: MicrophoneIcon }
 ]
 
