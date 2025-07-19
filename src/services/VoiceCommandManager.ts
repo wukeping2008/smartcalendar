@@ -12,7 +12,7 @@ import { EventCategory, Priority } from '@/types'
 export interface CommandContext {
   router: any
   eventStore: any
-  showToast: (type: string, message: string) => void
+  showToast: (type: 'success' | 'error' | 'info' | 'warning', message: string, duration?: number) => void
 }
 
 export class VoiceCommandManager {
