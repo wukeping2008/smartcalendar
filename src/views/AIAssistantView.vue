@@ -6,7 +6,7 @@
     </div>
 
     <!-- 语音交互组件 -->
-    <EnhancedVoiceInterface />
+    <SmartVoiceInterface />
 
     <div class="ai-content">
       <!-- AI建议卡片 -->
@@ -139,7 +139,7 @@
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useEventStore } from '@/stores/eventStore'
 import type { AISuggestion, SuggestionType } from '@/types'
-import EnhancedVoiceInterface from '@/components/EnhancedVoiceInterface.vue'
+import SmartVoiceInterface from '@/components/SmartVoiceInterface.vue'
 
 const eventStore = useEventStore()
 
