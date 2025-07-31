@@ -11,16 +11,17 @@ import DayView from './DayView'
 interface CalendarViewProps {
   currentDate: Date
   onEventSelect?: (event: Event) => void
+  onDateSelect?: (date: Date) => void
 }
 
 export default function CalendarView({ 
   currentDate, 
-  onEventSelect 
+  onEventSelect,
+  onDateSelect 
 }: CalendarViewProps) {
-  const { events, selectEvent } = useEventStore()
+  const { events, selectEvent, deleteEvent } = useEventStore()
   const [selectedDate, setSelectedDate] = useState<Date>(currentDate)
-  const [viewMode, setViewMode] = useState<'month' | 'day'>('month')
-  const [dayViewDate, setDayViewDate] = useState<Date>(currentDate)
+  const [showDayDetails, setShowDayDetails] = useState<boolean>(false)
 
   // 获取当前月份的所有日期
   const getDaysInMonth = (date: Date) => {
@@ -89,9 +90,23 @@ export default function CalendarView({
     setSelectedDate(newDate)
   }
 
-  const handleEventClick = (event: Event) => {
+  const handleEventClick = (event: Event, e?: React.MouseEvent) => {
+    e?.stopPropagation()
     selectEvent(event.id)
     onEventSelect?.(event)
+  }
+
+  const handleDateClick = (date: Date) => {
+    setSelectedDate(date)
+    setShowDayDetails(true)
+    onDateSelect?.(date)
+  }
+
+  const handleDeleteEvent = (eventId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (confirm('确定要删除这个事件吗？')) {
+      deleteEvent(eventId)
+    }
   }
 
   const getCategoryColor = (category: EventCategory): string => {
@@ -117,16 +132,6 @@ export default function CalendarView({
     return date.toDateString() === today.toDateString()
   }
 
-  // 如果是日视图模式，渲染日视图组件
-  if (viewMode === 'day') {
-    return (
-      <DayView
-        selectedDate={dayViewDate}
-        onBack={() => setViewMode('month')}
-        onEventSelect={onEventSelect}
-      />
-    )
-  }
 
   return (
     <div className="w-full h-full bg-black/30 backdrop-blur-sm rounded-xl border border-white/10 p-6">
@@ -194,11 +199,7 @@ export default function CalendarView({
             } ${
               selectedDate.toDateString() === day.date.toDateString() ? 'ring-2 ring-cyan-400' : ''
             }`}
-            onClick={() => {
-              setSelectedDate(day.date)
-              setDayViewDate(day.date)
-              setViewMode('day')
-            }}
+            onClick={() => handleDateClick(day.date)}
           >
             {/* 日期数字 */}
             <div className={`text-sm font-medium mb-1 ${
@@ -244,6 +245,139 @@ export default function CalendarView({
         ))}
       </div>
 
+      {/* 选中日期详情 */}
+      {showDayDetails && (
+        <div className="mt-6 border-t border-white/10 pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-white">
+              {selectedDate.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+              })}
+            </h3>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-gray-400 hover:text-white"
+              onClick={() => setShowDayDetails(false)}
+            >
+              ✕ 收起
+            </Button>
+          </div>
+          
+          {/* 该日期的事件列表 */}
+          <div className="space-y-2 max-h-80 overflow-y-auto">
+            {events
+              .filter(event => event.startTime.toDateString() === selectedDate.toDateString())
+              .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
+              .map((event) => (
+                <div
+                  key={event.id}
+                  className={`p-3 rounded-lg border cursor-pointer transition-colors bg-black/20 border-white/10 hover:bg-black/40 ${
+                    event.isConflicted ? 'border-red-400/50' : ''
+                  }`}
+                  onClick={() => handleEventClick(event)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: getCategoryColor(event.category) }}
+                        />
+                        <h4 className="text-white font-medium text-sm">{event.title}</h4>
+                        {event.isMarketProtected && (
+                          <span className="text-yellow-400 text-xs">🛡️</span>
+                        )}
+                        {event.isConflicted && (
+                          <span className="text-red-400 text-xs">⚠️</span>
+                        )}
+                      </div>
+                      
+                      <div className="text-xs text-gray-400 mb-2">
+                        {event.startTime.toLocaleTimeString('zh-CN', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })} - {event.endTime.toLocaleTimeString('zh-CN', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })} • {Math.round((event.endTime.getTime() - event.startTime.getTime()) / (1000 * 60))}分钟
+                      </div>
+                      
+                      {event.description && (
+                        <p className="text-gray-300 text-xs mb-2 line-clamp-2">
+                          {event.description}
+                        </p>
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className={`text-xs px-2 py-1 rounded ${ 
+                            event.energyRequired === 'peak' ? 'bg-red-500/20 text-red-300' :
+                            event.energyRequired === 'high' ? 'bg-orange-500/20 text-orange-300' :  
+                            event.energyRequired === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                            'bg-emerald-500/20 text-emerald-300'
+                          }`}>
+                            {event.energyRequired === 'peak' ? '巅峰' :
+                             event.energyRequired === 'high' ? '高能' :
+                             event.energyRequired === 'medium' ? '中等' : '低耗'}
+                          </span>
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            event.priority === 'urgent' ? 'bg-red-500/20 text-red-300' :
+                            event.priority === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                            event.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                            'bg-green-500/20 text-green-300'
+                          }`}>
+                            {event.priority === 'urgent' ? '紧急' :
+                             event.priority === 'high' ? '高' :
+                             event.priority === 'medium' ? '中' : '低'}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center space-x-1">
+                          <div className={`text-xs px-2 py-1 rounded ${
+                            event.status === 'completed' ? 'bg-green-500/20 text-green-300' :
+                            event.status === 'in_progress' ? 'bg-blue-500/20 text-blue-300' :
+                            'bg-gray-500/20 text-gray-300'
+                          }`}>
+                            {event.status === 'completed' ? '✅ 已完成' :
+                             event.status === 'in_progress' ? '🔄 进行中' : '📋 计划中'}
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-1 h-6 w-6"
+                            onClick={(e) => handleDeleteEvent(event.id, e)}
+                            title="删除事件"
+                          >
+                            🗑️
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            ))}
+            
+            {events.filter(event => event.startTime.toDateString() === selectedDate.toDateString()).length === 0 && (
+              <div className="text-center py-8">
+                <div className="text-gray-400 text-sm mb-2">该日期暂无事件</div>
+                <AddEventButton />
+              </div>
+            )}
+          </div>
+          
+          {/* 快速操作 */}
+          {events.filter(event => event.startTime.toDateString() === selectedDate.toDateString()).length > 0 && (
+            <div className="mt-4 flex justify-center">
+              <AddEventButton />
+            </div>
+          )}
+        </div>
+      )}
+
       {/* 底部操作区 */}
       <div className="mt-6 flex justify-between items-center">
         <div className="text-sm text-gray-400">
@@ -255,14 +389,10 @@ export default function CalendarView({
             size="sm"
             variant="outline"
             className="text-white border-white/20"
-            onClick={() => {
-              setDayViewDate(new Date())
-              setViewMode('day')
-            }}
+            onClick={() => handleDateClick(new Date())}
           >
-            📅 今日详情
+            📅 查看今日
           </Button>
-          <AddEventButton />
         </div>
       </div>
 

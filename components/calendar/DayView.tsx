@@ -147,7 +147,6 @@ export default function DayView({
               </div>
             )}
           </div>
-          <AddEventButton />
         </div>
       </div>
 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import FlowCanvas from '../../components/timeflow/FlowCanvas'
 import CalendarView from '../../components/calendar/CalendarView'
-import AddEventButton from '../../components/calendar/AddEventButton'
+import SmartEventCreator from '../../components/calendar/SmartEventCreator'
 import VoiceInputButton from '../../components/voice/VoiceInputButton'
 import TimeFlowGuide from '../../components/help/TimeFlowGuide'
 import FloatingTips from '../../components/help/FloatingTips'
@@ -302,9 +302,10 @@ const initializeSampleEvents = (addEvent: (event: Omit<Event, 'id' | 'createdAt'
 }
 
 export default function HomePage() {
-  const { events, selectEvent, addEvent } = useEventStore()
+  const { events, selectEvent, addEvent, deleteEvent } = useEventStore()
   const [currentTime] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [initialized, setInitialized] = useState(false)
   const [viewMode, setViewMode] = useState<'flow' | 'calendar'>('calendar')
 
@@ -329,6 +330,18 @@ export default function HomePage() {
 
   const handleEventDrag = (eventId: string, newPosition: { x: number; y: number; z: number }) => {
     console.log('Drag event:', eventId, newPosition)
+  }
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date)
+  }
+
+  const handleDeleteEvent = (eventId: string) => {
+    deleteEvent(eventId)
+    // 如果删除的是当前选中的事件，清除选中状态
+    if (selectedEvent?.id === eventId) {
+      setSelectedEvent(null)
+    }
   }
 
   return (
@@ -365,8 +378,7 @@ export default function HomePage() {
                 </Button>
               </div>
               <div className="flex space-x-2">
-                <AddEventButton />
-                <VoiceInputButton />
+                <SmartEventCreator />
                 <TimeFlowGuide />
               </div>
             </div>
@@ -385,6 +397,7 @@ export default function HomePage() {
                 <CalendarView
                   currentDate={currentTime}
                   onEventSelect={handleEventSelect}
+                  onDateSelect={handleDateSelect}
                 />
                 
                 {/* 空状态提示 */}
@@ -399,8 +412,7 @@ export default function HomePage() {
                         开始创建您的第一个事件，体验智能日历管理！
                       </p>
                       <div className="flex space-x-2 justify-center">
-                        <AddEventButton />
-                        <VoiceInputButton />
+                        <SmartEventCreator />
                       </div>
                     </Card>
                   </div>
@@ -513,26 +525,10 @@ export default function HomePage() {
             {/* 智能冲突解决 */}
             <ConflictResolver />
 
-            {/* 快速操作 */}
+            {/* 语音创建 */}
             <Card className="bg-black/30 border-white/20 p-4">
-              <h3 className="text-white font-semibold mb-4">快速操作</h3>
-              <div className="space-y-2">
-                <AddEventButton />
-                <VoiceInputButton />
-                <Button variant="outline" className="w-full text-white border-white/20" size="sm">
-                  📊 时间分析
-                </Button>
-                {viewMode === 'calendar' && (
-                  <Button 
-                    variant="outline" 
-                    className="w-full text-white border-white/20" 
-                    size="sm"
-                    onClick={() => setViewMode('flow')}
-                  >
-                    🌊 切换到时间流
-                  </Button>
-                )}
-              </div>
+              <h3 className="text-white font-semibold mb-3">智能事件创建</h3>
+              <SmartEventCreator />
             </Card>
 
             {/* 选中事件详情 */}
@@ -565,10 +561,14 @@ export default function HomePage() {
             <Card className="bg-black/30 border-white/20 p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white font-semibold">今日事件</h3>
-                <span className="text-sm text-gray-400">({events.length})</span>
+                <span className="text-sm text-gray-400">({events.filter(event => 
+                  event.startTime.toDateString() === currentTime.toDateString()
+                ).length})</span>
               </div>
               <div className="space-y-3 max-h-64 overflow-y-auto">
-                {events.map((event) => (
+                {events.filter(event => 
+                  event.startTime.toDateString() === currentTime.toDateString()
+                ).map((event) => (
                   <div 
                     key={event.id}
                     className={`p-3 rounded-lg border cursor-pointer transition-colors ${
