@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { useEventStore } from '../../lib/stores/event-store'
-import { EventCategory, Priority, EventStatus } from '../../types/event'
+import { EventCategory, Priority, EventStatus, EnergyLevel } from '../../types/event'
+import { AzureSpeechService } from '../../lib/services/AzureSpeechService'
+import type { IAudioService } from '../../lib/services/IAudioService'
 
 interface VoiceInputButtonProps {
   onResult?: (text: string) => void
@@ -14,67 +16,192 @@ export default function VoiceInputButton({ onResult, className = "" }: VoiceInpu
   const [isListening, setIsListening] = useState(false)
   const [isSupported, setIsSupported] = useState(false)
   const [transcript, setTranscript] = useState('')
+  const [currentText, setCurrentText] = useState('')
+  const [isInitialized, setIsInitialized] = useState(false)
   const { addEvent } = useEventStore()
+  
+  const audioServiceRef = useRef<IAudioService | null>(null)
+  const accumulatedTextRef = useRef('')
 
-  // 检查浏览器支持
+  // 初始化Azure Speech Service
   useEffect(() => {
-    const speechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window
-    setIsSupported(speechRecognition)
+    const initAudioService = async () => {
+      try {
+        // 优先使用Azure Speech Service，如果没有配置则回退到浏览器API
+        const hasAzureConfig = process.env.NEXT_PUBLIC_AZURE_SPEECH_KEY && 
+                               process.env.NEXT_PUBLIC_AZURE_SPEECH_REGION
+        
+        if (hasAzureConfig) {
+          console.log('使用Azure Speech Service')
+          audioServiceRef.current = new AzureSpeechService()
+        } else {
+          console.log('Azure配置未找到，回退到浏览器Speech API')
+          // 检查浏览器支持
+          const speechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window
+          setIsSupported(speechRecognition)
+          return
+        }
+
+        // 初始化Azure服务
+        await audioServiceRef.current.initTranscription()
+        await audioServiceRef.current.initSynthesis()
+        
+        // 设置回调
+        audioServiceRef.current.onTranscriptionUpdate((text: string, isFinal: boolean) => {
+          if (isFinal && text) {
+            accumulatedTextRef.current += text + ' '
+            setCurrentText(accumulatedTextRef.current)
+            setTranscript(accumulatedTextRef.current)
+          } else {
+            setCurrentText(accumulatedTextRef.current + text)
+          }
+        })
+
+        audioServiceRef.current.onError((error) => {
+          console.error('Azure语音服务错误:', error)
+          setIsListening(false)
+        })
+
+        setIsSupported(true)
+        setIsInitialized(true)
+        console.log('Azure Speech Service初始化成功')
+      } catch (error) {
+        console.error('初始化语音服务失败:', error)
+        // 回退到浏览器API
+        const speechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window
+        setIsSupported(speechRecognition)
+      }
+    }
+
+    initAudioService()
+
+    // 清理函数
+    return () => {
+      if (audioServiceRef.current) {
+        audioServiceRef.current.destroy()
+      }
+    }
   }, [])
 
   // 语音识别
-  const startListening = () => {
+  const startListening = async () => {
     if (!isSupported) {
       alert('浏览器不支持语音识别')
       return
     }
 
-    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
-    const recognition = new SpeechRecognition()
-
-    recognition.continuous = false
-    recognition.interimResults = false
-    recognition.lang = 'zh-CN'
-
-    recognition.onstart = () => {
-      setIsListening(true)
-      setTranscript('')
-    }
-
-    recognition.onresult = (event: any) => {
-      const result = event.results[0][0].transcript
-      setTranscript(result)
-      onResult?.(result)
-      
-      // 自动解析并创建事件
-      const eventData = parseVoiceToEvent(result)
-      if (eventData) {
-        addEvent(eventData)
-        speak(`已创建事件：${eventData.title}`)
-      } else {
-        speak('抱歉，无法理解您的指令，请重试')
+    try {
+      // 如果有Azure服务，使用Azure
+      if (audioServiceRef.current && isInitialized) {
+        console.log('使用Azure Speech Service进行语音识别')
+        setIsListening(true)
+        setTranscript('')
+        accumulatedTextRef.current = ''
+        
+        await audioServiceRef.current.startTranscription()
+        return
       }
-    }
 
-    recognition.onerror = (event: any) => {
-      console.error('语音识别错误:', event.error)
+      // 回退到浏览器API
+      console.log('使用浏览器Speech API')
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
+      const recognition = new SpeechRecognition()
+
+      recognition.continuous = false
+      recognition.interimResults = false
+      recognition.lang = 'zh-CN'
+
+      recognition.onstart = () => {
+        setIsListening(true)
+        setTranscript('')
+      }
+
+      recognition.onresult = (event: any) => {
+        const result = event.results[0][0].transcript
+        setTranscript(result)
+        onResult?.(result)
+        
+        // 自动解析并创建事件
+        handleVoiceResult(result)
+      }
+
+      recognition.onerror = (event: any) => {
+        console.error('语音识别错误:', event.error)
+        setIsListening(false)
+      }
+
+      recognition.onend = () => {
+        setIsListening(false)
+      }
+
+      recognition.start()
+    } catch (error) {
+      console.error('启动语音识别失败:', error)
       setIsListening(false)
     }
-
-    recognition.onend = () => {
-      setIsListening(false)
-    }
-
-    recognition.start()
   }
 
-  // 语音合成
-  const speak = (text: string) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text)
-      utterance.lang = 'zh-CN'
-      window.speechSynthesis.speak(utterance)
+  // 停止语音识别
+  const stopListening = async () => {
+    try {
+      if (audioServiceRef.current && isInitialized) {
+        await audioServiceRef.current.stopTranscription()
+        
+        // 处理Azure识别结果
+        if (currentText.trim()) {
+          handleVoiceResult(currentText.trim())
+        }
+      }
+      setIsListening(false)
+    } catch (error) {
+      console.error('停止语音识别失败:', error)
+      setIsListening(false)
     }
+  }
+
+  // 处理语音识别结果
+  const handleVoiceResult = (result: string) => {
+    onResult?.(result)
+    
+    // 自动解析并创建事件
+    const eventData = parseVoiceToEvent(result)
+    if (eventData) {
+      addEvent(eventData)
+      speakResponse(`已创建事件：${eventData.title}`)
+    } else {
+      speakResponse('抱歉，无法理解您的指令，请重试')
+    }
+  }
+
+  // 语音合成响应
+  const speakResponse = async (text: string) => {
+    try {
+      // 优先使用Azure语音合成
+      if (audioServiceRef.current && isInitialized) {
+        await audioServiceRef.current.synthesizeAndPlay(text)
+        return
+      }
+      
+      // 回退到浏览器语音合成
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text)
+        utterance.lang = 'zh-CN'
+        window.speechSynthesis.speak(utterance)
+      }
+    } catch (error) {
+      console.error('语音合成失败:', error)
+      // 最后回退到浏览器API
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text)
+        utterance.lang = 'zh-CN'
+        window.speechSynthesis.speak(utterance)
+      }
+    }
+  }
+
+  // 语音合成（兼容性保留）
+  const speak = (text: string) => {
+    speakResponse(text)
   }
 
   // 解析语音指令创建事件
@@ -158,7 +285,11 @@ export default function VoiceInputButton({ onResult, className = "" }: VoiceInpu
       isHovered: false,
       isConflicted: false,
       tags: ['语音创建'],
-      reminders: []
+      reminders: [],
+      energyRequired: EnergyLevel.MEDIUM,
+      estimatedDuration: 60,
+      isMarketProtected: false,
+      flexibilityScore: 70
     }
   }
 
@@ -197,7 +328,7 @@ export default function VoiceInputButton({ onResult, className = "" }: VoiceInpu
   return (
     <div className={className}>
       <Button 
-        onClick={startListening}
+        onClick={isListening ? stopListening : startListening}
         variant="outline" 
         className={`w-full border-white/20 ${
           isListening 
@@ -205,14 +336,19 @@ export default function VoiceInputButton({ onResult, className = "" }: VoiceInpu
             : 'text-white hover:bg-white/10'
         }`}
         size="sm"
-        disabled={isListening}
       >
-        {isListening ? '🔴 正在录音...' : '🎤 语音创建'}
+        {isListening ? '🔴 点击停止录音' : '🎤 语音创建'}
       </Button>
       
-      {transcript && (
+      {(transcript || currentText) && (
         <div className="mt-2 text-xs text-gray-400 p-2 bg-black/20 rounded">
-          识别结果: {transcript}
+          识别结果: {transcript || currentText}
+        </div>
+      )}
+      
+      {isInitialized && (
+        <div className="mt-1 text-xs text-green-400">
+          ✅ Azure语音服务已就绪
         </div>
       )}
     </div>
