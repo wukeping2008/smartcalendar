@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { Event, EventCategory, Priority, EventStatus } from '../../types/event'
 import { FlowPosition } from '../../types/timeflow'
+import { storageService } from '../services/StorageService'
 
 // 事件存储状态接口
 interface EventStore {
@@ -10,6 +11,7 @@ interface EventStore {
   selectedEventIds: string[]
   draggedEventId: string | null
   hoveredEventId: string | null
+  isLoaded: boolean
   
   // 过滤和搜索
   filters: {
@@ -52,6 +54,10 @@ interface EventStore {
   // 批量操作
   deleteSelectedEvents: () => void
   updateSelectedEvents: (updates: Partial<Event>) => void
+  
+  // 持久化方法
+  loadEvents: () => Promise<void>
+  clearAllEvents: () => Promise<void>
 }
 
 // 生成唯一ID
@@ -72,6 +78,7 @@ export const useEventStore = create<EventStore>()(
     selectedEventIds: [],
     draggedEventId: null,
     hoveredEventId: null,
+    isLoaded: false,
     
     filters: {
       category: null,
@@ -123,23 +130,34 @@ export const useEventStore = create<EventStore>()(
       }
       
       state.events.push(newEvent)
+      
+      // 异步保存到StorageService
+      storageService.saveEvent(newEvent).catch((error) => {
+        console.error('Failed to save event to storage:', error)
+      })
     }),
     
     // 更新事件
     updateEvent: (id, updates) => set((state) => {
       const eventIndex = state.events.findIndex(e => e.id === id)
       if (eventIndex !== -1) {
-        state.events[eventIndex] = {
+        const updatedEvent = {
           ...state.events[eventIndex],
           ...updates,
           updatedAt: new Date()
         }
+        state.events[eventIndex] = updatedEvent
         
         // 重新检查所有冲突
         state.events.forEach(event => {
           event.isConflicted = state.events.some(otherEvent => 
             otherEvent.id !== event.id && hasTimeConflict(event, otherEvent)
           )
+        })
+        
+        // 异步更新到StorageService
+        storageService.saveEvent(updatedEvent).catch((error) => {
+          console.error('Failed to update event in storage:', error)
         })
       }
     }),
@@ -162,6 +180,11 @@ export const useEventStore = create<EventStore>()(
         event.isConflicted = state.events.some(otherEvent => 
           otherEvent.id !== event.id && hasTimeConflict(event, otherEvent)
         )
+      })
+      
+      // 异步从StorageService删除
+      storageService.deleteEvent(id).catch((error) => {
+        console.error('Failed to delete event from storage:', error)
       })
     }),
     
@@ -260,7 +283,7 @@ export const useEventStore = create<EventStore>()(
     
     // 设置过滤器
     setFilter: (key, value) => set((state) => {
-      (state.filters as any)[key] = value
+      state.filters[key] = value
     }),
     
     // 清除过滤器
@@ -350,6 +373,48 @@ export const useEventStore = create<EventStore>()(
       }
       
       return filteredEvents
+    },
+    
+    // 从StorageService加载所有事件
+    loadEvents: async () => {
+      try {
+        console.log('📥 Loading events from storage...')
+        const storedEvents = await storageService.getAllEvents()
+        console.log(`✅ Loaded ${storedEvents.length} events from storage`)
+        
+        set((state) => {
+          state.events = storedEvents
+          state.isLoaded = true
+          
+          // 重新检查所有冲突
+          state.events.forEach(event => {
+            event.isConflicted = state.events.some(otherEvent => 
+              otherEvent.id !== event.id && hasTimeConflict(event, otherEvent)
+            )
+          })
+        })
+      } catch (error) {
+        console.error('❌ Failed to load events from storage:', error)
+        set((state) => {
+          state.isLoaded = true
+        })
+      }
+    },
+    
+    // 清除所有事件
+    clearAllEvents: async () => {
+      try {
+        set((state) => {
+          state.events = []
+          state.selectedEventIds = []
+          state.draggedEventId = null
+          state.hoveredEventId = null
+        })
+        
+        console.log('🗑️ All events cleared from memory')
+      } catch (error) {
+        console.error('❌ Failed to clear events:', error)
+      }
     }
   }))
 )

@@ -81,13 +81,21 @@ class StorageService {
   }
 
   constructor() {
-    this.initDB()
+    // 只在浏览器环境初始化IndexedDB
+    if (typeof window !== 'undefined') {
+      this.initDB()
+    }
   }
 
   /**
    * 初始化IndexedDB数据库
    */
   private async initDB(): Promise<void> {
+    if (typeof window === 'undefined' || !window.indexedDB) {
+      console.warn('IndexedDB not available in this environment')
+      return Promise.resolve()
+    }
+    
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.config.dbName, this.config.dbVersion)
 

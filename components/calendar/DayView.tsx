@@ -47,6 +47,98 @@ export default function DayView({
     onEventSelect?.(event)
   }
 
+  const handleDayAnalysis = () => {
+    if (dayEvents.length === 0) {
+      alert('📊 当天分析：今日暂无事件安排。建议规划一些有意义的活动！')
+      return
+    }
+
+    const totalDuration = dayEvents.reduce((total, event) => 
+      total + (event.endTime.getTime() - event.startTime.getTime()) / (1000 * 60), 0
+    )
+    const completedEvents = dayEvents.filter(e => e.status === 'completed').length
+    const highPriorityEvents = dayEvents.filter(e => e.priority === 'urgent' || e.priority === 'high').length
+    const conflictedEvents = dayEvents.filter(e => e.isConflicted).length
+    
+    const analysis = `📊 ${selectedDate.toLocaleDateString('zh-CN')} 当天分析报告：
+
+🎯 基本统计：
+• 总事件数：${dayEvents.length} 个
+• 总时长：${(totalDuration / 60).toFixed(1)} 小时
+• 完成率：${dayEvents.length > 0 ? (completedEvents / dayEvents.length * 100).toFixed(1) : 0}%
+• 高优先级：${highPriorityEvents} 个
+${conflictedEvents > 0 ? `• ⚠️ 冲突事件：${conflictedEvents} 个` : '• ✅ 无时间冲突'}
+
+💡 AI分析建议：
+${totalDuration > 480 ? '• 今日安排较满，注意劳逸结合' : '• 今日安排适中，可考虑增加学习时间'}
+${highPriorityEvents > dayEvents.length * 0.5 ? '• 高优先级任务较多，建议重点关注' : '• 优先级分布合理'}
+${conflictedEvents > 0 ? '• 请及时解决时间冲突问题' : '• 时间安排合理有序'}`
+
+    alert(analysis)
+  }
+
+  const handleOptimizeAnalysis = () => {
+    if (dayEvents.length === 0) {
+      alert('🎯 优化分析：今日暂无事件，无需优化。建议先安排一些活动！')
+      return
+    }
+
+    const energyDistribution = dayEvents.reduce((acc, event) => {
+      acc[event.energyRequired] = (acc[event.energyRequired] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+
+    const recommendations = []
+    
+    // 精力分析
+    if (energyDistribution.peak > 3) {
+      recommendations.push('• 高峰精力任务过多，建议分散到不同时段')
+    }
+    if (energyDistribution.low < 2) {
+      recommendations.push('• 建议增加一些轻松的缓冲任务')
+    }
+    
+    // 时间分析
+    const morningEvents = dayEvents.filter(e => e.startTime.getHours() < 12).length
+    const afternoonEvents = dayEvents.filter(e => e.startTime.getHours() >= 12 && e.startTime.getHours() < 18).length
+    const eveningEvents = dayEvents.filter(e => e.startTime.getHours() >= 18).length
+    
+    if (morningEvents === 0) {
+      recommendations.push('• 上午时段空闲，建议安排重要任务')
+    }
+    if (eveningEvents > afternoonEvents + morningEvents) {
+      recommendations.push('• 晚上安排较多，注意休息时间')
+    }
+
+    // 冲突处理
+    const conflicts = dayEvents.filter(e => e.isConflicted)
+    if (conflicts.length > 0) {
+      recommendations.push(`• 发现 ${conflicts.length} 个时间冲突，需要重新安排`)
+    }
+
+    if (recommendations.length === 0) {
+      recommendations.push('• 当前安排已经很优化，继续保持！')
+    }
+
+    const analysis = `🎯 ${selectedDate.toLocaleDateString('zh-CN')} 优化分析报告：
+
+📈 时间分布：
+• 上午：${morningEvents} 个事件
+• 下午：${afternoonEvents} 个事件  
+• 晚上：${eveningEvents} 个事件
+
+⚡ 精力分配：
+• 巅峰：${energyDistribution.peak || 0} 个
+• 高能：${energyDistribution.high || 0} 个
+• 中等：${energyDistribution.medium || 0} 个
+• 低耗：${energyDistribution.low || 0} 个
+
+💡 优化建议：
+${recommendations.join('\n')}`
+
+    alert(analysis)
+  }
+
   const getCategoryColor = (category: EventCategory): string => {
     const colors = {
       [EventCategory.WORK]: '#3b82f6',
@@ -376,12 +468,21 @@ export default function DayView({
           <Card className="bg-black/40 border-white/20 p-4">
             <h3 className="text-white font-semibold mb-3">快速操作</h3>
             <div className="space-y-2">
-              <AddEventButton />
-              <Button variant="outline" className="w-full text-white border-white/20" size="sm">
+              <Button 
+                variant="outline" 
+                className="w-full text-white border-white/20" 
+                size="sm"
+                onClick={handleDayAnalysis}
+              >
                 📊 当天分析
               </Button>
-              <Button variant="outline" className="w-full text-white border-white/20" size="sm">
-                ⚡ 优化建议
+              <Button 
+                variant="outline" 
+                className="w-full text-white border-white/20" 
+                size="sm"
+                onClick={handleOptimizeAnalysis}
+              >
+                🎯 优化分析
               </Button>
             </div>
           </Card>

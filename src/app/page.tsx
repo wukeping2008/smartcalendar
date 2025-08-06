@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import EnhancedFlowCanvas from '../../components/timeflow/FlowCanvas'
 import CalendarContainer from '../../components/calendar/CalendarContainer'
+import Link from 'next/link'
+import { Settings, Brain } from 'lucide-react'
 import SmartEventCreator from '../../components/calendar/SmartEventCreator'
 import VoiceInputButton from '../../components/voice/VoiceInputButton'
 import TimeFlowGuide from '../../components/help/TimeFlowGuide'
@@ -379,8 +381,22 @@ export default function HomePage() {
                   🌊 时间流
                 </Button>
               </div>
+              <Link 
+                href="/settings" 
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+              >
+                <Brain className="h-4 w-4" />
+                <span className="text-sm font-medium">AI助手</span>
+              </Link>
+              <Link 
+                href="/settings" 
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 text-white transition-colors"
+              >
+                <Settings className="h-4 w-4" />
+                <span className="text-sm">设置</span>
+              </Link>
               <div className="text-sm text-cyan-300">
-                v2.1 - AI智能日历系统
+                v4.2 - AI智能日历系统
               </div>
             </div>
           </div>

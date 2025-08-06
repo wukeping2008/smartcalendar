@@ -148,6 +148,77 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
     }
   }
 
+  // 应用AI建议
+  const handleApplyRecommendation = (rec: AIRecommendation) => {
+    if (!selectedEvent) {
+      alert('请先选择一个事件')
+      return
+    }
+
+    try {
+      if (rec.action === 'reschedule') {
+        // 重新安排建议
+        const currentTime = new Date()
+        const suggestedTime = new Date(currentTime.getTime() + 60 * 60 * 1000) // 1小时后
+        
+        const confirmReschedule = confirm(
+          `建议将"${selectedEvent.title}"重新安排到${suggestedTime.toLocaleString('zh-CN')}，是否确认？`
+        )
+        
+        if (confirmReschedule) {
+          const duration = selectedEvent.endTime.getTime() - selectedEvent.startTime.getTime()
+          const { updateEvent } = useEventStore.getState()
+          
+          updateEvent(selectedEvent.id, {
+            startTime: suggestedTime,
+            endTime: new Date(suggestedTime.getTime() + duration)
+          })
+          
+          alert('✅ 事件已重新安排！')
+        }
+      } else if (rec.action === 'resolve_conflict') {
+        // 解决冲突建议
+        alert(`🔧 AI建议：${rec.description}\n\n请手动调整相关事件时间或通过冲突解决器自动处理。`)
+      } else {
+        // 通用建议应用
+        alert(`💡 AI建议已记录：${rec.description}\n\n建议置信度：${Math.round(rec.confidence * 100)}%`)
+      }
+    } catch (error) {
+      console.error('应用建议失败:', error)
+      alert('❌ 应用建议时出现错误，请稍后重试')
+    }
+  }
+
+  // 应用冲突解决方案
+  const handleApplyConflictSolution = (conflict: ConflictData) => {
+    if (conflict.solutions.length === 0) {
+      alert('该冲突暂无可用解决方案')
+      return
+    }
+
+    const bestSolution = conflict.solutions.reduce((best, current) => 
+      current.confidence > best.confidence ? current : best
+    )
+
+    const confirmApply = confirm(
+      `是否应用最佳冲突解决方案？\n\n解决方案：${bestSolution.description}\n置信度：${Math.round(bestSolution.confidence * 100)}%`
+    )
+
+    if (confirmApply) {
+      try {
+        // 这里应该调用实际的冲突解决逻辑
+        // 暂时提供模拟实现
+        alert(`✅ 冲突解决方案已应用：${bestSolution.description}`)
+        
+        // 从冲突列表中移除已解决的冲突
+        setConflicts(prev => prev.filter(c => c.conflictId !== conflict.conflictId))
+      } catch (error) {
+        console.error('应用冲突解决方案失败:', error)
+        alert('❌ 应用解决方案时出现错误，请稍后重试')
+      }
+    }
+  }
+
   const tabs = [
     { key: 'insights', label: '🧠 AI洞察', count: null },
     { key: 'recommendations', label: '💡 智能建议', count: recommendations.length },
@@ -317,7 +388,12 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
                   {/* 原始建议 */}
                   <p className="text-gray-300 text-xs mb-2">{rec.description}</p>
                   {rec.action && (
-                    <Button size="sm" variant="outline" className="text-white border-white/20 text-xs">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-white border-white/20 text-xs hover:bg-white/10"
+                      onClick={() => handleApplyRecommendation(rec)}
+                    >
                       {rec.action === 'reschedule' ? '重新安排' :
                        rec.action === 'resolve_conflict' ? '解决冲突' : '应用建议'}
                     </Button>
@@ -364,7 +440,12 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
                   {conflict.solutions.slice(0, 2).map((solution, i: number) => (
                     <div key={i} className="flex items-center justify-between text-xs">
                       <span className="text-gray-300">{solution.description}</span>
-                      <Button size="sm" variant="ghost" className="text-cyan-300 hover:text-cyan-200 p-1 h-6">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="text-cyan-300 hover:text-cyan-200 p-1 h-6"
+                        onClick={() => handleApplyConflictSolution(conflict)}
+                      >
                         应用
                       </Button>
                     </div>

@@ -211,16 +211,6 @@ export default function WeekView({
             )}
           </div>
           
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-white border-white/20"
-            onClick={() => onDateSelect?.(new Date())}
-          >
-            今天
-          </Button>
-          
-          <AddEventButton />
         </div>
       </div>
 
