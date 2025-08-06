@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import FlowCanvas from '../../components/timeflow/FlowCanvas'
-import CalendarView from '../../components/calendar/CalendarView'
+import EnhancedFlowCanvas from '../../components/timeflow/FlowCanvas'
+import CalendarContainer from '../../components/calendar/CalendarContainer'
 import SmartEventCreator from '../../components/calendar/SmartEventCreator'
 import VoiceInputButton from '../../components/voice/VoiceInputButton'
 import TimeFlowGuide from '../../components/help/TimeFlowGuide'
@@ -11,9 +11,11 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Event, EventCategory, Priority, EventStatus, ReminderType, EnergyLevel } from '../../types/event'
 import { useEventStore } from '../../lib/stores/event-store'
-import WorkHoursBudgetComponent from '../../components/budget/WorkHoursBudget'
+import EnhancedWorkHoursBudgetComponent from '../../components/budget/WorkHoursBudget'
 import MarketStatusBar from '../../components/market/MarketStatusBar'
 import ConflictResolver from '../../components/optimization/ConflictResolver'
+import AIAssistant from '../../components/ai/AIAssistant'
+import WeeklyPlanGenerator from '../../components/planning/WeeklyPlanGenerator'
 
 // 初始化秉笔太监智能秘书系统演示数据
 const initializeSampleEvents = (addEvent: (event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>) => void) => {
@@ -394,10 +396,9 @@ export default function HomePage() {
             {viewMode === 'calendar' ? (
               /* 传统日历视图 - 主视图 */
               <>
-                <CalendarView
-                  currentDate={currentTime}
-                  onEventSelect={handleEventSelect}
-                  onDateSelect={handleDateSelect}
+                <CalendarContainer
+                  initialDate={currentTime}
+                  initialView="month"
                 />
                 
                 {/* 空状态提示 */}
@@ -422,12 +423,24 @@ export default function HomePage() {
               /* 3D时间流视图 - 辅助功能 */
               <>
                 <div className="w-full h-full rounded-xl bg-black/30 backdrop-blur-sm border border-white/10 overflow-hidden relative">
-                  <FlowCanvas
+                  <EnhancedFlowCanvas
                     events={events}
                     currentTime={currentTime}
                     timeRange={timeRange}
                     onEventSelect={handleEventSelect}
                     onEventDrag={handleEventDrag}
+                    riverFlow={{
+                      enabled: true,
+                      flowSpeed: 1.0,
+                      currentTimeCenter: true,
+                      rippleEffects: true
+                    }}
+                    smartInteraction={{
+                      dragPreview: true,
+                      conflictAvoidance: true,
+                      snapToSlots: true,
+                      energyOptimization: true
+                    }}
                     className="w-full h-full"
                   />
                   
@@ -519,11 +532,27 @@ export default function HomePage() {
             {/* 市场状态栏 */}
             <MarketStatusBar />
 
-            {/* 工时预算组件 */}
-            <WorkHoursBudgetComponent />
+            {/* 工时预算组件 - 升级版 */}
+            <EnhancedWorkHoursBudgetComponent 
+              preciseCalculation={{
+                weeklyBudget: 112,
+                fixedDeductions: 59,
+                availableHours: 53,
+                realTimeTracking: true
+              }}
+              energyCurve={{
+                morning: 'low',
+                afternoon: 'medium',
+                evening: 'high',
+                night: 'medium'
+              }}
+            />
 
             {/* 智能冲突解决 */}
             <ConflictResolver />
+
+            {/* AI智能助手 */}
+            <AIAssistant selectedEvent={selectedEvent} />
 
             {/* 语音创建 */}
             <Card className="bg-black/30 border-white/20 p-4">
