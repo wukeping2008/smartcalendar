@@ -567,10 +567,15 @@ class AIService {
   /**
    * 懒加载Claude客户端
    */
-  private get claude(): Anthropic {
+  private get claude(): Anthropic | null {
     if (!this._claude) {
+      const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY
+      if (!apiKey || apiKey === 'your_anthropic_api_key_here') {
+        console.warn('Anthropic API key not configured')
+        return null
+      }
       this._claude = new Anthropic({
-        apiKey: process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY || '',
+        apiKey,
         dangerouslyAllowBrowser: true
       })
     }
@@ -580,10 +585,15 @@ class AIService {
   /**
    * 懒加载OpenAI客户端
    */
-  private get openai(): OpenAI {
+  private get openai(): OpenAI | null {
     if (!this._openai) {
+      const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
+      if (!apiKey || apiKey === 'your_openai_api_key_here') {
+        console.warn('OpenAI API key not configured')
+        return null
+      }
       this._openai = new OpenAI({
-        apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY || '',
+        apiKey,
         dangerouslyAllowBrowser: true
       })
     }
@@ -595,7 +605,13 @@ class AIService {
    */
   async chatWithClaude(message: string): Promise<string> {
     try {
-      const response = await this.claude.messages.create({
+      const claude = this.claude
+      if (!claude) {
+        // 如果Claude不可用，尝试使用OpenAI
+        return this.chatWithOpenAI(message)
+      }
+
+      const response = await claude.messages.create({
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 1000,
         messages: [{ 
@@ -618,8 +634,79 @@ class AIService {
       return '抱歉，我无法理解您的请求。'
     } catch (error) {
       console.error('Claude API调用失败:', error)
-      return '抱歉，AI服务暂时不可用。请稍后再试。'
+      // 尝试使用备用的OpenAI
+      return this.chatWithOpenAI(message)
     }
+  }
+
+  /**
+   * OpenAI GPT自然语言对话
+   */
+  async chatWithOpenAI(message: string): Promise<string> {
+    try {
+      const openai = this.openai
+      if (!openai) {
+        // 如果OpenAI也不可用，返回本地模拟响应
+        return this.generateLocalResponse(message)
+      }
+
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `你是一个智能日历助手，专门为量化交易者提供时间管理服务。你的任务是：
+            1. 理解用户的日程安排需求
+            2. 提供智能建议和优化方案
+            3. 帮助用户提高工作效率
+            4. 特别注意交易时段的保护
+            
+            请用简洁、专业的中文回答，重点关注实用性。`
+          },
+          {
+            role: 'user',
+            content: message
+          }
+        ],
+        max_tokens: 1000,
+        temperature: 0.7
+      })
+
+      return response.choices[0]?.message?.content || '抱歉，我无法理解您的请求。'
+    } catch (error) {
+      console.error('OpenAI API调用失败:', error)
+      return this.generateLocalResponse(message)
+    }
+  }
+
+  /**
+   * 本地响应生成（当API不可用时的备用方案）
+   */
+  private generateLocalResponse(message: string): string {
+    const lowerMessage = message.toLowerCase()
+    
+    // 基本的关键词匹配响应
+    if (lowerMessage.includes('创建') || lowerMessage.includes('添加') || lowerMessage.includes('新建')) {
+      return '我可以帮您创建新的日程事件。请使用智能事件创建功能，输入事件的详细信息，比如："明天下午2点开会"。'
+    }
+    
+    if (lowerMessage.includes('今天') || lowerMessage.includes('今日')) {
+      return '您可以在右侧的今日事件列表中查看今天的所有安排。如需了解详细信息，请点击具体事件。'
+    }
+    
+    if (lowerMessage.includes('建议') || lowerMessage.includes('优化')) {
+      return '基于您的日程模式，建议：\n1. 将重要工作安排在上午9-11点的高精力时段\n2. Trading任务保持整点执行\n3. 会议间隙安排5-15分钟的缓冲时间\n4. 下午1-2点适合安排轻松的个人事务'
+    }
+    
+    if (lowerMessage.includes('冲突')) {
+      return '系统会自动检测时间冲突。如果存在冲突，会在事件上显示警告标记，您可以通过AI冲突解决功能获取智能建议。'
+    }
+    
+    if (lowerMessage.includes('精力') || lowerMessage.includes('能量')) {
+      return '精力管理建议：\n• 上午9-11点：高精力时段，适合处理重要工作\n• 下午1-2点：低精力时段，适合休息或轻松任务\n• 下午3-5点：中等精力，适合常规工作\n• 晚上6-11点：交易时段，需要保持专注'
+    }
+    
+    return '我是您的AI时间管理助手。我可以帮您：\n• 创建和管理日程事件\n• 分析时间使用习惯\n• 提供效率优化建议\n• 解决时间冲突\n\n请告诉我您需要什么帮助？'
   }
 
   /**
@@ -627,6 +714,17 @@ class AIService {
    */
   async parseNaturalLanguage(input: string): Promise<ParsedCommand> {
     try {
+      const claude = this.claude
+      if (!claude) {
+        // 使用本地解析或OpenAI
+        const openai = this.openai
+        if (!openai) {
+          return this.parseLocalNaturalLanguage(input)
+        }
+        // 使用OpenAI解析
+        return this.parseWithOpenAI(input)
+      }
+
       const systemPrompt = `你是一个日程解析专家。请解析用户的自然语言输入，并返回JSON格式的结构化数据。
 
 输入示例："明天下午2点开会，提前1小时提醒发材料"
@@ -653,7 +751,7 @@ class AIService {
 
 请解析以下输入：`
 
-      const response = await this.claude.messages.create({
+      const response = await claude.messages.create({
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 800,
         messages: [{ 
@@ -690,10 +788,149 @@ class AIService {
   }
 
   /**
+   * 使用OpenAI解析自然语言
+   */
+  private async parseWithOpenAI(input: string): Promise<ParsedCommand> {
+    try {
+      const openai = this.openai
+      if (!openai) {
+        return this.parseLocalNaturalLanguage(input)
+      }
+
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `你是一个日程解析专家。请解析用户的自然语言输入，返回JSON格式。
+            格式：{"intent": "create_event", "entities": {"title": "...", "dateTime": "...", "duration": 60}, "confidence": 0.9}`
+          },
+          {
+            role: 'user',
+            content: `解析: "${input}"`
+          }
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.3
+      })
+
+      const content = response.choices[0]?.message?.content
+      if (content) {
+        const parsed = JSON.parse(content)
+        return {
+          intent: parsed.intent || 'other',
+          entities: parsed.entities || {},
+          confidence: parsed.confidence || 0.5,
+          suggestedAction: parsed.suggestedAction || { type: 'unknown', data: {} }
+        }
+      }
+    } catch (error) {
+      console.error('OpenAI解析失败:', error)
+    }
+    return this.parseLocalNaturalLanguage(input)
+  }
+
+  /**
+   * 本地自然语言解析
+   */
+  private parseLocalNaturalLanguage(input: string): ParsedCommand {
+    const lowerInput = input.toLowerCase()
+    const entities: any = {}
+    let intent: 'create_event' | 'modify_event' | 'query_schedule' | 'set_goal' | 'other' = 'other'
+    let confidence = 0.3
+
+    // 时间解析
+    const timePatterns = [
+      { pattern: /明天/g, value: () => {
+        const tomorrow = new Date()
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        return tomorrow.toISOString().split('T')[0]
+      }},
+      { pattern: /今天/g, value: () => new Date().toISOString().split('T')[0] },
+      { pattern: /后天/g, value: () => {
+        const dayAfter = new Date()
+        dayAfter.setDate(dayAfter.getDate() + 2)
+        return dayAfter.toISOString().split('T')[0]
+      }},
+      { pattern: /(\d+)点/g, value: (match: RegExpMatchArray) => `${match[1]}:00` },
+      { pattern: /下午(\d+)点/g, value: (match: RegExpMatchArray) => `${parseInt(match[1]) + 12}:00` },
+      { pattern: /上午(\d+)点/g, value: (match: RegExpMatchArray) => `${match[1]}:00` }
+    ]
+
+    // 检测创建事件意图
+    if (lowerInput.includes('创建') || lowerInput.includes('添加') || lowerInput.includes('新建') || lowerInput.includes('安排')) {
+      intent = 'create_event'
+      confidence = 0.7
+    }
+
+    // 提取标题
+    const titleMatch = input.match(/["「](.*?)["」]/)
+    if (titleMatch) {
+      entities.title = titleMatch[1]
+    } else {
+      // 尝试提取动词后的内容作为标题
+      const verbPattern = /(创建|添加|新建|安排|开会|会议|任务|工作|学习|运动|吃饭|休息)/
+      const verbMatch = input.match(new RegExp(verbPattern.source + '(.+)'))
+      if (verbMatch) {
+        entities.title = verbMatch[2].trim()
+      }
+    }
+
+    // 提取时间
+    for (const { pattern, value } of timePatterns) {
+      const matches = [...input.matchAll(pattern)]
+      if (matches.length > 0) {
+        const dateStr = value(matches[0])
+        entities.dateTime = dateStr
+        confidence = Math.min(confidence + 0.1, 0.9)
+      }
+    }
+
+    // 提取时长
+    const durationMatch = input.match(/(\d+)(小时|分钟)/)
+    if (durationMatch) {
+      entities.duration = durationMatch[2] === '小时' 
+        ? parseInt(durationMatch[1]) * 60 
+        : parseInt(durationMatch[1])
+      confidence = Math.min(confidence + 0.1, 0.9)
+    }
+
+    // 分类检测
+    if (lowerInput.includes('会议') || lowerInput.includes('开会')) {
+      entities.category = EventCategory.MEETING
+      entities.priority = Priority.HIGH
+    } else if (lowerInput.includes('工作') || lowerInput.includes('任务')) {
+      entities.category = EventCategory.WORK
+      entities.priority = Priority.HIGH
+    } else if (lowerInput.includes('交易') || lowerInput.includes('trading')) {
+      entities.category = EventCategory.TRADING
+      entities.priority = Priority.URGENT
+    }
+
+    return {
+      intent,
+      entities,
+      confidence,
+      suggestedAction: {
+        type: intent === 'create_event' ? 'create_event' : 'unknown',
+        data: entities
+      }
+    }
+  }
+
+  /**
    * 智能任务分解
    */
   async breakdownTask(task: string, totalHours: number): Promise<SubTask[]> {
     try {
+      const claude = this.claude
+      const openai = this.openai
+      
+      if (!claude && !openai) {
+        // 使用本地简单分解
+        return this.breakdownTaskLocal(task, totalHours)
+      }
+
       const prompt = `作为项目管理专家，请将以下任务分解为可执行的子任务：
 
 任务: "${task}"
@@ -717,41 +954,67 @@ class AIService {
   }
 ]`
 
-      const response = await this.claude.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 1200,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      if (claude) {
+        const response = await claude.messages.create({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 1200,
+          messages: [{ role: 'user', content: prompt }]
+        })
 
-      const content = response.content[0]
-      if (content.type === 'text') {
-        try {
-          const subtasks = JSON.parse(content.text)
-          return subtasks.map((task: Record<string, unknown>) => ({
-            title: task.title,
-            estimatedHours: task.estimatedHours || 1,
-            energyLevel: this.mapEnergyLevel((task.energyLevel as string) || 'medium'),
-            preferredTimeOfDay: (task.preferredTimeOfDay as 'morning' | 'afternoon' | 'evening') || 'afternoon',
+        const content = response.content[0]
+        if (content.type === 'text') {
+          try {
+            const subtasks = JSON.parse(content.text)
+            return subtasks.map((task: Record<string, unknown>) => ({
+              title: task.title,
+              estimatedHours: task.estimatedHours || 1,
+              energyLevel: this.mapEnergyLevel((task.energyLevel as string) || 'medium'),
+              preferredTimeOfDay: (task.preferredTimeOfDay as 'morning' | 'afternoon' | 'evening') || 'afternoon',
+              dependencies: task.dependencies || [],
+              category: this.mapCategoryString((task.category as string) || 'work')
+            }))
+          } catch (parseError) {
+            console.error('任务分解JSON解析失败:', parseError)
+          }
+        }
+      } else if (openai) {
+        // 使用OpenAI分解任务
+        const response = await openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: '你是项目管理专家，请将任务分解为子任务，返回JSON数组。'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          response_format: { type: 'json_object' },
+          temperature: 0.5
+        })
+
+        const content = response.choices[0]?.message?.content
+        if (content) {
+          const parsed = JSON.parse(content)
+          const subtasks = parsed.subtasks || parsed.tasks || []
+          return subtasks.map((task: any) => ({
+            title: task.title || task.name || '子任务',
+            estimatedHours: task.estimatedHours || task.hours || 1,
+            energyLevel: this.mapEnergyLevel(task.energyLevel || 'medium'),
+            preferredTimeOfDay: task.preferredTimeOfDay || 'afternoon',
             dependencies: task.dependencies || [],
-            category: this.mapCategoryString((task.category as string) || 'work')
+            category: this.mapCategoryString(task.category || 'work')
           }))
-        } catch (parseError) {
-          console.error('任务分解JSON解析失败:', parseError)
         }
       }
     } catch (error) {
       console.error('任务分解失败:', error)
     }
 
-    // 返回简单分解
-    return [{
-      title: task,
-      estimatedHours: totalHours,
-      energyLevel: EnergyLevel.MEDIUM,
-      preferredTimeOfDay: 'afternoon',
-      dependencies: [],
-      category: EventCategory.WORK
-    }]
+    // 返回本地分解
+    return this.breakdownTaskLocal(task, totalHours)
   }
 
   /**
@@ -804,6 +1067,100 @@ class AIService {
       case 'meal': return EventCategory.MEAL
       default: return EventCategory.OTHER
     }
+  }
+
+  /**
+   * 本地任务分解（当API不可用时）
+   */
+  private breakdownTaskLocal(task: string, totalHours: number): SubTask[] {
+    const subtasks: SubTask[] = []
+    const lowerTask = task.toLowerCase()
+    
+    // 基于任务类型的简单分解
+    if (lowerTask.includes('开发') || lowerTask.includes('编程') || lowerTask.includes('代码')) {
+      const phases = [
+        { title: '需求分析和设计', hours: totalHours * 0.2, energy: EnergyLevel.HIGH },
+        { title: '核心功能开发', hours: totalHours * 0.4, energy: EnergyLevel.PEAK },
+        { title: '测试和调试', hours: totalHours * 0.25, energy: EnergyLevel.MEDIUM },
+        { title: '优化和文档', hours: totalHours * 0.15, energy: EnergyLevel.LOW }
+      ]
+      
+      phases.forEach((phase, index) => {
+        subtasks.push({
+          title: `${task} - ${phase.title}`,
+          estimatedHours: Math.max(0.5, phase.hours),
+          energyLevel: phase.energy,
+          preferredTimeOfDay: index < 2 ? 'morning' : 'afternoon',
+          dependencies: index > 0 ? [`${task} - ${phases[index - 1].title}`] : [],
+          category: EventCategory.WORK
+        })
+      })
+    } else if (lowerTask.includes('会议') || lowerTask.includes('讨论')) {
+      subtasks.push(
+        {
+          title: `${task} - 准备材料`,
+          estimatedHours: totalHours * 0.3,
+          energyLevel: EnergyLevel.MEDIUM,
+          preferredTimeOfDay: 'morning',
+          dependencies: [],
+          category: EventCategory.PREPARATION
+        },
+        {
+          title: task,
+          estimatedHours: totalHours * 0.5,
+          energyLevel: EnergyLevel.HIGH,
+          preferredTimeOfDay: 'afternoon',
+          dependencies: [`${task} - 准备材料`],
+          category: EventCategory.MEETING
+        },
+        {
+          title: `${task} - 后续跟进`,
+          estimatedHours: totalHours * 0.2,
+          energyLevel: EnergyLevel.LOW,
+          preferredTimeOfDay: 'afternoon',
+          dependencies: [task],
+          category: EventCategory.WORK
+        }
+      )
+    } else if (lowerTask.includes('学习') || lowerTask.includes('研究')) {
+      const studyPhases = Math.ceil(totalHours / 2)
+      for (let i = 0; i < studyPhases; i++) {
+        subtasks.push({
+          title: `${task} - 第${i + 1}部分`,
+          estimatedHours: Math.min(2, totalHours - i * 2),
+          energyLevel: i === 0 ? EnergyLevel.HIGH : EnergyLevel.MEDIUM,
+          preferredTimeOfDay: i < studyPhases / 2 ? 'morning' : 'afternoon',
+          dependencies: i > 0 ? [`${task} - 第${i}部分`] : [],
+          category: EventCategory.PERSONAL
+        })
+      }
+    } else {
+      // 默认简单分解
+      if (totalHours <= 2) {
+        subtasks.push({
+          title: task,
+          estimatedHours: totalHours,
+          energyLevel: EnergyLevel.MEDIUM,
+          preferredTimeOfDay: 'afternoon',
+          dependencies: [],
+          category: EventCategory.WORK
+        })
+      } else {
+        const chunks = Math.ceil(totalHours / 2)
+        for (let i = 0; i < chunks; i++) {
+          subtasks.push({
+            title: `${task} - 阶段${i + 1}`,
+            estimatedHours: Math.min(2, totalHours - i * 2),
+            energyLevel: i === 0 ? EnergyLevel.HIGH : EnergyLevel.MEDIUM,
+            preferredTimeOfDay: i < chunks / 2 ? 'morning' : 'afternoon',
+            dependencies: i > 0 ? [`${task} - 阶段${i}`] : [],
+            category: EventCategory.WORK
+          })
+        }
+      }
+    }
+    
+    return subtasks
   }
 }
 

@@ -379,9 +379,8 @@ export default function HomePage() {
                   🌊 时间流
                 </Button>
               </div>
-              <div className="flex space-x-2">
-                <SmartEventCreator />
-                <TimeFlowGuide />
+              <div className="text-sm text-cyan-300">
+                v2.1 - AI智能日历系统
               </div>
             </div>
           </div>
@@ -412,8 +411,8 @@ export default function HomePage() {
                       <p className="text-gray-300 mb-4">
                         开始创建您的第一个事件，体验智能日历管理！
                       </p>
-                      <div className="flex space-x-2 justify-center">
-                        <SmartEventCreator />
+                      <div className="text-sm text-gray-400 text-center">
+                        → 使用右侧"智能语音创建"开始
                       </div>
                     </Card>
                   </div>
@@ -526,179 +525,160 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* 侧边栏 */}
+        {/* 侧边栏 - 智能折叠设计 */}
         <div className="w-96 bg-black/20 backdrop-blur-sm border-l border-white/10 p-6">
-          <div className="space-y-6">
-            {/* 市场状态栏 */}
-            <MarketStatusBar />
+          <div className="space-y-4 h-full overflow-y-auto">
+            {/* 🎯 快速操作区 (固定显示) */}
+            <div className="space-y-4">
+              {/* 语音创建 */}
+              <Card className="bg-black/30 border-white/20 p-3">
+                <div className="flex items-center space-x-2 mb-2">
+                  <span className="text-lg">🎤</span>
+                  <h3 className="text-white font-semibold text-sm">智能语音创建</h3>
+                </div>
+                <SmartEventCreator />
+              </Card>
 
-            {/* 工时预算组件 - 升级版 */}
-            <EnhancedWorkHoursBudgetComponent 
-              preciseCalculation={{
-                weeklyBudget: 112,
-                fixedDeductions: 59,
-                availableHours: 53,
-                realTimeTracking: true
-              }}
-              energyCurve={{
-                morning: 'low',
-                afternoon: 'medium',
-                evening: 'high',
-                night: 'medium'
-              }}
-            />
-
-            {/* 智能冲突解决 */}
-            <ConflictResolver />
-
-            {/* AI智能助手 */}
-            <AIAssistant selectedEvent={selectedEvent} />
-
-            {/* 语音创建 */}
-            <Card className="bg-black/30 border-white/20 p-4">
-              <h3 className="text-white font-semibold mb-3">智能事件创建</h3>
-              <SmartEventCreator />
-            </Card>
-
-            {/* 选中事件详情 */}
-            {selectedEvent && (
-              <Card className="bg-black/30 border-white/20 p-4">
-                <h3 className="text-white font-semibold mb-2">事件详情</h3>
-                <div className="space-y-2">
-                  <p className="text-cyan-300 font-medium">{selectedEvent.title}</p>
-                  <p className="text-sm text-gray-400">{selectedEvent.description}</p>
-                  <div className="text-xs text-gray-500">
-                    <p>开始: {selectedEvent.startTime.toLocaleString('zh-CN')}</p>
-                    <p>结束: {selectedEvent.endTime.toLocaleString('zh-CN')}</p>
-                    <p>优先级: {selectedEvent.priority}</p>
-                    <p>状态: {selectedEvent.status}</p>
-                    <p>精力需求: {selectedEvent.energyRequired}</p>
-                    <p>预估时长: {selectedEvent.estimatedDuration} 分钟</p>
-                    <p>灵活度: {selectedEvent.flexibilityScore}%</p>
-                    {selectedEvent.isMarketProtected && (
-                      <p className="text-yellow-400">🛡️ 市场保护时段</p>
-                    )}
-                    {selectedEvent.isConflicted && (
-                      <p className="text-red-400">⚠️ 存在时间冲突</p>
-                    )}
+              {/* 市场状态 - 紧凑版 */}
+              <Card className="bg-black/30 border-white/20 p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">📊</span>
+                    <span className="text-white text-sm font-semibold">市场状态</span>
                   </div>
+                  <div className="text-xs text-gray-400">实时监控</div>
+                </div>
+                <div className="mt-2">
+                  <MarketStatusBar />
                 </div>
               </Card>
-            )}
 
-            {/* 今日事件列表 */}
-            <Card className="bg-black/30 border-white/20 p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-white font-semibold">今日事件</h3>
-                <span className="text-sm text-gray-400">({events.filter(event => 
-                  event.startTime.toDateString() === currentTime.toDateString()
-                ).length})</span>
-              </div>
-              <div className="space-y-3 max-h-64 overflow-y-auto">
-                {events.filter(event => 
-                  event.startTime.toDateString() === currentTime.toDateString()
-                ).map((event) => (
-                  <div 
-                    key={event.id}
-                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                      selectedEvent?.id === event.id 
-                        ? 'bg-cyan-600/20 border-cyan-500' 
-                        : 'bg-white/5 border-white/10 hover:bg-white/10'
-                    } ${
-                      event.isConflicted ? 'border-red-400/50' : ''
-                    }`}
-                    onClick={() => handleEventSelect(event)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-white font-medium">{event.title}</p>
-                      <div className="flex items-center space-x-1">
-                        {event.isMarketProtected && (
-                          <span className="text-yellow-400 text-xs">🛡️</span>
-                        )}
-                        {event.isConflicted && (
-                          <span className="text-red-400 text-xs">⚠️</span>
-                        )}
-                        <span className={`w-2 h-2 rounded-full ${
-                          event.priority === 'urgent' ? 'bg-red-500' : 
-                          event.priority === 'high' ? 'bg-orange-500' : 
-                          event.priority === 'medium' ? 'bg-yellow-500' : 'bg-emerald-500'
-                        }`} />
+              {/* 选中事件详情 */}
+              {selectedEvent && (
+                <Card className="bg-black/30 border-white/20 p-3">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="text-lg">📋</span>
+                    <h3 className="text-white font-semibold text-sm">事件详情</h3>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-cyan-300 font-medium text-sm">{selectedEvent.title}</p>
+                    <p className="text-xs text-gray-400 line-clamp-2">{selectedEvent.description}</p>
+                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+                      <div>
+                        <span className="text-gray-400">时间:</span> {selectedEvent.startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                      <div>
+                        <span className="text-gray-400">时长:</span> {selectedEvent.estimatedDuration}分钟
+                      </div>
+                      <div>
+                        <span className="text-gray-400">优先级:</span> {selectedEvent.priority}
+                      </div>
+                      <div>
+                        <span className="text-gray-400">精力:</span> {selectedEvent.energyRequired}
                       </div>
                     </div>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {event.startTime.toLocaleTimeString('zh-CN', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })} - {event.endTime.toLocaleTimeString('zh-CN', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </p>
-                    <div className="flex justify-between items-center mt-1">
-                      <p className="text-xs text-cyan-300 capitalize">
-                        {event.category}
-                      </p>
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        event.energyRequired === 'peak' ? 'bg-red-500/20 text-red-300' :
-                        event.energyRequired === 'high' ? 'bg-orange-500/20 text-orange-300' :
-                        event.energyRequired === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
-                        'bg-emerald-500/20 text-emerald-300'
-                      }`}>
-                        {event.energyRequired}
-                      </span>
+                    <div className="flex space-x-1">
+                      {selectedEvent.isMarketProtected && (
+                        <span className="text-yellow-400 text-xs">🛡️ 市场保护</span>
+                      )}
+                      {selectedEvent.isConflicted && (
+                        <span className="text-red-400 text-xs">⚠️ 冲突</span>
+                      )}
                     </div>
                   </div>
-                ))}
-                {events.length === 0 && (
-                  <p className="text-gray-400 text-sm text-center py-4">
-                    暂无事件
-                  </p>
-                )}
-              </div>
-            </Card>
+                </Card>
+              )}
+            </div>
 
-            {/* 统计信息 */}
-            <Card className="bg-black/30 border-white/20 p-4">
-              <h3 className="text-white font-semibold mb-4">今日统计</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">总事件</span>
-                  <span className="text-white">{events.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">已完成</span>
-                  <span className="text-green-400">
-                    {events.filter(e => e.status === 'completed').length}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">进行中</span>
-                  <span className="text-blue-400">
-                    {events.filter(e => e.status === 'in_progress').length}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">待执行</span>
-                  <span className="text-cyan-400">
-                    {events.filter(e => e.status === 'planned').length}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">市场保护</span>
-                  <span className="text-yellow-400">
-                    {events.filter(e => e.isMarketProtected).length}
-                  </span>
-                </div>
-                {events.filter(e => e.isConflicted).length > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">冲突事件</span>
-                    <span className="text-red-400">
-                      {events.filter(e => e.isConflicted).length}
-                    </span>
+            {/* 🤖 AI智能区 (可折叠) */}
+            <div className="border-t border-white/10 pt-4">
+              <div className="space-y-3">
+                {/* AI智能推荐 */}
+                <Card className="bg-black/30 border-white/20 p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg">🧠</span>
+                      <h3 className="text-white font-semibold text-sm">AI智能推荐</h3>
+                    </div>
+                    <span className="text-xs text-gray-400">实时分析</span>
                   </div>
-                )}
+                  <div className="space-y-2">
+                    <div className="p-2 rounded bg-red-500/20 border border-red-400/50">
+                      <div className="flex items-center justify-between">
+                        <span className="text-red-400 text-xs font-semibold">🚨 Critical</span>
+                        <span className="text-xs text-gray-500">2秒前</span>
+                      </div>
+                      <p className="text-white text-xs mt-1">
+                        VIX指数27.3，建议清空下午2-4点非交易安排
+                      </p>
+                    </div>
+                    <div className="p-2 rounded bg-orange-500/20 border border-orange-400/50">
+                      <div className="flex items-center justify-between">
+                        <span className="text-orange-400 text-xs font-semibold">⚡ High</span>
+                        <span className="text-xs text-gray-500">5分钟前</span>
+                      </div>
+                      <p className="text-white text-xs mt-1">
+                        精力匹配度62%，建议将高精力任务移到上午9-11点
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* AI智能助手 */}
+                <Card className="bg-black/30 border-white/20 p-3">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="text-lg">🤖</span>
+                    <h3 className="text-white font-semibold text-sm">AI智能助手</h3>
+                  </div>
+                  <AIAssistant selectedEvent={selectedEvent} />
+                </Card>
+
+                {/* 智能冲突解决 */}
+                <Card className="bg-black/30 border-white/20 p-3">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="text-lg">⚡</span>
+                    <h3 className="text-white font-semibold text-sm">冲突解决</h3>
+                  </div>
+                  <ConflictResolver />
+                </Card>
               </div>
-            </Card>
+            </div>
+
+            {/* 📈 数据分析区 (可折叠) */}
+            <div className="border-t border-white/10 pt-4">
+              <div className="space-y-3">
+                {/* 工时预算 */}
+                <Card className="bg-black/30 border-white/20 p-3">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="text-lg">📊</span>
+                    <h3 className="text-white font-semibold text-sm">工时预算</h3>
+                  </div>
+                  <EnhancedWorkHoursBudgetComponent 
+                    preciseCalculation={{
+                      weeklyBudget: 112,
+                      fixedDeductions: 59,
+                      availableHours: 53,
+                      realTimeTracking: true
+                    }}
+                    energyCurve={{
+                      morning: 'low',
+                      afternoon: 'medium',
+                      evening: 'high',
+                      night: 'medium'
+                    }}
+                  />
+                </Card>
+
+                {/* 周度规划生成器 */}
+                <Card className="bg-black/30 border-white/20 p-3">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="text-lg">📅</span>
+                    <h3 className="text-white font-semibold text-sm">周度规划</h3>
+                  </div>
+                  <WeeklyPlanGenerator />
+                </Card>
+              </div>
+            </div>
           </div>
         </div>
       </main>
