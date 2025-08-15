@@ -18,6 +18,7 @@ import MarketStatusBar from '../../components/market/MarketStatusBar'
 import ConflictResolver from '../../components/optimization/ConflictResolver'
 import AIAssistant from '../../components/ai/AIAssistant'
 import WeeklyPlanGenerator from '../../components/planning/WeeklyPlanGenerator'
+import RelationshipManager from '../../components/relationship/RelationshipManager'
 
 // 初始化秉笔太监智能秘书系统演示数据
 const initializeSampleEvents = (addEvent: (event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>) => void) => {
@@ -660,7 +661,18 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* 📈 数据分析区 (可折叠) */}
+            {/* � 人际关系管理区 (新增) */}
+            <div className="border-t border-white/10 pt-4">
+              <Card className="bg-black/30 border-white/20 p-3">
+                <div className="flex items-center space-x-2 mb-2">
+                  <span className="text-lg">👥</span>
+                  <h3 className="text-white font-semibold text-sm">人际关系管理</h3>
+                </div>
+                <RelationshipManager className="h-96" />
+              </Card>
+            </div>
+
+            {/* �📈 数据分析区 (可折叠) */}
             <div className="border-t border-white/10 pt-4">
               <div className="space-y-3">
                 {/* 工时预算 */}
@@ -691,7 +703,20 @@ export default function HomePage() {
                     <span className="text-lg">📅</span>
                     <h3 className="text-white font-semibold text-sm">周度规划</h3>
                   </div>
-                  <WeeklyPlanGenerator />
+                  <WeeklyPlanGenerator 
+                    inputSources={{
+                      quarterlyGoals: [],
+                      previousWeekIncomplete: [],
+                      sopTasks: [],
+                      inboxTasks: []
+                    }}
+                    generation={{
+                      autoSchedule: true,
+                      conflictResolution: true,
+                      energyOptimization: true,
+                      marketProtection: true
+                    }}
+                  />
                 </Card>
               </div>
             </div>
