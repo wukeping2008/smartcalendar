@@ -356,7 +356,7 @@ class RealTimeMarketService {
   async connect(): Promise<boolean> {
     // 在实际环境中，这里会连接到真实的WebSocket API
     // 例如：Binance、Alpha Vantage、Yahoo Finance等
-    console.log('🔗 模拟WebSocket连接已建立')
+    // 模拟WebSocket连接已建立
     this.isConnected = true
     return true
   }
@@ -370,7 +370,7 @@ class RealTimeMarketService {
       this.ws = null
     }
     this.isConnected = false
-    console.log('🔗 WebSocket连接已断开')
+    // WebSocket连接已断开
   }
 
   /**

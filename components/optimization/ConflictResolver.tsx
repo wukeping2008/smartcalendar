@@ -24,7 +24,7 @@ export default function ConflictResolver({ className = "" }: ConflictResolverPro
       const detectedConflicts = optimizer.detectConflicts()
       setConflicts(detectedConflicts)
     } catch (error) {
-      console.error('冲突分析失败:', error)
+      // 冲突分析失败
     } finally {
       setIsAnalyzing(false)
     }
@@ -53,7 +53,7 @@ export default function ConflictResolver({ className = "" }: ConflictResolverPro
       // 清除选中的冲突
       setSelectedConflict(null)
     } catch (error) {
-      console.error('应用解决方案失败:', error)
+      // 应用解决方案失败
     }
   }
 

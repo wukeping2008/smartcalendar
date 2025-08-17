@@ -38,7 +38,7 @@ export default function AddEventButton() {
       isDragging: false,
       isHovered: false,
       isConflicted: false,
-      energyRequired: 'medium' as any,
+      energyRequired: EnergyLevel.MEDIUM,
       estimatedDuration: 60,
       isMarketProtected: false,
       flexibilityScore: 50,
@@ -51,7 +51,7 @@ export default function AddEventButton() {
     setDescription('')
     setShowForm(false)
     
-    console.log('New event created:', title)
+    // New event created successfully
   }
 
   const handleCancel = () => {

@@ -30,7 +30,7 @@ export default function ChatInterface({ onClose }: ChatInterfaceProps) {
   ])
   const [inputText, setInputText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [currentRequest, setCurrentRequest] = useState<any>(null)
+  const [currentRequest, setCurrentRequest] = useState<{ requestId: string; cancel: () => void } | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -88,7 +88,7 @@ export default function ChatInterface({ onClose }: ChatInterfaceProps) {
           setCurrentRequest(null)
         },
         onError: (error) => {
-          console.error('Chat error:', error)
+          // Chat error occurred
           setMessages(prev => prev.map(msg => 
             msg.id === assistantMessage.id 
               ? { ...msg, content: '抱歉，发生了错误。请稍后再试。', streaming: false }
@@ -101,7 +101,7 @@ export default function ChatInterface({ onClose }: ChatInterfaceProps) {
 
       setCurrentRequest(request)
     } catch (error) {
-      console.error('Failed to send message:', error)
+      // Failed to send message
       setMessages(prev => prev.filter(msg => msg.id !== assistantMessage.id))
       setIsLoading(false)
     }

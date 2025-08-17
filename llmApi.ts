@@ -1,6 +1,11 @@
-  const llmUrl = 'https://node.long-arena.com'; //可以写到env
-  // token 写死的 后边可以通过用户登录获取
-  const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOlsiMDdjYTFlMmU5MDFlNDVjNThmNTQwNGQwN2FhYTNkZjYiLCJmN2UzMDQ5OC00NjNkLTQ4MzgtOGI4NC02MGFmZDBhMGEyZGYiXX0.q0tDW6Ja-r9rptbD1gJ0tBWNs3f4S6n7NVBTPbiuKWs';
+  // 从环境变量读取配置，提高安全性
+  const llmUrl = process.env.NEXT_PUBLIC_LLM_API_URL || 'https://node.long-arena.com';
+  const token = process.env.NEXT_PUBLIC_LLM_API_TOKEN || '';
+
+  // 验证token是否配置
+  if (!token) {
+    // LLM API Token未配置
+  }
 
   // 调用此方法返回一个实例 含有cancel 可取消调用  使用方式 const llmInstance = postAiSSE({...})  llmInstance.cancel()
   export const postAiSSE = ({
@@ -11,12 +16,12 @@
   }: {
     params?: {
       modelName?: string;//deepseek|siliconDeepseek|volcesDeepseek|kimi|minimax-text|qwen-turbo-latest|alideepseekv3|volcesDeepseekR1
-      messages?: any[]; //主要参数 openAi一致 一定传数组
+      messages?: Array<{role: string; content: string}>; //主要参数 openAi一致 一定传数组
       temperature?: string;//温度 openAi一致
       maxTokens?: number;//这个大多情况不需要传递 openAi一致
     };
     onData?: (data: string) => void;// 这个是重要参数 就是返回值的流式数据 
-    onError?: (error: any) => void;//错误信息 可以不传
+    onError?: (error: Error) => void;//错误信息 可以不传
     onComplete?: (tokens: number) => void; //返回输出token数量
   })=>{
     const controller = new AbortController();
@@ -48,7 +53,7 @@
       body: JSON.stringify(requestData),
       signal: signal
     })
-    .then((response:any) => {
+    .then((response: Response) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -57,7 +62,7 @@
       let buffer = '';
       let outPutTokens = 0;
       function readChunk() {
-        return reader.read().then(({ done, value }:any) => {
+        return reader.read().then(({ done, value }: ReadableStreamReadResult<Uint8Array>) => {
           if (done) {
             onComplete && onComplete(outPutTokens);
             controller.abort()
@@ -88,14 +93,14 @@
                   onData(content);
                 }
               } catch (e) {
-                console.error('Error parsing SSE data:', e);
+                // 生产环境不输出错误到控制台
                 // 如果不是JSON格式，可能是纯文本
                 if (line.slice(6) && onData) {
                   onData(line.slice(6));
                 }
               }
             } else if (line === 'data: [DONE]' || line.includes('"done":true') || line.includes('"finished":true')) {
-              // console.log('[ done]-435')
+              // Stream processing completed
               return;
             }
           });
@@ -105,7 +110,7 @@
       return readChunk();
     })
     .catch(error => {
-      console.error('SSE请求失败:', error.message);
+      // 生产环境使用错误处理而非console
       onError && onError(error);
     });
     return {

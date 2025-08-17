@@ -92,7 +92,7 @@ const RelationshipManager: React.FC<RelationshipManagerProps> = ({ className }) 
       setInsights(insightsData)
       setMetrics(metricsData)
     } catch (error) {
-      console.error('加载关系数据失败:', error)
+      // 加载关系数据失败
     }
   }
 
@@ -136,7 +136,7 @@ const RelationshipManager: React.FC<RelationshipManagerProps> = ({ className }) 
         }
       })
     } catch (error) {
-      console.error('添加联系人失败:', error)
+      // 添加联系人失败
     }
   }
 
@@ -164,7 +164,7 @@ const RelationshipManager: React.FC<RelationshipManagerProps> = ({ className }) 
         reminderDays: [7, 3, 1]
       })
     } catch (error) {
-      console.error('添加里程碑失败:', error)
+      // 添加里程碑失败
     }
   }
 
@@ -173,7 +173,7 @@ const RelationshipManager: React.FC<RelationshipManagerProps> = ({ className }) 
       relationshipService.completeRelationshipTask(taskId)
       loadData()
     } catch (error) {
-      console.error('完成任务失败:', error)
+      // 完成任务失败
     }
   }
 
@@ -182,7 +182,7 @@ const RelationshipManager: React.FC<RelationshipManagerProps> = ({ className }) 
       relationshipService.recordInteraction(contactId)
       loadData()
     } catch (error) {
-      console.error('记录互动失败:', error)
+      // 记录互动失败
     }
   }
 
@@ -191,7 +191,7 @@ const RelationshipManager: React.FC<RelationshipManagerProps> = ({ className }) 
       await relationshipService.generateRelationshipInsights()
       loadData()
     } catch (error) {
-      console.error('生成洞察失败:', error)
+      // 生成洞察失败
     }
   }
 
@@ -765,7 +765,7 @@ const RelationshipManager: React.FC<RelationshipManagerProps> = ({ className }) 
           ].map((tab) => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key as any)}
+              onClick={() => setActiveTab(tab.key as typeof activeTab)}
               className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm transition-colors ${
                 activeTab === tab.key
                   ? 'bg-white text-blue-600 shadow-sm'

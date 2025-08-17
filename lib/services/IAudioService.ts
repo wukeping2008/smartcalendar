@@ -3,6 +3,16 @@ export interface AudioDeviceInfo {
   audioOutputs: MediaDeviceInfo[]
 }
 
+export interface VoiceInfo {
+  id: string
+  name: string
+  language: string
+  gender?: 'male' | 'female' | 'neutral'
+  locale?: string
+  isDefault?: boolean
+  isLocal?: boolean
+}
+
 export interface IAudioService {
   initTranscription(deviceId?: string): Promise<void>
   initSynthesis(): Promise<void>
@@ -15,7 +25,7 @@ export interface IAudioService {
   onTranscriptionUpdate(callback: (text: string, isFinal: boolean) => void): void
   onError(callback: (error: unknown) => void): void
   getAudioDevices(): Promise<AudioDeviceInfo>
-  getAvailableVoices(): Promise<any[]>
+  getAvailableVoices(): Promise<VoiceInfo[]>
   getStatus(): {
     transcriptionReady: boolean
     synthesisReady: boolean

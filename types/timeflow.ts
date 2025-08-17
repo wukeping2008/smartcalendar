@@ -261,11 +261,20 @@ export interface PerformanceMetrics {
   memoryUsage: number
 }
 
+// 时间流事件数据类型
+export type TimeFlowEventData = 
+  | { eventId?: string; position?: FlowPosition } // 拖拽/选择事件
+  | { animationId?: string; properties?: AnimationProperties } // 动画事件
+  | { time?: Date; zoomLevel?: number } // 时间/缩放变化
+  | { conflictId?: string; resolution?: string } // 冲突事件
+  | { center?: FlowPosition; radius?: number } // 涟漪事件
+  | Record<string, unknown> // 其他事件数据
+
 // 时间流事件
 export interface TimeFlowEvent {
   type: TimeFlowEventType
   timestamp: number
-  data: any
+  data: TimeFlowEventData
 }
 
 export enum TimeFlowEventType {

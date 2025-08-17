@@ -6,7 +6,7 @@ export function useEventStoreInitializer() {
 
   useEffect(() => {
     if (!isLoaded) {
-      console.log('🚀 Initializing event store...')
+      // Initializing event store
       loadEvents()
     }
   }, [loadEvents, isLoaded])

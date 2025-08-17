@@ -38,7 +38,7 @@ export class AzureSpeechService implements IAudioService {
       this.isInitialized = true
       return true
     } catch (error) {
-      console.error('检查权限失败:', error)
+      // 检查权限失败
       return false
     }
   }
@@ -50,7 +50,7 @@ export class AzureSpeechService implements IAudioService {
       const audioOutputs = devices.filter(device => device.kind === 'audiooutput')
       return { audioInputs, audioOutputs }
     } catch (error) {
-      console.error('获取音频设备失败:', error)
+      // 获取音频设备失败
       return { audioInputs: [], audioOutputs: [] }
     }
   }
@@ -74,7 +74,7 @@ export class AzureSpeechService implements IAudioService {
     this.recognizer = new SpeechSDK.SpeechRecognizer(this.speechConfig, this.audioConfig)
     this.setupRecognitionEvents()
     
-    console.log('Azure 语音识别客户端初始化成功')
+    // Azure 语音识别客户端初始化成功
   }
 
   private setupRecognitionEvents(): void {
@@ -93,7 +93,7 @@ export class AzureSpeechService implements IAudioService {
     }
 
     this.recognizer.canceled = (sender, e) => {
-      console.error('语音识别取消:', e.reason, e.errorDetails)
+      // 语音识别取消
       if (this.errorCallback) {
         this.errorCallback(new Error(`语音识别错误: ${e.errorDetails}`))
       }
@@ -106,7 +106,7 @@ export class AzureSpeechService implements IAudioService {
     }
 
     this.synthesizer = new SpeechSDK.SpeechSynthesizer(this.speechConfig)
-    console.log('Azure 语音合成客户端初始化成功')
+    // Azure 语音合成客户端初始化成功
   }
 
   async startTranscription(): Promise<void> {
@@ -117,11 +117,11 @@ export class AzureSpeechService implements IAudioService {
     await new Promise<void>((resolve, reject) => {
       this.recognizer!.startContinuousRecognitionAsync(
         () => {
-          console.log('开始 Azure 语音识别')
+          // 开始 Azure 语音识别
           resolve()
         },
         (error) => {
-          console.error('开始 Azure 语音识别失败:', error)
+          // 开始 Azure 语音识别失败
           reject(new Error(error))
         }
       )
@@ -133,11 +133,11 @@ export class AzureSpeechService implements IAudioService {
       await new Promise<void>((resolve, reject) => {
         this.recognizer!.stopContinuousRecognitionAsync(
           () => {
-            console.log('停止 Azure 语音识别')
+            // 停止 Azure 语音识别
             resolve()
           },
           (error) => {
-            console.error('停止 Azure 语音识别失败:', error)
+            // 停止 Azure 语音识别失败
             reject(new Error(error))
           }
         )
@@ -171,7 +171,7 @@ export class AzureSpeechService implements IAudioService {
         ssml,
         (result) => {
           if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
-            console.log('Azure 语音合成播放成功')
+            // Azure 语音合成播放成功
             resolve()
           } else {
             reject(new Error(`语音合成失败: ${result.errorDetails}`))
@@ -194,11 +194,11 @@ export class AzureSpeechService implements IAudioService {
   }
 
   async pauseSynthesis(): Promise<void> {
-    console.warn('Azure Speech SDK 不直接支持暂停/恢复')
+    // Azure Speech SDK 不直接支持暂停/恢复
   }
 
   async resumeSynthesis(): Promise<void> {
-    console.warn('Azure Speech SDK 不直接支持暂停/恢复')
+    // Azure Speech SDK 不直接支持暂停/恢复
   }
 
   async interruptSynthesis(): Promise<void> {
@@ -244,9 +244,9 @@ export class AzureSpeechService implements IAudioService {
         this.synthesizer = null
       }
 
-      console.log('Azure 音频服务资源已清理')
+      // Azure 音频服务资源已清理
     } catch (error) {
-      console.error('清理 Azure 音频服务资源失败:', error)
+      // 清理 Azure 音频服务资源失败
     }
   }
 }

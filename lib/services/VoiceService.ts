@@ -1,5 +1,13 @@
 import { VoiceRecognitionEngine, VoiceCommand, VoiceResponse } from '../../types/voice'
-import { Event, EventCategory, Priority, EventStatus } from '../../types/event'
+import { Event, EventCategory, Priority, EventStatus, Reminder, ReminderType } from '../../types/event'
+
+// 扩展Web Speech API类型定义
+interface ExtendedWindow extends Window {
+  webkitSpeechRecognition?: typeof SpeechRecognition
+  SpeechRecognition?: typeof SpeechRecognition
+}
+
+declare const window: ExtendedWindow
 
 // 语音识别服务类
 export class VoiceService {
@@ -17,9 +25,9 @@ export class VoiceService {
   // 初始化语音识别
   private initSpeechRecognition() {
     if ('webkitSpeechRecognition' in window) {
-      this.recognition = new (window as any).webkitSpeechRecognition()
+      this.recognition = new window.webkitSpeechRecognition!()
     } else if ('SpeechRecognition' in window) {
-      this.recognition = new (window as any).SpeechRecognition()
+      this.recognition = new window.SpeechRecognition!()
     }
 
     if (this.recognition) {
@@ -29,12 +37,12 @@ export class VoiceService {
 
       this.recognition.onresult = (event) => {
         const result = event.results[0][0].transcript
-        console.log('语音识别结果:', result)
+        // 语音识别结果获取成功
         this.onResultCallback?.(result)
       }
 
       this.recognition.onerror = (event) => {
-        console.error('语音识别错误:', event.error)
+        // 语音识别错误
         this.onErrorCallback?.(event.error)
         this.isListening = false
       }
@@ -64,7 +72,7 @@ export class VoiceService {
       this.recognition.start()
       this.isListening = true
     } catch (error) {
-      console.error('启动语音识别失败:', error)
+      // 启动语音识别失败
       onError?.('启动语音识别失败')
     }
   }
@@ -80,7 +88,7 @@ export class VoiceService {
   // 语音合成（文字转语音）
   speak(text: string, options?: { lang?: string; rate?: number; pitch?: number }) {
     if (!this.synthesis) {
-      console.error('浏览器不支持语音合成')
+      // 浏览器不支持语音合成
       return
     }
 
@@ -125,7 +133,7 @@ export class VoiceCommandParser {
     let priority = Priority.MEDIUM
     let startTime = new Date()
     let endTime = new Date()
-    let reminders: any[] = []
+    let reminders: Reminder[] = []
 
     // 增强的时间解析模式
     const timePatterns = [
@@ -340,8 +348,8 @@ export class VoiceCommandParser {
   }
 
   // 解析多重提醒
-  private parseReminders(text: string, startTime: Date): any[] {
-    const reminders: any[] = []
+  private parseReminders(text: string, startTime: Date): Reminder[] {
+    const reminders: Reminder[] = []
 
     // 解析自定义提醒时间
     const reminderPatterns = [
@@ -360,7 +368,7 @@ export class VoiceCommandParser {
         reminders.push({
           id: `custom-${minutes}m`,
           eventId: '',
-          type: 'notification' as const,
+          type: ReminderType.NOTIFICATION,
           time: new Date(startTime.getTime() - minutes * 60 * 1000),
           message: `${minutes}分钟后开始`,
           isTriggered: false
@@ -374,7 +382,7 @@ export class VoiceCommandParser {
         {
           id: 'default-30m',
           eventId: '',
-          type: 'notification' as const,
+          type: ReminderType.NOTIFICATION,
           time: new Date(startTime.getTime() - 30 * 60 * 1000),
           message: '30分钟后开始',
           isTriggered: false
@@ -382,7 +390,7 @@ export class VoiceCommandParser {
         {
           id: 'default-5m',
           eventId: '',
-          type: 'notification' as const,
+          type: ReminderType.NOTIFICATION,
           time: new Date(startTime.getTime() - 5 * 60 * 1000),
           message: '5分钟后开始',
           isTriggered: false

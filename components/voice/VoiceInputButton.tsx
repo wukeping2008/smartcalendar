@@ -7,6 +7,31 @@ import { EventCategory, Priority, EventStatus, EnergyLevel } from '../../types/e
 import { AzureSpeechService } from '../../lib/services/AzureSpeechService'
 import type { IAudioService } from '../../lib/services/IAudioService'
 
+// 扩展浏览器类型定义
+interface ExtendedWindow extends Window {
+  webkitSpeechRecognition?: typeof SpeechRecognition
+  SpeechRecognition?: typeof SpeechRecognition
+}
+
+// 语音识别事件类型
+interface SpeechRecognitionEvent {
+  results: {
+    [index: number]: {
+      [index: number]: {
+        transcript: string
+        confidence: number
+      }
+    }
+  }
+}
+
+interface SpeechRecognitionErrorEvent {
+  error: string
+  message: string
+}
+
+declare const window: ExtendedWindow
+
 interface VoiceInputButtonProps {
   onResult?: (text: string) => void
   className?: string
@@ -32,10 +57,8 @@ export default function VoiceInputButton({ onResult, className = "" }: VoiceInpu
                                process.env.NEXT_PUBLIC_AZURE_SPEECH_REGION
         
         if (hasAzureConfig) {
-          console.log('使用Azure Speech Service')
           audioServiceRef.current = new AzureSpeechService()
         } else {
-          console.log('Azure配置未找到，回退到浏览器Speech API')
           // 检查浏览器支持
           const speechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window
           setIsSupported(speechRecognition)
@@ -58,16 +81,14 @@ export default function VoiceInputButton({ onResult, className = "" }: VoiceInpu
         })
 
         audioServiceRef.current.onError((error) => {
-          console.error('Azure语音服务错误:', error)
+          // Azure语音服务错误 - 静默处理
           setIsListening(false)
         })
 
         setIsSupported(true)
         setIsInitialized(true)
-        console.log('Azure Speech Service初始化成功')
       } catch (error) {
-        console.error('初始化语音服务失败:', error)
-        // 回退到浏览器API
+        // 初始化语音服务失败，回退到浏览器API
         const speechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window
         setIsSupported(speechRecognition)
       }
@@ -93,7 +114,6 @@ export default function VoiceInputButton({ onResult, className = "" }: VoiceInpu
     try {
       // 如果有Azure服务，使用Azure
       if (audioServiceRef.current && isInitialized) {
-        console.log('使用Azure Speech Service进行语音识别')
         setIsListening(true)
         setTranscript('')
         accumulatedTextRef.current = ''
@@ -103,8 +123,12 @@ export default function VoiceInputButton({ onResult, className = "" }: VoiceInpu
       }
 
       // 回退到浏览器API
-      console.log('使用浏览器Speech API')
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
+      const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition
+      
+      if (!SpeechRecognition) {
+        alert('浏览器不支持语音识别')
+        return
+      }
       const recognition = new SpeechRecognition()
 
       recognition.continuous = false
@@ -116,7 +140,7 @@ export default function VoiceInputButton({ onResult, className = "" }: VoiceInpu
         setTranscript('')
       }
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         const result = event.results[0][0].transcript
         setTranscript(result)
         onResult?.(result)
@@ -125,8 +149,8 @@ export default function VoiceInputButton({ onResult, className = "" }: VoiceInpu
         handleVoiceResult(result)
       }
 
-      recognition.onerror = (event: any) => {
-        console.error('语音识别错误:', event.error)
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        // 语音识别错误 - 静默处理
         setIsListening(false)
       }
 
@@ -136,7 +160,7 @@ export default function VoiceInputButton({ onResult, className = "" }: VoiceInpu
 
       recognition.start()
     } catch (error) {
-      console.error('启动语音识别失败:', error)
+      // 启动语音识别失败 - 静默处理
       setIsListening(false)
     }
   }
@@ -154,7 +178,7 @@ export default function VoiceInputButton({ onResult, className = "" }: VoiceInpu
       }
       setIsListening(false)
     } catch (error) {
-      console.error('停止语音识别失败:', error)
+      // 停止语音识别失败 - 静默处理
       setIsListening(false)
     }
   }
@@ -189,8 +213,7 @@ export default function VoiceInputButton({ onResult, className = "" }: VoiceInpu
         window.speechSynthesis.speak(utterance)
       }
     } catch (error) {
-      console.error('语音合成失败:', error)
-      // 最后回退到浏览器API
+      // 语音合成失败，回退到浏览器API
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(text)
         utterance.lang = 'zh-CN'

@@ -330,11 +330,11 @@ export default function HomePage() {
   const handleEventSelect = (event: Event) => {
     setSelectedEvent(event)
     selectEvent(event.id)
-    console.log('Selected event:', event.title)
+    // Event selected
   }
 
   const handleEventDrag = (eventId: string, newPosition: { x: number; y: number; z: number }) => {
-    console.log('Drag event:', eventId, newPosition)
+    // Event dragged
   }
 
   const handleDateSelect = (date: Date) => {

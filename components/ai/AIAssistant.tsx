@@ -104,12 +104,12 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
           setIsEnhancing(false)
         },
         onError: (error) => {
-          console.error('Enhanced insights error:', error)
+          // Enhanced insights error
           setIsEnhancing(false)
         }
       })
     } catch (error) {
-      console.error('Failed to enhance insights:', error)
+      // Failed to enhance insights
       setIsEnhancing(false)
     }
   }
@@ -140,11 +140,11 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
           })
         },
         onError: (error) => {
-          console.error('Enhanced recommendation error:', error)
+          // Enhanced recommendation error
         }
       })
     } catch (error) {
-      console.error('Failed to enhance recommendation:', error)
+      // Failed to enhance recommendation
     }
   }
 
@@ -184,7 +184,7 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
         alert(`💡 AI建议已记录：${rec.description}\n\n建议置信度：${Math.round(rec.confidence * 100)}%`)
       }
     } catch (error) {
-      console.error('应用建议失败:', error)
+      // 应用建议失败
       alert('❌ 应用建议时出现错误，请稍后重试')
     }
   }
@@ -213,7 +213,7 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
         // 从冲突列表中移除已解决的冲突
         setConflicts(prev => prev.filter(c => c.conflictId !== conflict.conflictId))
       } catch (error) {
-        console.error('应用冲突解决方案失败:', error)
+        // 应用冲突解决方案失败
         alert('❌ 应用解决方案时出现错误，请稍后重试')
       }
     }

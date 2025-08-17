@@ -31,7 +31,7 @@ export default function TradingTaskTemplates() {
       isDragging: false,
       isHovered: false,
       isConflicted: false,
-      energyRequired: 'medium' as any,
+      energyRequired: EnergyLevel.MEDIUM,
       estimatedDuration: 5,
       isMarketProtected: true,
       flexibilityScore: 30,

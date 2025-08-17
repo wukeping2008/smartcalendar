@@ -22,13 +22,24 @@ export interface ChatMessage {
 export interface LLMStreamOptions {
   onData?: (chunk: string) => void
   onComplete?: (response: LLMResponse) => void
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
+}
+
+// LLM请求的返回类型
+interface LLMRequestResult {
+  requestId: string
+  cancel: () => void
+}
+
+// postAiSSE返回的实例类型
+interface LLMInstance {
+  cancel(): void
 }
 
 export class LLMIntegrationService {
   private static instance: LLMIntegrationService
   private cache: Map<string, LLMResponse> = new Map()
-  private activeRequests: Map<string, any> = new Map()
+  private activeRequests: Map<string, LLMInstance> = new Map()
 
   private constructor() {}
 
@@ -45,7 +56,7 @@ export class LLMIntegrationService {
   async chat(
     messages: ChatMessage[],
     options: LLMStreamOptions = {}
-  ): Promise<any> {
+  ): Promise<LLMRequestResult> {
     const requestId = `chat_${Date.now()}`
     let fullResponse = ''
     let totalTokens = 0
@@ -61,8 +72,8 @@ export class LLMIntegrationService {
         fullResponse += chunk
         options.onData?.(chunk)
       },
-      onError: (error: any) => {
-        console.error('LLM Chat Error:', error)
+      onError: (error: unknown) => {
+        // LLM Chat Error occurred
         this.activeRequests.delete(requestId)
         options.onError?.(error)
       },
@@ -96,7 +107,7 @@ export class LLMIntegrationService {
     originalRecommendation: string,
     eventContext: Event,
     options: LLMStreamOptions = {}
-  ): Promise<any> {
+  ): Promise<LLMRequestResult> {
     const cacheKey = `enhance_${originalRecommendation.slice(0, 50)}_${eventContext.category}`
     
     // 检查缓存
@@ -151,7 +162,7 @@ export class LLMIntegrationService {
     },
     events: Event[],
     options: LLMStreamOptions = {}
-  ): Promise<any> {
+  ): Promise<LLMRequestResult> {
     const eventSummary = this.buildEventsSummary(events)
     
     const messages: ChatMessage[] = [
@@ -195,7 +206,7 @@ ${analysisData.productivityTips.map(tip => `• ${tip}`).join('\n')}
     question: string,
     userEvents: Event[],
     options: LLMStreamOptions = {}
-  ): Promise<any> {
+  ): Promise<LLMRequestResult> {
     const eventContext = this.buildEventsContext(userEvents)
     
     const messages: ChatMessage[] = [
@@ -233,7 +244,7 @@ ${analysisData.productivityTips.map(tip => `• ${tip}`).join('\n')}
   async enhanceVoiceCommand(
     voiceText: string,
     options: LLMStreamOptions = {}
-  ): Promise<any> {
+  ): Promise<LLMRequestResult> {
     const messages: ChatMessage[] = [
       {
         role: 'system',
@@ -277,7 +288,7 @@ ${analysisData.productivityTips.map(tip => `• ${tip}`).join('\n')}
    * 取消所有活跃请求
    */
   cancelAllRequests(): void {
-    this.activeRequests.forEach((request) => {
+    this.activeRequests.forEach((request: LLMInstance) => {
       request.cancel()
     })
     this.activeRequests.clear()

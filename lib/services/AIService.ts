@@ -200,7 +200,7 @@ class AIService {
   learnFromEvents(events: Event[]): void {
     this.learningData = events
     this.updateHabitsFromData(events)
-    console.log('🧠 AI学习完成:', this.userHabits)
+    // AI学习完成
   }
 
   private updateHabitsFromData(events: Event[]): void {
@@ -571,7 +571,7 @@ class AIService {
     if (!this._claude) {
       const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY
       if (!apiKey || apiKey === 'your_anthropic_api_key_here') {
-        console.warn('Anthropic API key not configured')
+        // Anthropic API key not configured
         return null
       }
       this._claude = new Anthropic({
@@ -589,7 +589,7 @@ class AIService {
     if (!this._openai) {
       const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
       if (!apiKey || apiKey === 'your_openai_api_key_here') {
-        console.warn('OpenAI API key not configured')
+        // OpenAI API key not configured
         return null
       }
       this._openai = new OpenAI({
@@ -633,7 +633,7 @@ class AIService {
       }
       return '抱歉，我无法理解您的请求。'
     } catch (error) {
-      console.error('Claude API调用失败:', error)
+      // Claude API调用失败
       // 尝试使用备用的OpenAI
       return this.chatWithOpenAI(message)
     }
@@ -674,7 +674,7 @@ class AIService {
 
       return response.choices[0]?.message?.content || '抱歉，我无法理解您的请求。'
     } catch (error) {
-      console.error('OpenAI API调用失败:', error)
+      // OpenAI API调用失败
       return this.generateLocalResponse(message)
     }
   }
@@ -771,11 +771,11 @@ class AIService {
             suggestedAction: parsed.suggestedAction || { type: 'unknown', data: {} }
           }
         } catch (parseError) {
-          console.error('JSON解析失败:', parseError)
+          // JSON解析失败
         }
       }
     } catch (error) {
-      console.error('自然语言解析失败:', error)
+      // 自然语言解析失败
     }
 
     // 返回默认值
@@ -825,7 +825,7 @@ class AIService {
         }
       }
     } catch (error) {
-      console.error('OpenAI解析失败:', error)
+      // OpenAI解析失败
     }
     return this.parseLocalNaturalLanguage(input)
   }
@@ -835,7 +835,7 @@ class AIService {
    */
   private parseLocalNaturalLanguage(input: string): ParsedCommand {
     const lowerInput = input.toLowerCase()
-    const entities: any = {}
+    const entities: ParsedCommand['entities'] = {}
     let intent: 'create_event' | 'modify_event' | 'query_schedule' | 'set_goal' | 'other' = 'other'
     let confidence = 0.3
 
@@ -974,7 +974,7 @@ class AIService {
               category: this.mapCategoryString((task.category as string) || 'work')
             }))
           } catch (parseError) {
-            console.error('任务分解JSON解析失败:', parseError)
+            // 任务分解JSON解析失败
           }
         }
       } else if (openai) {
@@ -999,18 +999,21 @@ class AIService {
         if (content) {
           const parsed = JSON.parse(content)
           const subtasks = parsed.subtasks || parsed.tasks || []
-          return subtasks.map((task: any) => ({
-            title: task.title || task.name || '子任务',
-            estimatedHours: task.estimatedHours || task.hours || 1,
-            energyLevel: this.mapEnergyLevel(task.energyLevel || 'medium'),
-            preferredTimeOfDay: task.preferredTimeOfDay || 'afternoon',
-            dependencies: task.dependencies || [],
-            category: this.mapCategoryString(task.category || 'work')
-          }))
+          return subtasks.map((task: unknown) => {
+            const taskObj = task as Record<string, unknown>
+            return {
+              title: (taskObj.title as string) || (taskObj.name as string) || '子任务',
+              estimatedHours: (taskObj.estimatedHours as number) || (taskObj.hours as number) || 1,
+              energyLevel: this.mapEnergyLevel((taskObj.energyLevel as string) || 'medium'),
+              preferredTimeOfDay: (taskObj.preferredTimeOfDay as 'morning' | 'afternoon' | 'evening') || 'afternoon',
+              dependencies: (taskObj.dependencies as string[]) || [],
+              category: this.mapCategoryString((taskObj.category as string) || 'work')
+            }
+          })
         }
       }
     } catch (error) {
-      console.error('任务分解失败:', error)
+      // 任务分解失败
     }
 
     // 返回本地分解

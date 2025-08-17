@@ -118,7 +118,7 @@ class AIService {
   learnFromEvents(events: Event[]): void {
     this.learningData = events
     this.updateHabitsFromData(events)
-    console.log('🧠 AI学习完成:', this.userHabits)
+    // AI学习完成
   }
 
   private updateHabitsFromData(events: Event[]): void {

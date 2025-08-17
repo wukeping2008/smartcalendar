@@ -133,7 +133,7 @@ export const useEventStore = create<EventStore>()(
       
       // 异步保存到StorageService
       storageService.saveEvent(newEvent).catch((error) => {
-        console.error('Failed to save event to storage:', error)
+        // Failed to save event to storage
       })
     }),
     
@@ -157,7 +157,7 @@ export const useEventStore = create<EventStore>()(
         
         // 异步更新到StorageService
         storageService.saveEvent(updatedEvent).catch((error) => {
-          console.error('Failed to update event in storage:', error)
+          // Failed to update event in storage
         })
       }
     }),
@@ -184,7 +184,7 @@ export const useEventStore = create<EventStore>()(
       
       // 异步从StorageService删除
       storageService.deleteEvent(id).catch((error) => {
-        console.error('Failed to delete event from storage:', error)
+        // Failed to delete event from storage
       })
     }),
     
@@ -378,9 +378,9 @@ export const useEventStore = create<EventStore>()(
     // 从StorageService加载所有事件
     loadEvents: async () => {
       try {
-        console.log('📥 Loading events from storage...')
+        // Loading events from storage
         const storedEvents = await storageService.getAllEvents()
-        console.log(`✅ Loaded ${storedEvents.length} events from storage`)
+        // Events loaded from storage
         
         set((state) => {
           state.events = storedEvents
@@ -394,7 +394,7 @@ export const useEventStore = create<EventStore>()(
           })
         })
       } catch (error) {
-        console.error('❌ Failed to load events from storage:', error)
+        // Failed to load events from storage
         set((state) => {
           state.isLoaded = true
         })
@@ -411,9 +411,9 @@ export const useEventStore = create<EventStore>()(
           state.hoveredEventId = null
         })
         
-        console.log('🗑️ All events cleared from memory')
+        // All events cleared from memory
       } catch (error) {
-        console.error('❌ Failed to clear events:', error)
+        // Failed to clear events
       }
     }
   }))

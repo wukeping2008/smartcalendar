@@ -494,7 +494,7 @@ export default function EnhancedFlowCanvas({
       setRipples(prev => [...prev, newRipple])
     }
     
-    console.log('🌊 Drag start:', event.title, position)
+    // Drag start event handled
   }, [riverFlow.rippleEffects])
 
   const handleRippleComplete = useCallback((rippleId: string) => {

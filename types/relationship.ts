@@ -322,13 +322,32 @@ export interface RelationshipRule {
   updatedAt: Date
 }
 
+// 规则触发条件类型
+export type RuleTriggerConditions = {
+  milestoneType?: MilestoneType[]
+  importanceLevel?: { min?: number; max?: number }
+  relationshipType?: RelationshipType[]
+  daysSinceLastInteraction?: number
+  contactIds?: string[]
+} & Record<string, unknown>
+
+// 规则动作参数类型
+export type RuleActionParameters = {
+  taskType?: RelationshipTaskType
+  reminderMessage?: string
+  meetingDuration?: number
+  noteContent?: string
+  priority?: Priority
+  reminderDays?: number[]
+} & Record<string, unknown>
+
 export interface RuleTrigger {
   type: 'milestone_approaching' | 'interaction_overdue' | 'new_contact' | 'task_created'
-  conditions: Record<string, any>
+  conditions: RuleTriggerConditions
   daysBefore?: number
 }
 
 export interface RuleAction {
   type: 'create_task' | 'send_reminder' | 'schedule_meeting' | 'add_note'
-  parameters: Record<string, any>
+  parameters: RuleActionParameters
 }

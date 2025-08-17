@@ -92,7 +92,7 @@ class StorageService {
    */
   private async initDB(): Promise<void> {
     if (typeof window === 'undefined' || !window.indexedDB) {
-      console.warn('IndexedDB not available in this environment')
+      // IndexedDB not available in this environment
       return Promise.resolve()
     }
     
@@ -100,13 +100,13 @@ class StorageService {
       const request = indexedDB.open(this.config.dbName, this.config.dbVersion)
 
       request.onerror = () => {
-        console.error('Failed to open IndexedDB:', request.error)
+        // Failed to open IndexedDB
         reject(request.error)
       }
 
       request.onsuccess = () => {
         this.db = request.result
-        console.log('✅ IndexedDB initialized successfully')
+        // IndexedDB initialized successfully
         resolve()
       }
 
@@ -122,7 +122,7 @@ class StorageService {
           eventStore.createIndex('category', 'category', { unique: false })
           eventStore.createIndex('status', 'status', { unique: false })
           eventStore.createIndex('priority', 'priority', { unique: false })
-          console.log('✅ Created events store')
+          // Created events store
         }
 
         // 创建AI决策存储
@@ -134,7 +134,7 @@ class StorageService {
           aiStore.createIndex('priority', 'priority', { unique: false })
           aiStore.createIndex('createdAt', 'createdAt', { unique: false })
           aiStore.createIndex('eventId', 'eventId', { unique: false })
-          console.log('✅ Created AI decisions store')
+          // Created AI decisions store
         }
 
         // 创建用户偏好存储
@@ -142,7 +142,7 @@ class StorageService {
           db.createObjectStore(this.config.stores.userPreferences, { 
             keyPath: 'id' 
           })
-          console.log('✅ Created user preferences store')
+          // Created user preferences store
         }
 
         // 创建市场数据缓存存储
@@ -152,7 +152,7 @@ class StorageService {
           })
           marketStore.createIndex('symbol', 'symbol', { unique: false })
           marketStore.createIndex('timestamp', 'timestamp', { unique: false })
-          console.log('✅ Created market data store')
+          // Created market data store
         }
       }
     })
@@ -194,12 +194,12 @@ class StorageService {
       const request = store.put(eventToStore)
       
       request.onsuccess = () => {
-        console.log(`✅ Event saved: ${event.title}`)
+        // Event saved successfully
         resolve()
       }
       
       request.onerror = () => {
-        console.error('Failed to save event:', request.error)
+        // Failed to save event
         reject(request.error)
       }
     })
@@ -230,13 +230,13 @@ class StorageService {
         request.onsuccess = () => {
           savedCount++
           if (savedCount === events.length) {
-            console.log(`✅ Saved ${savedCount} events`)
+            // Events saved successfully
             resolve()
           }
         }
         
         request.onerror = () => {
-          console.error('Failed to save event:', request.error)
+          // Failed to save event
           reject(request.error)
         }
       })
@@ -265,12 +265,12 @@ class StorageService {
             time: new Date(reminder.time)
           })) || []
         }))
-        console.log(`✅ Loaded ${events.length} events from storage`)
+        // Events loaded successfully
         resolve(events)
       }
       
       request.onerror = () => {
-        console.error('Failed to get events:', request.error)
+        // Failed to get events
         reject(request.error)
       }
     })
@@ -309,7 +309,7 @@ class StorageService {
       }
       
       request.onerror = () => {
-        console.error('Failed to get events by date range:', request.error)
+        // Failed to get events by date range
         reject(request.error)
       }
     })
@@ -326,12 +326,12 @@ class StorageService {
       const request = store.delete(eventId)
       
       request.onsuccess = () => {
-        console.log(`✅ Event deleted: ${eventId}`)
+        // Event deleted successfully
         resolve()
       }
       
       request.onerror = () => {
-        console.error('Failed to delete event:', request.error)
+        // Failed to delete event
         reject(request.error)
       }
     })
@@ -357,12 +357,12 @@ class StorageService {
       const request = store.put(decisionToStore)
       
       request.onsuccess = () => {
-        console.log(`✅ AI decision saved: ${decision.message}`)
+        // AI decision saved successfully
         resolve()
       }
       
       request.onerror = () => {
-        console.error('Failed to save AI decision:', request.error)
+        // Failed to save AI decision
         reject(request.error)
       }
     })
@@ -392,13 +392,13 @@ class StorageService {
           })
           cursor.continue()
         } else {
-          console.log(`✅ Loaded ${decisions.length} AI decisions from storage`)
+          // AI decisions loaded successfully
           resolve(decisions)
         }
       }
       
       request.onerror = () => {
-        console.error('Failed to get AI decision history:', request.error)
+        // Failed to get AI decision history
         reject(request.error)
       }
     })
@@ -423,12 +423,12 @@ class StorageService {
       const request = store.put(prefsToStore)
       
       request.onsuccess = () => {
-        console.log('✅ User preferences saved')
+        // User preferences saved successfully
         resolve()
       }
       
       request.onerror = () => {
-        console.error('Failed to save user preferences:', request.error)
+        // Failed to save user preferences
         reject(request.error)
       }
     })
@@ -457,7 +457,7 @@ class StorageService {
       }
       
       request.onerror = () => {
-        console.error('Failed to get user preferences:', request.error)
+        // Failed to get user preferences
         reject(request.error)
       }
     })
@@ -482,12 +482,12 @@ class StorageService {
       const request = store.put(dataToStore)
       
       request.onsuccess = () => {
-        console.log(`✅ Market data saved: ${data.symbol}`)
+        // Market data saved successfully
         resolve()
       }
       
       request.onerror = () => {
-        console.error('Failed to save market data:', request.error)
+        // Failed to save market data
         reject(request.error)
       }
     })
@@ -519,7 +519,7 @@ class StorageService {
       }
       
       request.onerror = () => {
-        console.error('Failed to get market data:', request.error)
+        // Failed to get market data
         reject(request.error)
       }
     })
@@ -548,13 +548,13 @@ class StorageService {
           deletedCount++
           cursor.continue()
         } else {
-          console.log(`✅ Cleared ${deletedCount} expired market data entries`)
+          // Expired market data entries cleared
           resolve()
         }
       }
       
       request.onerror = () => {
-        console.error('Failed to clear expired market data:', request.error)
+        // Failed to clear expired market data
         reject(request.error)
       }
     })
@@ -620,7 +620,7 @@ class StorageService {
       await this.saveUserPreferences(data.data.preferences)
     }
     
-    console.log('✅ Data import completed successfully')
+    // Data import completed successfully
   }
 
   /**
@@ -645,12 +645,12 @@ class StorageService {
       transaction.objectStore(this.config.stores.marketData).clear()
       
       transaction.oncomplete = () => {
-        console.log('✅ All data cleared successfully')
+        // All data cleared successfully
         resolve()
       }
       
       transaction.onerror = () => {
-        console.error('Failed to clear data:', transaction.error)
+        // Failed to clear data
         reject(transaction.error)
       }
     })

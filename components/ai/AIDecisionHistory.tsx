@@ -28,7 +28,7 @@ export function AIDecisionHistory({ limit = 50, showStats = true }: AIDecisionHi
       setDecisions(data)
       setError(null)
     } catch (err) {
-      console.error('Failed to load AI decisions:', err)
+      // Failed to load AI decisions
       setError('无法加载AI决策历史')
     } finally {
       setLoading(false)

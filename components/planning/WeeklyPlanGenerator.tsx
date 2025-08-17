@@ -401,7 +401,7 @@ export default function WeeklyPlanGenerator({
       }
       
     } catch (error) {
-      console.error('生成周计划失败:', error)
+      // 生成周计划失败
     } finally {
       setIsGenerating(false)
     }

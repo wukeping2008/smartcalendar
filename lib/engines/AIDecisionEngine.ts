@@ -79,7 +79,7 @@ class AIDecisionEngine {
    * 初始化决策引擎
    */
   private async initializeEngine() {
-    console.log('🧠 AI决策引擎初始化中...')
+    // AI决策引擎初始化中
     
     // 连接市场数据服务
     await marketService.connect()
@@ -89,7 +89,7 @@ class AIDecisionEngine {
       this.handleMarketAlert(alert)
     })
 
-    console.log('✅ AI决策引擎初始化完成')
+    // AI决策引擎初始化完成
   }
 
   /**
@@ -200,7 +200,7 @@ class AIDecisionEngine {
   private async handleMarketAlert(alert: MarketAlert) {
     if (!this.decisionContext) return
 
-    console.log(`🚨 处理市场预警: ${alert.title}`)
+    // 处理市场预警
 
     // 根据预警严重程度生成相应建议
     if (alert.severity === 'critical' || alert.severity === 'high') {
@@ -208,7 +208,7 @@ class AIDecisionEngine {
       this.activeRecommendations.set(recommendation.id, recommendation)
       
       // 通知用户
-      console.log(`💡 生成市场预警推荐: ${recommendation.title}`)
+      // 生成市场预警推荐
     }
   }
 
@@ -410,7 +410,7 @@ class AIDecisionEngine {
         })
       }
     } catch (error) {
-      console.warn('AI增强推荐生成失败:', error)
+      // AI增强推荐生成失败
     }
 
     return recommendations
@@ -534,7 +534,7 @@ class AIDecisionEngine {
         aiGenerated: true
       })
     } catch (error) {
-      console.warn('AI预测洞察生成失败:', error)
+      // AI预测洞察生成失败
     }
 
     return insights

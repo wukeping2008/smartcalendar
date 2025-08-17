@@ -73,7 +73,7 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
           })
 
           audioServiceRef.current.onError((error) => {
-            console.error('语音服务错误:', error)
+            // 语音服务错误
             setIsListening(false)
           })
 
@@ -85,7 +85,7 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
 
         setIsVoiceSupported(true)
       } catch (error) {
-        console.error('初始化语音服务失败:', error)
+        // 初始化语音服务失败
         const speechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window
         setIsVoiceSupported(speechRecognition)
       }
@@ -147,7 +147,7 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
       setOptimizationTips(tips)
 
     } catch (error) {
-      console.error('智能分析失败:', error)
+      // 智能分析失败
     }
   }
 
@@ -164,14 +164,19 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
         await audioServiceRef.current.startTranscription()
       } else {
         // 浏览器API回退
-        const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
+        const SpeechRecognition = (window as ExtendedWindow).webkitSpeechRecognition || (window as ExtendedWindow).SpeechRecognition
+        
+        if (!SpeechRecognition) {
+          // 浏览器不支持语音识别
+          return
+        }
         const recognition = new SpeechRecognition()
         
         recognition.continuous = true
         recognition.interimResults = true
         recognition.lang = 'zh-CN'
 
-        recognition.onresult = (event: any) => {
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
           let finalTranscript = ''
           let interimTranscript = ''
 
@@ -198,7 +203,7 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
         recognition.start()
       }
     } catch (error) {
-      console.error('语音识别启动失败:', error)
+      // 语音识别启动失败
       setIsListening(false)
     }
   }
@@ -217,7 +222,7 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
       }
       setIsListening(false)
     } catch (error) {
-      console.error('停止语音识别失败:', error)
+      // 停止语音识别失败
       setIsListening(false)
     }
   }
@@ -298,7 +303,7 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
         window.speechSynthesis.speak(utterance)
       }
     } catch (error) {
-      console.error('语音反馈失败:', error)
+      // 语音反馈失败
     }
   }
 
@@ -435,7 +440,7 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
       accumulatedTextRef.current = ''
       
     } catch (error) {
-      console.error('语音创建事件失败:', error)
+      // 语音创建事件失败
       await speakFeedback('创建失败，请重试')
     }
   }
@@ -498,7 +503,7 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
       resetForm()
       
     } catch (error) {
-      console.error('创建事件失败:', error)
+      // 创建事件失败
       await speakFeedback('创建事件失败，请重试')
     }
   }

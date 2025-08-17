@@ -77,7 +77,7 @@ class RelationshipService {
     this.database.contacts.push(contact)
     this.saveToStorage()
 
-    console.log(`👥 添加新联系人: ${contact.name} (${contact.title})`)
+    // 添加新联系人
 
     // 自动创建周期性事务（如1:1会议）
     this.autoCreatePeriodicEvents(contact)
@@ -150,7 +150,7 @@ class RelationshipService {
     contact.personalInfo.personalMilestones.push(newMilestone)
     this.updateContact(contactId, { personalInfo: contact.personalInfo })
 
-    console.log(`📅 为 ${contact.name} 添加里程碑: ${milestone.description}`)
+    // 添加里程碑
 
     // 自动创建相关任务
     this.autoCreateMilestoneTask(contact, newMilestone)
@@ -218,7 +218,7 @@ class RelationshipService {
     this.database.periodicEvents.push(periodicEvent)
     this.saveToStorage()
 
-    console.log(`🔄 创建周期性事务: ${periodicEvent.title}`)
+    // 创建周期性事务
     return periodicEvent
   }
 
@@ -292,7 +292,7 @@ class RelationshipService {
     this.saveToStorage()
 
     const contact = this.getContact(task.contactId)
-    console.log(`💝 创建关系任务: ${task.title} (${contact?.name})`)
+    // 创建关系任务
 
     return task
   }
@@ -481,7 +481,7 @@ class RelationshipService {
         insights.push(aiInsight)
       }
     } catch (error) {
-      console.warn('AI关系洞察生成失败:', error)
+      // AI关系洞察生成失败
     }
 
     // 保存洞察到数据库
@@ -544,7 +544,7 @@ class RelationshipService {
         generatedAt: new Date()
       }
     } catch (error) {
-      console.error('AI洞察生成失败:', error)
+      // AI洞察生成失败
       return null
     }
   }
@@ -562,7 +562,7 @@ class RelationshipService {
     const activeContacts = this.database.contacts.filter(c => c.isActive)
     
     // 按关系类型统计
-    const contactsByRelationship: Record<RelationshipType, number> = {} as any
+    const contactsByRelationship: Record<RelationshipType, number> = {} as Record<RelationshipType, number>
     Object.values(RelationshipType).forEach(type => {
       contactsByRelationship[type] = activeContacts.filter(c => c.relationship === type).length
     })
@@ -715,9 +715,9 @@ class RelationshipService {
     // 比如生日提醒、工作纪念日等
   }
 
-  private triggerRules(triggerType: string, context: any) {
+  private triggerRules(triggerType: string, context: Record<string, unknown>) {
     // 实现规则触发逻辑
-    console.log(`🔄 触发规则: ${triggerType}`, context)
+    // 触发规则
   }
 
   // ==================== 数据持久化 ====================
@@ -728,7 +728,7 @@ class RelationshipService {
         localStorage.setItem(this.storageKey, JSON.stringify(this.database, this.dateReplacer))
       }
     } catch (error) {
-      console.error('保存关系数据失败:', error)
+      // 保存关系数据失败
     }
   }
 
@@ -741,19 +741,22 @@ class RelationshipService {
         }
       }
     } catch (error) {
-      console.error('加载关系数据失败:', error)
+      // 加载关系数据失败
     }
   }
 
-  private dateReplacer(key: string, value: any): any {
+  private dateReplacer(key: string, value: unknown): unknown {
     if (value instanceof Date) {
       return { __type: 'Date', value: value.toISOString() }
     }
     return value
   }
 
-  private dateReviver(key: string, value: any): any {
-    if (typeof value === 'object' && value !== null && value.__type === 'Date') {
+  private dateReviver(key: string, value: unknown): unknown {
+    if (typeof value === 'object' && value !== null && 
+        value && typeof value === 'object' && 
+        '__type' in value && value.__type === 'Date' &&
+        'value' in value && typeof value.value === 'string') {
       return new Date(value.value)
     }
     return value
@@ -787,7 +790,7 @@ class RelationshipService {
     contact.totalInteractions += 1
     this.updateContact(contactId, contact)
 
-    console.log(`💬 记录与${contact.name}的互动`)
+    // 记录互动
     return true
   }
 

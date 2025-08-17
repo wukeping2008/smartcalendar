@@ -94,7 +94,7 @@ export default function EventModal({ children, event, onClose }: EventModalProps
       isDragging: false,
       isHovered: false,
       isConflicted: false,
-      energyRequired: 'medium' as any,
+      energyRequired: EnergyLevel.MEDIUM,
       estimatedDuration: Math.floor((endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60)),
       isMarketProtected: false,
       flexibilityScore: 50,
