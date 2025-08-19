@@ -4,11 +4,12 @@ import React, { useState, useEffect } from 'react'
 import EnhancedFlowCanvas from '../../components/timeflow/FlowCanvas'
 import CalendarContainer from '../../components/calendar/CalendarContainer'
 import Link from 'next/link'
-import { Settings, Brain } from 'lucide-react'
+import { Settings, Brain, HelpCircle, Sparkles } from 'lucide-react'
 import SmartEventCreator from '../../components/calendar/SmartEventCreator'
 import VoiceInputButton from '../../components/voice/VoiceInputButton'
 import TimeFlowGuide from '../../components/help/TimeFlowGuide'
 import FloatingTips from '../../components/help/FloatingTips'
+import FeatureGuideModal from '../../components/help/FeatureGuideModal'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Event, EventCategory, Priority, EventStatus, ReminderType, EnergyLevel } from '../../types/event'
@@ -19,6 +20,10 @@ import ConflictResolver from '../../components/optimization/ConflictResolver'
 import AIAssistant from '../../components/ai/AIAssistant'
 import WeeklyPlanGenerator from '../../components/planning/WeeklyPlanGenerator'
 import RelationshipManager from '../../components/relationship/RelationshipManager'
+// v4.0 新组件
+import ContextMonitor from '../../components/context/ContextMonitor'
+import SOPExecutor from '../../components/context/SOPExecutor'
+import InboxPanel from '../../components/inbox/InboxPanel'
 
 // 初始化秉笔太监智能秘书系统演示数据
 const initializeSampleEvents = (addEvent: (event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>) => void) => {
@@ -313,9 +318,16 @@ export default function HomePage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [initialized, setInitialized] = useState(false)
   const [viewMode, setViewMode] = useState<'flow' | 'calendar'>('calendar')
+  const [showFeatureGuide, setShowFeatureGuide] = useState(false)
 
   // 初始化样本数据（仅一次）
   useEffect(() => {
+    // 首次访问时自动显示功能指南
+    const hasSeenGuide = localStorage.getItem('hasSeenV4Guide')
+    if (!hasSeenGuide) {
+      setShowFeatureGuide(true)
+      localStorage.setItem('hasSeenV4Guide', 'true')
+    }
     if (!initialized && events.length === 0) {
       initializeSampleEvents(addEvent)
       setInitialized(true)
@@ -396,8 +408,17 @@ export default function HomePage() {
                 <Settings className="h-4 w-4" />
                 <span className="text-sm">设置</span>
               </Link>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowFeatureGuide(true)}
+                className="flex items-center gap-2 text-white border-cyan-500/50 hover:bg-cyan-500/20"
+              >
+                <HelpCircle className="h-4 w-4" />
+                <span className="text-sm">功能指南</span>
+              </Button>
               <div className="text-sm text-cyan-300">
-                v4.2 - AI智能日历系统
+                v4.0 - 智能生活管家
               </div>
             </div>
           </div>
@@ -421,15 +442,22 @@ export default function HomePage() {
                 {events.length === 0 && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm rounded-xl">
                     <Card className="bg-black/80 backdrop-blur-sm border-cyan-500/50 p-8 text-center max-w-md">
-                      <div className="text-6xl mb-4">📅</div>
+                      <div className="text-6xl mb-4">🚀</div>
                       <h3 className="text-xl font-bold text-cyan-300 mb-2">
-                        欢迎使用智能日历
+                        欢迎使用智能日历 v4.0
                       </h3>
                       <p className="text-gray-300 mb-4">
-                        开始创建您的第一个事件，体验智能日历管理！
+                        全新升级！从时间管理到智能生活管家
                       </p>
+                      <Button
+                        onClick={() => setShowFeatureGuide(true)}
+                        className="bg-cyan-600 hover:bg-cyan-700 text-white mb-3"
+                      >
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        查看新功能
+                      </Button>
                       <div className="text-sm text-gray-400 text-center">
-                        → 使用右侧"智能语音创建"开始
+                        或使用右侧"智能语音创建"开始体验
                       </div>
                     </Card>
                   </div>
@@ -607,6 +635,25 @@ export default function HomePage() {
               )}
             </div>
 
+            {/* 🚀 v4.0 核心功能区 */}
+            <div className="border-t border-white/10 pt-4">
+              <div className="space-y-3">
+                {/* 情境监控 */}
+                <ContextMonitor compact />
+                
+                {/* SOP执行器 */}
+                <SOPExecutor compact />
+                
+                {/* 收集箱 */}
+                <InboxPanel 
+                  className="max-h-96"
+                  onTaskSchedule={(task) => {
+                    console.log('Schedule task:', task)
+                  }}
+                />
+              </div>
+            </div>
+
             {/* 🤖 AI智能区 (可折叠) */}
             <div className="border-t border-white/10 pt-4">
               <div className="space-y-3">
@@ -728,6 +775,12 @@ export default function HomePage() {
       <FloatingTips 
         currentView={viewMode === 'flow' ? 'flow-view' : 'calendar'}
         isVisible={true}
+      />
+      
+      {/* v4.0 功能指南弹窗 */}
+      <FeatureGuideModal 
+        isOpen={showFeatureGuide}
+        onClose={() => setShowFeatureGuide(false)}
       />
     </div>
   )

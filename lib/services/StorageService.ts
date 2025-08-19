@@ -657,6 +657,9 @@ class StorageService {
   }
 }
 
+// 导出类
+export { StorageService }
+
 // 导出单例实例
 export const storageService = new StorageService()
 
