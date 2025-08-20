@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(start http://localhost:3002)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

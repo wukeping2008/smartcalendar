@@ -24,6 +24,12 @@ import RelationshipManager from '../../components/relationship/RelationshipManag
 import ContextMonitor from '../../components/context/ContextMonitor'
 import SOPExecutor from '../../components/context/SOPExecutor'
 import InboxPanel from '../../components/inbox/InboxPanel'
+// 时间预算系统组件
+import TimeTrackerWidget from '../../components/timebudget/TimeTrackerWidget'
+import TimeBudgetDashboard from '../../components/timebudget/TimeBudgetDashboard'
+import TimeBankPanel from '../../components/timebudget/TimeBankPanel'
+// 浮动面板系统
+import { FloatingPanelSystem } from '../../components/layout/FloatingPanelSystem'
 
 // 初始化秉笔太监智能秘书系统演示数据
 const initializeSampleEvents = (addEvent: (event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>) => void) => {
@@ -362,25 +368,27 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-teal-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col">
       {/* 头部导航 */}
-      <header className="bg-black/20 backdrop-blur-sm border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="bg-gray-900/90 backdrop-blur-md border-b border-gray-700/50 shadow-xl">
+        <div className="w-full px-6">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-white">
-                秉笔太监智能日历系统
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                智能日历系统
               </h1>
-              <span className="text-sm text-cyan-300">
-                {viewMode === 'calendar' ? '专业日历规划' : '3D时间流体验'}
-              </span>
+              <div className="px-3 py-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full border border-cyan-500/30">
+                <span className="text-sm text-cyan-300 font-medium">
+                  {viewMode === 'calendar' ? '📅 日历视图' : '🌊 时间流'}
+                </span>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="flex bg-black/30 rounded-lg border border-white/20 p-1">
+              <div className="flex bg-gray-800/50 rounded-lg border border-gray-600/50 p-1 shadow-inner">
                 <Button
                   size="sm"
                   variant={viewMode === 'calendar' ? 'default' : 'ghost'}
-                  className={viewMode === 'calendar' ? 'bg-cyan-600 text-white' : 'text-white hover:bg-white/10'}
+                  className={viewMode === 'calendar' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white transition-all'}
                   onClick={() => setViewMode('calendar')}
                 >
                   📅 日历视图
@@ -388,7 +396,7 @@ export default function HomePage() {
                 <Button
                   size="sm"
                   variant={viewMode === 'flow' ? 'default' : 'ghost'}
-                  className={viewMode === 'flow' ? 'bg-cyan-600 text-white' : 'text-white hover:bg-white/10'}
+                  className={viewMode === 'flow' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white transition-all'}
                   onClick={() => setViewMode('flow')}
                 >
                   🌊 时间流
@@ -396,14 +404,14 @@ export default function HomePage() {
               </div>
               <Link 
                 href="/settings" 
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 hover:border-blue-400/50 text-white transition-all hover:shadow-lg hover:shadow-blue-500/20"
               >
                 <Brain className="h-4 w-4" />
                 <span className="text-sm font-medium">AI助手</span>
               </Link>
               <Link 
                 href="/settings" 
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 text-white transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 hover:text-white transition-all border border-gray-600/50 hover:border-gray-500/50"
               >
                 <Settings className="h-4 w-4" />
                 <span className="text-sm">设置</span>
@@ -412,24 +420,22 @@ export default function HomePage() {
                 size="sm"
                 variant="outline"
                 onClick={() => setShowFeatureGuide(true)}
-                className="flex items-center gap-2 text-white border-cyan-500/50 hover:bg-cyan-500/20"
+                className="flex items-center gap-2 text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 hover:border-gray-500/50 transition-all"
               >
                 <HelpCircle className="h-4 w-4" />
                 <span className="text-sm">功能指南</span>
               </Button>
-              <div className="text-sm text-cyan-300">
-                v4.0 - 智能生活管家
+              <div className="px-3 py-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full border border-purple-500/30">
+                <span className="text-sm text-purple-300 font-medium">✨ v4.0</span>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* 主内容区域 */}
-      <main className="flex-1 flex">
-        {/* 主视图区域 */}
-        <div className="flex-1 relative">
-          <div className="absolute inset-4">
+      {/* 主内容区域 - 全宽度，不再有固定侧边栏 */}
+      <main className="flex-1 relative overflow-hidden">
+          <div className="absolute inset-0 p-6">
             {viewMode === 'calendar' ? (
               /* 传统日历视图 - 主视图 */
               <>
@@ -440,24 +446,24 @@ export default function HomePage() {
                 
                 {/* 空状态提示 */}
                 {events.length === 0 && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm rounded-xl">
-                    <Card className="bg-black/80 backdrop-blur-sm border-cyan-500/50 p-8 text-center max-w-md">
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm rounded-xl">
+                    <Card className="bg-gray-800/90 backdrop-blur-sm border-gray-700/50 shadow-2xl p-8 text-center max-w-md">
                       <div className="text-6xl mb-4">🚀</div>
-                      <h3 className="text-xl font-bold text-cyan-300 mb-2">
+                      <h3 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
                         欢迎使用智能日历 v4.0
                       </h3>
-                      <p className="text-gray-300 mb-4">
+                      <p className="text-gray-400 mb-4">
                         全新升级！从时间管理到智能生活管家
                       </p>
                       <Button
                         onClick={() => setShowFeatureGuide(true)}
-                        className="bg-cyan-600 hover:bg-cyan-700 text-white mb-3"
+                        className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white mb-3 shadow-lg transition-all"
                       >
                         <Sparkles className="h-4 w-4 mr-2" />
                         查看新功能
                       </Button>
-                      <div className="text-sm text-gray-400 text-center">
-                        或使用右侧"智能语音创建"开始体验
+                      <div className="text-sm text-gray-500 text-center">
+                        点击右侧图标开始体验
                       </div>
                     </Card>
                   </div>
@@ -466,7 +472,7 @@ export default function HomePage() {
             ) : (
               /* 3D时间流视图 - 辅助功能 */
               <>
-                <div className="w-full h-full rounded-xl bg-black/30 backdrop-blur-sm border border-white/10 overflow-hidden relative">
+                <div className="w-full h-full rounded-xl bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 overflow-hidden relative shadow-2xl">
                   <EnhancedFlowCanvas
                     events={events}
                     currentTime={currentTime}
@@ -490,8 +496,8 @@ export default function HomePage() {
                   
                   {/* 3D视图说明 */}
                   <div className="absolute top-4 left-4">
-                    <Card className="bg-black/80 backdrop-blur-sm border-cyan-500/50 p-3">
-                      <p className="text-xs text-cyan-300">
+                    <Card className="bg-gray-800/90 backdrop-blur-sm border-gray-700/50 p-3 shadow-lg">
+                      <p className="text-xs text-cyan-400">
                         🌊 3D时间流可视化 • 拖拽旋转 • 滚轮缩放 • 点击选择
                       </p>
                     </Card>
@@ -500,17 +506,17 @@ export default function HomePage() {
                   {/* 空状态提示 */}
                   {events.length === 0 && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <Card className="bg-black/80 backdrop-blur-sm border-cyan-500/50 p-8 text-center max-w-md">
+                      <Card className="bg-gray-800/90 backdrop-blur-sm border-gray-700/50 shadow-2xl p-8 text-center max-w-md">
                         <div className="text-6xl mb-4">🌊</div>
-                        <h3 className="text-xl font-bold text-cyan-300 mb-2">
+                        <h3 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2">
                           3D时间流体验
                         </h3>
-                        <p className="text-gray-300 mb-4">
+                        <p className="text-gray-400 mb-4">
                           创建事件后可以在这里体验革命性的3D时间管理方式！
                         </p>
                         <Button
                           variant="outline"
-                          className="text-white border-white/20"
+                          className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-all"
                           onClick={() => setViewMode('calendar')}
                         >
                           ← 返回日历视图
@@ -522,15 +528,15 @@ export default function HomePage() {
                 
                 {/* 时间流控制器 */}
                 <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-                  <Card className="bg-black/40 backdrop-blur-sm border-white/20 p-4">
+                  <Card className="bg-gray-800/90 backdrop-blur-sm border-gray-700/50 p-4 shadow-xl">
                     <div className="text-center mb-3">
-                      <p className="text-xs text-gray-400">时间流控制器</p>
+                      <p className="text-xs text-gray-500">时间流控制器</p>
                     </div>
                     <div className="flex items-center space-x-4">
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="text-white border-white/20 hover:bg-white/10"
+                        className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-all"
                         title="回到今天"
                       >
                         ⏮️ 今天
@@ -538,7 +544,7 @@ export default function HomePage() {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="text-white border-white/20 hover:bg-white/10"
+                        className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-all"
                         title="暂停时间流动画"
                       >
                         ⏸️ 暂停
@@ -546,7 +552,7 @@ export default function HomePage() {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="text-white border-white/20 hover:bg-white/10"
+                        className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-all"
                         title="播放时间流动画"
                       >
                         ⏯️ 播放
@@ -554,222 +560,29 @@ export default function HomePage() {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="text-white border-white/20 hover:bg-white/10"
+                        className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-all"
                         title="查看明天"
                       >
                         ⏭️ 明天
                       </Button>
                     </div>
                     <div className="text-center mt-2">
-                      <p className="text-xs text-gray-500">切换到日历视图可获得更好的规划体验</p>
+                      <p className="text-xs text-gray-500/80">切换到日历视图可获得更好的规划体验</p>
                     </div>
                   </Card>
                 </div>
               </>
             )}
           </div>
-        </div>
-
-        {/* 侧边栏 - 智能折叠设计 */}
-        <div className="w-96 bg-black/20 backdrop-blur-sm border-l border-white/10 p-6">
-          <div className="space-y-4 h-full overflow-y-auto">
-            {/* 🎯 快速操作区 (固定显示) */}
-            <div className="space-y-4">
-              {/* 语音创建 */}
-              <Card className="bg-black/30 border-white/20 p-3">
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-lg">🎤</span>
-                  <h3 className="text-white font-semibold text-sm">智能语音创建</h3>
-                </div>
-                <SmartEventCreator />
-              </Card>
-
-              {/* 市场状态 - 紧凑版 */}
-              <Card className="bg-black/30 border-white/20 p-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg">📊</span>
-                    <span className="text-white text-sm font-semibold">市场状态</span>
-                  </div>
-                  <div className="text-xs text-gray-400">实时监控</div>
-                </div>
-                <div className="mt-2">
-                  <MarketStatusBar />
-                </div>
-              </Card>
-
-              {/* 选中事件详情 */}
-              {selectedEvent && (
-                <Card className="bg-black/30 border-white/20 p-3">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="text-lg">📋</span>
-                    <h3 className="text-white font-semibold text-sm">事件详情</h3>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-cyan-300 font-medium text-sm">{selectedEvent.title}</p>
-                    <p className="text-xs text-gray-400 line-clamp-2">{selectedEvent.description}</p>
-                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-                      <div>
-                        <span className="text-gray-400">时间:</span> {selectedEvent.startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                      <div>
-                        <span className="text-gray-400">时长:</span> {selectedEvent.estimatedDuration}分钟
-                      </div>
-                      <div>
-                        <span className="text-gray-400">优先级:</span> {selectedEvent.priority}
-                      </div>
-                      <div>
-                        <span className="text-gray-400">精力:</span> {selectedEvent.energyRequired}
-                      </div>
-                    </div>
-                    <div className="flex space-x-1">
-                      {selectedEvent.isMarketProtected && (
-                        <span className="text-yellow-400 text-xs">🛡️ 市场保护</span>
-                      )}
-                      {selectedEvent.isConflicted && (
-                        <span className="text-red-400 text-xs">⚠️ 冲突</span>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              )}
-            </div>
-
-            {/* 🚀 v4.0 核心功能区 */}
-            <div className="border-t border-white/10 pt-4">
-              <div className="space-y-3">
-                {/* 情境监控 */}
-                <ContextMonitor compact />
-                
-                {/* SOP执行器 */}
-                <SOPExecutor compact />
-                
-                {/* 收集箱 */}
-                <InboxPanel 
-                  className="max-h-96"
-                  onTaskSchedule={(task) => {
-                    console.log('Schedule task:', task)
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* 🤖 AI智能区 (可折叠) */}
-            <div className="border-t border-white/10 pt-4">
-              <div className="space-y-3">
-                {/* AI智能推荐 */}
-                <Card className="bg-black/30 border-white/20 p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-lg">🧠</span>
-                      <h3 className="text-white font-semibold text-sm">AI智能推荐</h3>
-                    </div>
-                    <span className="text-xs text-gray-400">实时分析</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="p-2 rounded bg-red-500/20 border border-red-400/50">
-                      <div className="flex items-center justify-between">
-                        <span className="text-red-400 text-xs font-semibold">🚨 Critical</span>
-                        <span className="text-xs text-gray-500">2秒前</span>
-                      </div>
-                      <p className="text-white text-xs mt-1">
-                        VIX指数27.3，建议清空下午2-4点非交易安排
-                      </p>
-                    </div>
-                    <div className="p-2 rounded bg-orange-500/20 border border-orange-400/50">
-                      <div className="flex items-center justify-between">
-                        <span className="text-orange-400 text-xs font-semibold">⚡ High</span>
-                        <span className="text-xs text-gray-500">5分钟前</span>
-                      </div>
-                      <p className="text-white text-xs mt-1">
-                        精力匹配度62%，建议将高精力任务移到上午9-11点
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* AI智能助手 */}
-                <Card className="bg-black/30 border-white/20 p-3">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="text-lg">🤖</span>
-                    <h3 className="text-white font-semibold text-sm">AI智能助手</h3>
-                  </div>
-                  <AIAssistant selectedEvent={selectedEvent} />
-                </Card>
-
-                {/* 智能冲突解决 */}
-                <Card className="bg-black/30 border-white/20 p-3">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="text-lg">⚡</span>
-                    <h3 className="text-white font-semibold text-sm">冲突解决</h3>
-                  </div>
-                  <ConflictResolver />
-                </Card>
-              </div>
-            </div>
-
-            {/* � 人际关系管理区 (新增) */}
-            <div className="border-t border-white/10 pt-4">
-              <Card className="bg-black/30 border-white/20 p-3">
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-lg">👥</span>
-                  <h3 className="text-white font-semibold text-sm">人际关系管理</h3>
-                </div>
-                <RelationshipManager className="h-96" />
-              </Card>
-            </div>
-
-            {/* �📈 数据分析区 (可折叠) */}
-            <div className="border-t border-white/10 pt-4">
-              <div className="space-y-3">
-                {/* 工时预算 */}
-                <Card className="bg-black/30 border-white/20 p-3">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="text-lg">📊</span>
-                    <h3 className="text-white font-semibold text-sm">工时预算</h3>
-                  </div>
-                  <EnhancedWorkHoursBudgetComponent 
-                    preciseCalculation={{
-                      weeklyBudget: 112,
-                      fixedDeductions: 59,
-                      availableHours: 53,
-                      realTimeTracking: true
-                    }}
-                    energyCurve={{
-                      morning: 'low',
-                      afternoon: 'medium',
-                      evening: 'high',
-                      night: 'medium'
-                    }}
-                  />
-                </Card>
-
-                {/* 周度规划生成器 */}
-                <Card className="bg-black/30 border-white/20 p-3">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="text-lg">📅</span>
-                    <h3 className="text-white font-semibold text-sm">周度规划</h3>
-                  </div>
-                  <WeeklyPlanGenerator 
-                    inputSources={{
-                      quarterlyGoals: [],
-                      previousWeekIncomplete: [],
-                      sopTasks: [],
-                      inboxTasks: []
-                    }}
-                    generation={{
-                      autoSchedule: true,
-                      conflictResolution: true,
-                      energyOptimization: true,
-                      marketProtection: true
-                    }}
-                  />
-                </Card>
-              </div>
-            </div>
-          </div>
-        </div>
       </main>
+
+      {/* 浮动面板系统 - 替代原有侧边栏 */}
+      <FloatingPanelSystem 
+        selectedEvent={selectedEvent}
+        onTaskSchedule={(task: any) => {
+          console.log('Schedule task:', task)
+        }}
+      />
 
       {/* 浮动提示系统 */}
       <FloatingTips 
