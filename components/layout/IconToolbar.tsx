@@ -301,7 +301,7 @@ export function IconToolbar({
           {/* 帮助按钮 */}
           <div className="px-2">
             <button
-              className="w-full flex items-center justify-center p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800 rounded-lg transition-colors text-xs">
+              className="w-full flex items-center justify-center p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800 rounded-lg transition-colors text-xs"
               title="查看帮助 (F1)"
             >
               <HelpCircle size={16} className="mr-1" />
