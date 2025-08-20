@@ -244,30 +244,30 @@ export function getPriorityStyles(priority: PanelPriority): {
   switch (priority) {
     case PanelPriority.CRITICAL:
       return {
-        iconClassName: 'text-red-500 bg-red-50 border-red-200',
-        badgeClassName: 'bg-red-500 text-white',
+        iconClassName: 'text-red-400 bg-red-950/30 border-red-700',
+        badgeClassName: 'bg-red-600 text-white',
         glowEffect: true,
         animationIntensity: 'strong'
       };
     case PanelPriority.HIGH:
       return {
-        iconClassName: 'text-orange-500 bg-orange-50 border-orange-200',
-        badgeClassName: 'bg-orange-500 text-white',
+        iconClassName: 'text-orange-400 bg-orange-950/30 border-orange-700',
+        badgeClassName: 'bg-orange-600 text-white',
         glowEffect: true,
         animationIntensity: 'moderate'
       };
     case PanelPriority.MEDIUM:
       return {
-        iconClassName: 'text-blue-500 bg-blue-50 border-blue-200',
-        badgeClassName: 'bg-blue-500 text-white',
+        iconClassName: 'text-blue-400 bg-blue-950/30 border-blue-700',
+        badgeClassName: 'bg-blue-600 text-white',
         glowEffect: false,
         animationIntensity: 'subtle'
       };
     case PanelPriority.LOW:
     default:
       return {
-        iconClassName: 'text-gray-500 bg-gray-50 border-gray-200',
-        badgeClassName: 'bg-gray-500 text-white',
+        iconClassName: 'text-gray-400 bg-gray-800/50 border-gray-700',
+        badgeClassName: 'bg-gray-600 text-white',
         glowEffect: false,
         animationIntensity: 'none'
       };

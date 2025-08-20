@@ -211,8 +211,8 @@ export function FloatingPanel({
   return (
     <div
       ref={panelRef}
-      className={`fixed bg-white border border-gray-300 rounded-lg shadow-xl overflow-hidden transition-shadow duration-200 ${
-        isActive ? 'shadow-2xl ring-2 ring-blue-500/20' : 'shadow-lg'
+      className={`fixed bg-gray-900 border border-gray-700 rounded-lg shadow-xl overflow-hidden transition-shadow duration-200 ${
+        isActive ? 'shadow-2xl ring-2 ring-blue-500/30' : 'shadow-lg'
       } ${className}`}
       style={{
         left: panel.position.x,
@@ -226,14 +226,14 @@ export function FloatingPanel({
       {/* 标题栏 */}
       <div
         ref={headerRef}
-        className={`flex items-center justify-between px-4 py-2 border-b border-gray-200 cursor-grab active:cursor-grabbing ${
-          isActive ? 'bg-blue-50' : 'bg-gray-50'
+        className={`flex items-center justify-between px-4 py-2 border-b border-gray-700 cursor-grab active:cursor-grabbing ${
+          isActive ? 'bg-blue-900/20' : 'bg-gray-800'
         }`}
         onMouseDown={handleMouseDown}
       >
         <div className="flex items-center gap-2">
-          <Move className="w-4 h-4 text-gray-400" />
-          <h3 className="text-sm font-medium text-gray-900 select-none">
+          <Move className="w-4 h-4 text-gray-500" />
+          <h3 className="text-sm font-medium text-gray-100 select-none">
             {title}
           </h3>
           {panel.isPinned && (
@@ -245,29 +245,29 @@ export function FloatingPanel({
           {/* 钉住/取消钉住按钮 */}
           <button
             onClick={panel.isPinned ? onUnpin : onPin}
-            className="p-1 rounded hover:bg-gray-200 transition-colors"
+            className="p-1 rounded hover:bg-gray-700 transition-colors"
             title={panel.isPinned ? '取消钉住' : '钉住面板'}
           >
             {panel.isPinned ? (
-              <PinOff className="w-3 h-3 text-gray-600" />
+              <PinOff className="w-3 h-3 text-gray-400" />
             ) : (
-              <Pin className="w-3 h-3 text-gray-600" />
+              <Pin className="w-3 h-3 text-gray-400" />
             )}
           </button>
 
           {/* 最小化按钮 */}
           <button
             onClick={onMinimize}
-            className="p-1 rounded hover:bg-gray-200 transition-colors"
+            className="p-1 rounded hover:bg-gray-700 transition-colors"
             title="最小化"
           >
-            <Minimize2 className="w-3 h-3 text-gray-600" />
+            <Minimize2 className="w-3 h-3 text-gray-400" />
           </button>
 
           {/* 关闭按钮 */}
           <button
             onClick={onClose}
-            className="p-1 rounded hover:bg-red-100 hover:text-red-600 transition-colors"
+            className="p-1 rounded hover:bg-red-900/30 hover:text-red-400 transition-colors"
             title="关闭"
           >
             <X className="w-3 h-3" />
@@ -276,7 +276,7 @@ export function FloatingPanel({
       </div>
 
       {/* 面板内容 */}
-      <div className="flex-1 overflow-auto p-4" style={{ height: panel.size.height - 48 }}>
+      <div className="flex-1 overflow-auto p-4 text-gray-100" style={{ height: panel.size.height - 48 }}>
         {children}
       </div>
 

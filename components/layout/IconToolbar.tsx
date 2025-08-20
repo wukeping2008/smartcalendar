@@ -184,7 +184,7 @@ function ToolbarIcon({
         className={`
           relative flex items-center justify-center p-3 rounded-lg border-2 transition-all duration-200
           ${isActive 
-            ? 'bg-blue-100 border-blue-300 text-blue-700 shadow-md scale-105' 
+            ? 'bg-blue-600/20 border-blue-500 text-blue-400 shadow-md scale-105' 
             : `${priorityStyles.iconClassName} hover:scale-105 hover:shadow-md`
           }
           ${priorityStyles.glowEffect && !isActive ? 'opacity-90' : ''}
@@ -218,7 +218,7 @@ function ToolbarIcon({
 
       {/* 悬浮提示 */}
       <div className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-safe pointer-events-none z-50">
-        <div className="bg-gray-900 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap shadow-lg">
+        <div className="bg-gray-800 text-gray-100 px-3 py-2 rounded-lg text-sm whitespace-nowrap shadow-lg border border-gray-700">
           <div className="font-medium">{config.title}</div>
           {showLabel && (
             <div className="text-gray-300 text-xs mt-1">{config.description}</div>
@@ -229,7 +229,7 @@ function ToolbarIcon({
             </div>
           )}
           <div className="absolute left-full top-1/2 transform -translate-y-1/2">
-            <div className="w-0 h-0 border-l-4 border-l-gray-900 border-t-4 border-t-transparent border-b-4 border-b-transparent" />
+            <div className="w-0 h-0 border-l-4 border-l-gray-800 border-t-4 border-t-transparent border-b-4 border-b-transparent" />
           </div>
         </div>
       </div>
@@ -262,17 +262,17 @@ export function IconToolbar({
       } ${className}`}
       style={{ width: config.width }}
     >
-      <div className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-xl shadow-lg p-2">
+      <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-xl shadow-lg p-2">
         <div className="flex flex-col gap-2">
           {/* 工具条标题 */}
           <div className="px-2 py-1 text-center">
-            <h3 className="text-xs font-semibold text-gray-700">工具面板</h3>
-            <div className="text-xs text-gray-500 mt-1">
+            <h3 className="text-xs font-semibold text-gray-200">工具面板</h3>
+            <div className="text-xs text-gray-400 mt-1">
               {activePanelIds.length > 0 ? `${activePanelIds.length} 个已打开` : '点击打开'}
             </div>
           </div>
 
-          <div className="w-full h-px bg-gray-200" />
+          <div className="w-full h-px bg-gray-700" />
 
           {/* 面板图标列表 */}
           <div className="space-y-2">
@@ -296,12 +296,12 @@ export function IconToolbar({
             })}
           </div>
 
-          <div className="w-full h-px bg-gray-200" />
+          <div className="w-full h-px bg-gray-700" />
 
           {/* 帮助按钮 */}
           <div className="px-2">
             <button
-              className="w-full flex items-center justify-center p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors text-xs"
+              className="w-full flex items-center justify-center p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800 rounded-lg transition-colors text-xs">
               title="查看帮助 (F1)"
             >
               <HelpCircle size={16} className="mr-1" />
@@ -313,7 +313,7 @@ export function IconToolbar({
 
       {/* 快捷键提示 */}
       <div className="mt-4 text-center">
-        <div className="inline-block bg-gray-900 text-white px-2 py-1 rounded text-xs opacity-75">
+        <div className="inline-block bg-gray-800 text-gray-200 px-2 py-1 rounded text-xs opacity-90">
           <div>Alt + 1-8: 快速打开</div>
           <div className="mt-1">ESC: 关闭所有</div>
         </div>
