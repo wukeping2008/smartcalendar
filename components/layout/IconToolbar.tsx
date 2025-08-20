@@ -187,7 +187,7 @@ function ToolbarIcon({
             ? 'bg-blue-100 border-blue-300 text-blue-700 shadow-md scale-105' 
             : `${priorityStyles.iconClassName} hover:scale-105 hover:shadow-md`
           }
-          ${priorityStyles.glowEffect && !isActive ? 'animate-pulse' : ''}
+          ${priorityStyles.glowEffect && !isActive ? 'opacity-90' : ''}
         `}
         title={`${config.description} (${config.shortcut})`}
         style={{
@@ -197,7 +197,7 @@ function ToolbarIcon({
       >
         <IconComponent 
           size={iconSize} 
-          className={`${priorityStyles.animationIntensity === 'strong' && !isActive ? 'animate-bounce' : ''}`}
+          className="transition-transform hover:scale-110"
         />
         
         {/* 优先级指示器 */}
@@ -212,12 +212,12 @@ function ToolbarIcon({
 
         {/* 活跃状态指示器 */}
         {isActive && (
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-ping" />
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full" />
         )}
       </button>
 
       {/* 悬浮提示 */}
-      <div className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+      <div className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-safe pointer-events-none z-50">
         <div className="bg-gray-900 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap shadow-lg">
           <div className="font-medium">{config.title}</div>
           {showLabel && (

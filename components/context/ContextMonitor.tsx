@@ -38,7 +38,7 @@ export default function ContextMonitor({ className = '', compact = false }: Cont
   const [matches, setMatches] = useState<ContextMatch[]>([])
   const [isMonitoring, setIsMonitoring] = useState(true)
   const [showDetails, setShowDetails] = useState(!compact)
-  const [refreshInterval, setRefreshInterval] = useState(30000)
+  const [refreshInterval, setRefreshInterval] = useState(120000) // 减少刷新频率，防止闪烁
 
   useEffect(() => {
     // 初始化情境监听
@@ -107,7 +107,7 @@ export default function ContextMonitor({ className = '', compact = false }: Cont
     return (
       <Card className={`p-4 ${className}`}>
         <div className="flex items-center justify-center">
-          <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+          <RefreshCw className="h-4 w-4 mr-2 opacity-50" />
           <span className="text-sm text-gray-500">正在加载情境...</span>
         </div>
       </Card>

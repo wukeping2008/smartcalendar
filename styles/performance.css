@@ -1,0 +1,120 @@
+/* Performance Optimization Styles */
+
+/* Disable all animations globally */
+*, *::before, *::after {
+  animation: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 0 !important;
+}
+
+/* Smooth but fast transitions */
+* {
+  transition-property: opacity, transform !important;
+  transition-duration: 100ms !important;
+  transition-timing-function: ease-out !important;
+}
+
+/* Hardware acceleration for fixed elements */
+.fixed, .absolute, .sticky {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Optimize repaints */
+.performance-critical {
+  contain: layout style paint;
+}
+
+/* Disable all animated classes */
+.animate-spin,
+.animate-pulse,
+.animate-bounce,
+.animate-ping,
+.animate-pulse-gentle,
+.animate-fade-in,
+.animate-slide-in {
+  animation: none !important;
+}
+
+/* Prevent layout shifts */
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Optimize text rendering */
+body {
+  text-rendering: optimizeSpeed;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Reduce motion for accessibility and performance */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Prevent hover effects from causing reflows */
+button:hover,
+a:hover {
+  transition-duration: 50ms !important;
+}
+
+/* Optimize shadows */
+.shadow,
+.shadow-sm,
+.shadow-md,
+.shadow-lg,
+.shadow-xl,
+.shadow-2xl {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Disable backdrop filters on low-end devices */
+.backdrop-blur-sm,
+.backdrop-blur,
+.backdrop-blur-md,
+.backdrop-blur-lg,
+.backdrop-blur-xl {
+  backdrop-filter: none !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Optimize gradients */
+[class*="bg-gradient-"] {
+  background-attachment: fixed;
+  will-change: auto;
+}
+
+/* Prevent flashing on load */
+body {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Optimize scrolling */
+.overflow-auto,
+.overflow-scroll,
+.overflow-x-auto,
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Force GPU acceleration for transforms */
+.transform {
+  transform: translateZ(0);
+}
+
+/* Disable unnecessary effects */
+.transition-safe {
+  transition: opacity 100ms ease-out, transform 100ms ease-out !important;
+}

@@ -388,7 +388,7 @@ export default function HomePage() {
                 <Button
                   size="sm"
                   variant={viewMode === 'calendar' ? 'default' : 'ghost'}
-                  className={viewMode === 'calendar' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white transition-all'}
+                  className={viewMode === 'calendar' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white transition-safe'}
                   onClick={() => setViewMode('calendar')}
                 >
                   📅 日历视图
@@ -396,7 +396,7 @@ export default function HomePage() {
                 <Button
                   size="sm"
                   variant={viewMode === 'flow' ? 'default' : 'ghost'}
-                  className={viewMode === 'flow' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white transition-all'}
+                  className={viewMode === 'flow' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white transition-safe'}
                   onClick={() => setViewMode('flow')}
                 >
                   🌊 时间流
@@ -404,14 +404,14 @@ export default function HomePage() {
               </div>
               <Link 
                 href="/settings" 
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 hover:border-blue-400/50 text-white transition-all hover:shadow-lg hover:shadow-blue-500/20"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 hover:border-blue-400/50 text-white transition-safe hover:shadow-lg hover:shadow-blue-500/20"
               >
                 <Brain className="h-4 w-4" />
                 <span className="text-sm font-medium">AI助手</span>
               </Link>
               <Link 
                 href="/settings" 
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 hover:text-white transition-all border border-gray-600/50 hover:border-gray-500/50"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 hover:text-white transition-safe border border-gray-600/50 hover:border-gray-500/50"
               >
                 <Settings className="h-4 w-4" />
                 <span className="text-sm">设置</span>
@@ -420,7 +420,7 @@ export default function HomePage() {
                 size="sm"
                 variant="outline"
                 onClick={() => setShowFeatureGuide(true)}
-                className="flex items-center gap-2 text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 hover:border-gray-500/50 transition-all"
+                className="flex items-center gap-2 text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 hover:border-gray-500/50 transition-safe"
               >
                 <HelpCircle className="h-4 w-4" />
                 <span className="text-sm">功能指南</span>
@@ -457,7 +457,7 @@ export default function HomePage() {
                       </p>
                       <Button
                         onClick={() => setShowFeatureGuide(true)}
-                        className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white mb-3 shadow-lg transition-all"
+                        className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white mb-3 shadow-lg transition-safe"
                       >
                         <Sparkles className="h-4 w-4 mr-2" />
                         查看新功能
@@ -516,7 +516,7 @@ export default function HomePage() {
                         </p>
                         <Button
                           variant="outline"
-                          className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-all"
+                          className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-safe"
                           onClick={() => setViewMode('calendar')}
                         >
                           ← 返回日历视图
@@ -536,7 +536,7 @@ export default function HomePage() {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-all"
+                        className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-safe"
                         title="回到今天"
                       >
                         ⏮️ 今天
@@ -544,7 +544,7 @@ export default function HomePage() {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-all"
+                        className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-safe"
                         title="暂停时间流动画"
                       >
                         ⏸️ 暂停
@@ -552,7 +552,7 @@ export default function HomePage() {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-all"
+                        className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-safe"
                         title="播放时间流动画"
                       >
                         ⏯️ 播放
@@ -560,7 +560,7 @@ export default function HomePage() {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-all"
+                        className="text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 transition-safe"
                         title="查看明天"
                       >
                         ⏭️ 明天

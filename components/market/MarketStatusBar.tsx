@@ -121,7 +121,7 @@ export default function MarketStatusBar({ className = "" }: MarketStatusBarProps
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 rounded-full bg-gray-400 animate-pulse" />
+              <div className="w-3 h-3 rounded-full bg-gray-400 opacity-60" />
               <span className="font-semibold text-gray-400">加载中...</span>
             </div>
           </div>
@@ -179,7 +179,7 @@ export default function MarketStatusBar({ className = "" }: MarketStatusBarProps
         {/* 市场状态 */}
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <div className={`w-3 h-3 rounded-full ${marketStatus.isOpen ? 'bg-green-400' : 'bg-red-400'} animate-pulse`} />
+            <div className={`w-3 h-3 rounded-full ${marketStatus.isOpen ? 'bg-green-400' : 'bg-red-400'}`} />
             <span className={`font-semibold ${getStatusColor(marketStatus.isOpen)}`}>
               {marketStatus.currentSession}
             </span>

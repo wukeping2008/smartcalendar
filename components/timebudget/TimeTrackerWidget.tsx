@@ -46,7 +46,7 @@ export default function TimeTrackerWidget({
       if (state.category) {
         setCurrentCategory(state.category)
       }
-    }, 100) // 每100ms更新一次
+    }, 5000) // 每5秒更新一次，减少重渲染
 
     return () => clearInterval(interval)
   }, [])

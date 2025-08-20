@@ -1,0 +1,86 @@
+/* 优化动画性能，减少屏闪 */
+
+/* 禁用可能导致屏闪的动画 */
+@media (prefers-reduced-motion: no-preference) {
+  /* 优化弹跳动画 */
+  .animate-bounce-gentle {
+    animation: bounce-gentle 2s infinite;
+  }
+  
+  /* 优化脉冲动画 */
+  .animate-pulse-gentle {
+    animation: pulse-gentle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  /* 优化ping动画 */
+  .animate-ping-gentle {
+    animation: ping-gentle 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+}
+
+/* 温和的动画定义 */
+@keyframes bounce-gentle {
+  0%, 100% {
+    transform: translateY(-5%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+@keyframes pulse-gentle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes ping-gentle {
+  75%, 100% {
+    transform: scale(1.1);
+    opacity: 0;
+  }
+}
+
+/* 防止动画导致的重绘 */
+.will-change-safe {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 减少过渡动画的闪烁 */
+.transition-safe {
+  transition: all 0.2s ease-in-out;
+  transform: translateZ(0);
+}
+
+/* 禁用开发环境的某些动画 */
+.dev-no-animation {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* 优化渐变背景的性能 */
+.gradient-optimized {
+  background-attachment: fixed;
+  will-change: background;
+}
+
+/* 防止文字渲染闪烁 */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 减少透明度变化导致的闪烁 */
+.opacity-transition {
+  transition: opacity 0.15s ease-in-out;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}

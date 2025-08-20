@@ -1,0 +1,87 @@
+/* 完全禁用可能导致闪烁的动画和过渡 */
+
+/* 禁用所有动画 */
+* {
+  animation: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+}
+
+/* 保留必要的过渡效果，但优化性能 */
+* {
+  transition-duration: 0.15s !important;
+  transition-timing-function: ease-out !important;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 禁用特定的动画类 */
+.animate-spin,
+.animate-pulse,
+.animate-bounce,
+.animate-ping {
+  animation: none !important;
+}
+
+/* 优化渐变背景性能 */
+.bg-gradient-to-r,
+.bg-gradient-to-br,
+.bg-gradient-to-b,
+.bg-gradient-to-l {
+  background-attachment: fixed;
+  will-change: auto;
+}
+
+/* 防止hover状态导致的闪烁 */
+button:hover,
+a:hover {
+  transition-duration: 0.1s !important;
+}
+
+/* 优化阴影渲染 */
+.shadow-lg,
+.shadow-xl,
+.shadow-2xl {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 防止内容跳动 */
+.fixed,
+.absolute {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* 禁用backdrop-filter在性能较低设备上 */
+@media (max-width: 768px) {
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .backdrop-blur-lg {
+    backdrop-filter: none !important;
+    background-color: rgba(0, 0, 0, 0.8) !important;
+  }
+}
+
+/* 优化字体渲染 */
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 防止图标闪烁 */
+svg {
+  shape-rendering: geometricPrecision;
+}
+
+/* 减少重绘 */
+.will-change-auto {
+  will-change: auto !important;
+}
+
+/* 关键性能优化 */
+.performance-critical {
+  contain: layout style paint;
+  transform: translateZ(0);
+}
