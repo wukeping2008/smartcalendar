@@ -15,6 +15,7 @@ import VoiceInputButton from '../voice/VoiceInputButton';
 import InboxPanel from '../inbox/InboxPanel';
 import TimeBudgetDashboard from '../timebudget/TimeBudgetDashboard';
 import RelationshipManager from '../relationship/RelationshipManager';
+import DailyBriefingPanel from '../briefing/DailyBriefingPanel';
 
 interface FloatingPanelSystemProps {
   className?: string;
@@ -31,7 +32,8 @@ const PANEL_COMPONENTS: Record<PanelType, React.ComponentType<any>> = {
   [PanelType.VOICE_INPUT]: VoiceInputButton,
   [PanelType.INBOX]: InboxPanel,
   [PanelType.TIME_BUDGET]: TimeBudgetDashboard,
-  [PanelType.RELATIONSHIPS]: RelationshipManager
+  [PanelType.RELATIONSHIPS]: RelationshipManager,
+  [PanelType.DAILY_BRIEFING]: DailyBriefingPanel
 };
 
 // 简化的面板内容组件，用于演示

@@ -10,7 +10,8 @@ import {
   Inbox,
   Clock,
   Users,
-  HelpCircle
+  HelpCircle,
+  FileText
 } from 'lucide-react';
 import {
   PanelType,
@@ -144,6 +145,20 @@ const PANEL_CONFIGS: Record<PanelType, Omit<PanelConfig, 'component'>> = {
     canMinimize: true,
     priority: PanelPriority.LOW,
     description: '人际关系和社交网络管理'
+  },
+  [PanelType.DAILY_BRIEFING]: {
+    id: PanelType.DAILY_BRIEFING,
+    title: '今日简报',
+    icon: FileText,
+    shortcut: 'Alt+9',
+    defaultSize: { width: 500, height: 600 },
+    minSize: { width: 450, height: 400 },
+    resizable: true,
+    draggable: true,
+    canPin: true,
+    canMinimize: true,
+    priority: PanelPriority.HIGH,
+    description: '每日智能简报和洞察分析'
   }
 };
 
@@ -314,7 +329,7 @@ export function IconToolbar({
       {/* 快捷键提示 */}
       <div className="mt-4 text-center">
         <div className="inline-block bg-gray-800 text-gray-200 px-2 py-1 rounded text-xs opacity-90">
-          <div>Alt + 1-8: 快速打开</div>
+          <div>Alt + 1-9: 快速打开</div>
           <div className="mt-1">ESC: 关闭所有</div>
         </div>
       </div>

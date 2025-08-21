@@ -26,7 +26,8 @@ export enum PanelType {
   VOICE_INPUT = 'voice-input',
   INBOX = 'inbox',
   TIME_BUDGET = 'time-budget',
-  RELATIONSHIPS = 'relationships'
+  RELATIONSHIPS = 'relationships',
+  DAILY_BRIEFING = 'daily-briefing'
 }
 
 // 面板位置类型
