@@ -233,7 +233,7 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
     
     // 提取标题
     if (!title && normalizedText) {
-      let extractedTitle = normalizedText
+      const extractedTitle = normalizedText
         .replace(/创建|新建|添加|安排|预约/g, '')
         .replace(/\d{1,2}[点时](\d{0,2}[分]?)?/g, '')
         .replace(/上午|下午|晚上|明天|后天|今天/g, '')

@@ -16,7 +16,7 @@ export const DEFAULT_SMART_PRIORITY_CONFIG: SmartPriorityConfig = {
     PanelType.MARKET_STATUS, // 市场动态监控
     PanelType.TIME_FLOW,     // 时间流管理
     PanelType.AI_ASSISTANT,  // AI辅助决策
-    PanelType.RELATIONSHIPS  // 关系管理
+    PanelType.PERSON_CARD    // 人脉CRM
   ],
   eveningPanels: [
     PanelType.TIME_BUDGET,   // 回顾时间使用

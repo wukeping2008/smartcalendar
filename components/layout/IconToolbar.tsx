@@ -11,7 +11,9 @@ import {
   Clock,
   Users,
   HelpCircle,
-  FileText
+  FileText,
+  GitBranch,
+  Train
 } from 'lucide-react';
 import {
   PanelType,
@@ -132,20 +134,21 @@ const PANEL_CONFIGS: Record<PanelType, Omit<PanelConfig, 'component'>> = {
     priority: PanelPriority.LOW,
     description: '时间预算管理和效率分析'
   },
-  [PanelType.RELATIONSHIPS]: {
-    id: PanelType.RELATIONSHIPS,
-    title: '关系管理',
-    icon: Users,
-    shortcut: 'Alt+8',
-    defaultSize: { width: 450, height: 550 },
-    minSize: { width: 400, height: 400 },
-    resizable: true,
-    draggable: true,
-    canPin: true,
-    canMinimize: true,
-    priority: PanelPriority.LOW,
-    description: '人际关系和社交网络管理'
-  },
+  // 已合并到人物卡CRM
+  // [PanelType.RELATIONSHIPS]: {
+  //   id: PanelType.RELATIONSHIPS,
+  //   title: '关系管理',
+  //   icon: Users,
+  //   shortcut: 'Alt+8',
+  //   defaultSize: { width: 450, height: 550 },
+  //   minSize: { width: 400, height: 400 },
+  //   resizable: true,
+  //   draggable: true,
+  //   canPin: true,
+  //   canMinimize: true,
+  //   priority: PanelPriority.LOW,
+  //   description: '人际关系和社交网络管理'
+  // },
   [PanelType.DAILY_BRIEFING]: {
     id: PanelType.DAILY_BRIEFING,
     title: '今日简报',
@@ -159,6 +162,62 @@ const PANEL_CONFIGS: Record<PanelType, Omit<PanelConfig, 'component'>> = {
     canMinimize: true,
     priority: PanelPriority.HIGH,
     description: '每日智能简报和洞察分析'
+  },
+  [PanelType.WHAT_IF]: {
+    id: PanelType.WHAT_IF,
+    title: 'What-If模拟器',
+    icon: GitBranch,
+    shortcut: 'Alt+0',
+    defaultSize: { width: 550, height: 650 },
+    minSize: { width: 500, height: 500 },
+    resizable: true,
+    draggable: true,
+    canPin: true,
+    canMinimize: true,
+    priority: PanelPriority.MEDIUM,
+    description: '决策模拟和影响分析工具'
+  },
+  [PanelType.PERSON_CARD]: {
+    id: PanelType.PERSON_CARD,
+    title: '人脉CRM',
+    icon: Users,
+    shortcut: 'Alt+8',
+    defaultSize: { width: 500, height: 600 },
+    minSize: { width: 450, height: 400 },
+    resizable: true,
+    draggable: true,
+    canPin: true,
+    canMinimize: true,
+    priority: PanelPriority.HIGH,
+    description: '智能人脉管理·关系维护·礼物建议·执行秘书'
+  },
+  [PanelType.COMMUTE_PLANNER]: {
+    id: PanelType.COMMUTE_PLANNER,
+    title: '通勤规划',
+    icon: Train,
+    shortcut: 'Ctrl+T',
+    defaultSize: { width: 480, height: 580 },
+    minSize: { width: 420, height: 400 },
+    resizable: true,
+    draggable: true,
+    canPin: true,
+    canMinimize: true,
+    priority: PanelPriority.LOW,
+    description: '通勤和碎片时间规划器'
+  },
+  [PanelType.GTD_INBOX]: {
+    id: PanelType.GTD_INBOX,
+    title: 'GTD收集箱',
+    icon: Inbox,
+    shortcut: 'Alt+G',
+    defaultSize: { width: 500, height: 650 },
+    minSize: { width: 450, height: 500 },
+    resizable: true,
+    draggable: true,
+    canPin: true,
+    canMinimize: true,
+    priority: PanelPriority.HIGH,
+    description: 'GTD任务管理·智能分类·自动补全'
   }
 };
 
@@ -205,6 +264,7 @@ function ToolbarIcon({
           ${priorityStyles.glowEffect && !isActive ? 'opacity-90' : ''}
         `}
         title={`${config.description} (${config.shortcut})`}
+        data-panel-id={config.id}
         style={{
           width: iconSize + 24,
           height: iconSize + 24

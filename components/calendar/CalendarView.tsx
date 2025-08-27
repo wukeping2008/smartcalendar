@@ -162,7 +162,7 @@ export default function CalendarView({
         </div>
         
         <div className="text-sm text-gray-400">
-          使用上方"今天"按钮快速导航
+          使用上方&ldquo;今天&rdquo;按钮快速导航
         </div>
       </div>
 

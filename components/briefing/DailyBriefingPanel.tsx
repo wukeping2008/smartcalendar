@@ -288,7 +288,7 @@ export default function DailyBriefingPanel({
             <div className="flex items-start gap-3">
               <Star className="w-5 h-5 text-yellow-500 mt-1" />
               <div>
-                <p className="italic text-gray-700">"{briefing.summary.quote.text}"</p>
+                <p className="italic text-gray-700">&ldquo;{briefing.summary.quote.text}&rdquo;</p>
                 <p className="text-sm text-gray-500 mt-1">— {briefing.summary.quote.author}</p>
               </div>
             </div>

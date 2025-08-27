@@ -330,7 +330,7 @@ export function useFloatingPanels(): UseFloatingPanelsReturn {
         '5': PanelType.VOICE_INPUT,
         '6': PanelType.INBOX,
         '7': PanelType.TIME_BUDGET,
-        '8': PanelType.RELATIONSHIPS
+        '8': PanelType.PERSON_CARD // 已合并关系管理到人脉CRM
       };
 
       const panelId = keyMappings[e.key];

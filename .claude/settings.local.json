@@ -4,7 +4,11 @@
       "Bash(npm run dev:*)",
       "Bash(curl:*)",
       "Bash(start http://localhost:3002)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npm ls:*)",
+      "Bash(cmd /c:*)",
+      "Bash(npm run lint)"
     ],
     "deny": []
   }

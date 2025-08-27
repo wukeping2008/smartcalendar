@@ -26,8 +26,12 @@ export enum PanelType {
   VOICE_INPUT = 'voice-input',
   INBOX = 'inbox',
   TIME_BUDGET = 'time-budget',
-  RELATIONSHIPS = 'relationships',
-  DAILY_BRIEFING = 'daily-briefing'
+  // RELATIONSHIPS = 'relationships', // 已合并到PERSON_CARD
+  DAILY_BRIEFING = 'daily-briefing',
+  WHAT_IF = 'what-if',
+  PERSON_CARD = 'person-card',
+  COMMUTE_PLANNER = 'commute-planner',
+  GTD_INBOX = 'gtd-inbox'
 }
 
 // 面板位置类型

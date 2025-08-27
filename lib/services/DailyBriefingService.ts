@@ -29,7 +29,7 @@ import { aiService } from './AIService'
 import { marketService } from './RealTimeMarketService'
 import InboxService from './InboxService'
 import TimeBudgetService from './TimeBudgetService'
-import { eventStore } from '../stores/event-store'
+import { useEventStore } from '../stores/event-store'
 
 class DailyBriefingService {
   private static instance: DailyBriefingService
@@ -139,7 +139,7 @@ class DailyBriefingService {
    * 生成今日概览
    */
   private async generateOverview(date: Date): Promise<string> {
-    const events = eventStore.getState().events.filter(e => 
+    const events = useEventStore.getState().events.filter(e => 
       this.isSameDay(new Date(e.startTime), date)
     )
     
@@ -180,7 +180,7 @@ class DailyBriefingService {
     const highlights: string[] = []
     
     // 获取重要事件
-    const events = eventStore.getState().events.filter(e => 
+    const events = useEventStore.getState().events.filter(e => 
       this.isSameDay(new Date(e.startTime), date)
     )
     
@@ -192,14 +192,12 @@ class DailyBriefingService {
       highlights.push(`⭐ ${importantEvents[0].title}`)
     }
 
-    // 获取紧急任务
-    const tasks = await InboxService.getAllItems()
-    const urgentTasks = tasks.filter(t => 
-      t.priority === 'urgent' && t.status !== 'completed'
-    )
+    // 获取紧急任务统计
+    const inboxStats = InboxService.getStats()
+    const pendingUrgent = inboxStats.byPriority.urgent || 0
     
-    if (urgentTasks.length > 0) {
-      highlights.push(`🚨 ${urgentTasks.length}项紧急任务待处理`)
+    if (pendingUrgent > 0) {
+      highlights.push(`🚨 ${pendingUrgent}项紧急任务待处理`)
     }
 
     // 市场机会
@@ -254,7 +252,7 @@ class DailyBriefingService {
    * 生成日程摘要
    */
   private async generateScheduleSummary(date: Date): Promise<ScheduleSummary> {
-    const events = eventStore.getState().events
+    const events = useEventStore.getState().events
       .filter(e => this.isSameDay(new Date(e.startTime), date))
       .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
 
@@ -750,7 +748,7 @@ class DailyBriefingService {
    */
   private async generateTaskSchedule(tasks: TaskBrief[], date: Date): Promise<any[]> {
     // 获取已有日程
-    const events = eventStore.getState().events
+    const events = useEventStore.getState().events
       .filter(e => this.isSameDay(new Date(e.startTime), date))
       .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
     
@@ -997,14 +995,9 @@ class DailyBriefingService {
   }
 
   /**
-   * 加载偏好设置
+   * 获取默认偏好设置
    */
-  private loadPreferences(): BriefingPreferences {
-    const stored = localStorage.getItem('briefing_preferences')
-    if (stored) {
-      return JSON.parse(stored)
-    }
-    
+  private getDefaultPreferences(): BriefingPreferences {
     return {
       generateTime: '06:00',
       autoGenerate: true,
@@ -1035,11 +1028,28 @@ class DailyBriefingService {
   }
 
   /**
+   * 加载偏好设置
+   */
+  private loadPreferences(): BriefingPreferences {
+    if (typeof window === 'undefined') {
+      return this.getDefaultPreferences()
+    }
+    const stored = localStorage.getItem('briefing_preferences')
+    if (stored) {
+      return JSON.parse(stored)
+    }
+    
+    return this.getDefaultPreferences()
+  }
+
+  /**
    * 保存偏好设置
    */
   savePreferences(preferences: BriefingPreferences): void {
     this.preferences = preferences
-    localStorage.setItem('briefing_preferences', JSON.stringify(preferences))
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('briefing_preferences', JSON.stringify(preferences))
+    }
     this.initializeAutoGeneration()
   }
 

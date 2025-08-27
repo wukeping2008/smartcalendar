@@ -14,8 +14,12 @@ import EnhancedFlowCanvas from '../timeflow/FlowCanvas';
 import VoiceInputButton from '../voice/VoiceInputButton';
 import InboxPanel from '../inbox/InboxPanel';
 import TimeBudgetDashboard from '../timebudget/TimeBudgetDashboard';
-import RelationshipManager from '../relationship/RelationshipManager';
+// import RelationshipManager from '../relationship/RelationshipManager' // 已合并到PersonCardPanel;
 import DailyBriefingPanel from '../briefing/DailyBriefingPanel';
+import WhatIfSimulatorPanel from '../whatif/WhatIfSimulatorPanel';
+import PersonCardPanel from '../personcard/PersonCardPanel';
+import CommutePlannerPanel from '../commute/CommutePlannerPanel';
+import { TaskInbox } from '../gtd/TaskInbox';
 
 interface FloatingPanelSystemProps {
   className?: string;
@@ -32,8 +36,12 @@ const PANEL_COMPONENTS: Record<PanelType, React.ComponentType<any>> = {
   [PanelType.VOICE_INPUT]: VoiceInputButton,
   [PanelType.INBOX]: InboxPanel,
   [PanelType.TIME_BUDGET]: TimeBudgetDashboard,
-  [PanelType.RELATIONSHIPS]: RelationshipManager,
-  [PanelType.DAILY_BRIEFING]: DailyBriefingPanel
+  // [PanelType.RELATIONSHIPS]: RelationshipManager, // 已合并到PersonCardPanel
+  [PanelType.DAILY_BRIEFING]: DailyBriefingPanel,
+  [PanelType.WHAT_IF]: WhatIfSimulatorPanel,
+  [PanelType.PERSON_CARD]: PersonCardPanel,
+  [PanelType.COMMUTE_PLANNER]: CommutePlannerPanel,
+  [PanelType.GTD_INBOX]: TaskInbox
 };
 
 // 简化的面板内容组件，用于演示
@@ -291,6 +299,37 @@ function SimpleRelationshipPanel() {
   );
 }
 
+function SimpleWhatIfPanel() {
+  return (
+    <div className="space-y-4">
+      <div className="text-lg font-semibold text-gray-800">What-If 模拟器</div>
+      <div className="space-y-3">
+        <div className="p-3 bg-purple-50 rounded-lg">
+          <div className="text-sm font-medium text-purple-800">场景模拟</div>
+          <div className="text-sm text-purple-600 mt-1">
+            如果推迟会议30分钟，将获得额外45分钟深度工作时间
+          </div>
+        </div>
+        <div className="p-3 bg-blue-50 rounded-lg">
+          <div className="text-sm font-medium text-blue-800">决策建议</div>
+          <div className="text-sm text-blue-600 mt-1">
+            建议将低优先级任务委派，可节省2小时
+          </div>
+        </div>
+        <div className="p-3 bg-green-50 rounded-lg">
+          <div className="text-sm font-medium text-green-800">效率提升</div>
+          <div className="text-sm text-green-600 mt-1">
+            当前方案效率评分: 87/100
+          </div>
+        </div>
+      </div>
+      <button className="w-full px-4 py-2 bg-purple-500 text-white rounded-lg text-sm hover:bg-purple-600 transition-colors">
+        创建新模拟
+      </button>
+    </div>
+  );
+}
+
 // 简化的面板内容组件映射
 const SIMPLE_PANEL_COMPONENTS: Record<PanelType, React.ComponentType<any>> = {
   [PanelType.AI_ASSISTANT]: SimpleAIPanel,
@@ -300,7 +339,11 @@ const SIMPLE_PANEL_COMPONENTS: Record<PanelType, React.ComponentType<any>> = {
   [PanelType.VOICE_INPUT]: SimpleVoicePanel,
   [PanelType.INBOX]: SimpleInboxPanel,
   [PanelType.TIME_BUDGET]: SimpleTimeBudgetPanel,
-  [PanelType.RELATIONSHIPS]: SimpleRelationshipPanel
+  // [PanelType.RELATIONSHIPS]: SimpleRelationshipPanel, // 已合并到PersonCardPanel
+  [PanelType.WHAT_IF]: SimpleWhatIfPanel,
+  [PanelType.DAILY_BRIEFING]: DailyBriefingPanel,
+  [PanelType.PERSON_CARD]: PersonCardPanel,
+  [PanelType.COMMUTE_PLANNER]: CommutePlannerPanel
 };
 
 export function FloatingPanelSystem({ 

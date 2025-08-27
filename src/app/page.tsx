@@ -19,7 +19,7 @@ import MarketStatusBar from '../../components/market/MarketStatusBar'
 import ConflictResolver from '../../components/optimization/ConflictResolver'
 import AIAssistant from '../../components/ai/AIAssistant'
 import WeeklyPlanGenerator from '../../components/planning/WeeklyPlanGenerator'
-import RelationshipManager from '../../components/relationship/RelationshipManager'
+// import RelationshipManager from '../../components/relationship/RelationshipManager' // 已合并到PersonCardPanel
 // v4.0 新组件
 import ContextMonitor from '../../components/context/ContextMonitor'
 import SOPExecutor from '../../components/context/SOPExecutor'
@@ -30,6 +30,8 @@ import TimeBudgetDashboard from '../../components/timebudget/TimeBudgetDashboard
 import TimeBankPanel from '../../components/timebudget/TimeBankPanel'
 // 浮动面板系统
 import { FloatingPanelSystem } from '../../components/layout/FloatingPanelSystem'
+// 温暖引导系统
+import WarmGuidanceOverlay from '../../components/guidance/WarmGuidanceOverlay'
 
 // 初始化秉笔太监智能秘书系统演示数据
 const initializeSampleEvents = (addEvent: (event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>) => void) => {
@@ -595,6 +597,9 @@ export default function HomePage() {
         isOpen={showFeatureGuide}
         onClose={() => setShowFeatureGuide(false)}
       />
+      
+      {/* 温暖引导系统 */}
+      <WarmGuidanceOverlay />
     </div>
   )
 }
