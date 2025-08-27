@@ -8,7 +8,9 @@
       "Bash(npx shadcn@latest add:*)",
       "Bash(npm ls:*)",
       "Bash(cmd /c:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }

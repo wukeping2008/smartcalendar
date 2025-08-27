@@ -8,10 +8,10 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { 
   Wallet, TrendingUp, TrendingDown, Award, 
-  Clock, History, Coins, Target
+  Clock, History, Coins, Target, Plus, Minus
 } from 'lucide-react'
 import TimeBudgetService from '../../lib/services/TimeBudgetService'
-import { TimeBank, TimeBankTransaction, TimeBankTransactionType } from '../../types/timebudget'
+import { TimeBank, TimeBankTransaction, TimeBankTransactionType, BudgetCategory } from '../../types/timebudget'
 
 interface TimeBankPanelProps {
   compact?: boolean
@@ -20,6 +20,10 @@ interface TimeBankPanelProps {
 export default function TimeBankPanel({ compact = false }: TimeBankPanelProps) {
   const [timeBank, setTimeBank] = useState<TimeBank | null>(null)
   const [showHistory, setShowHistory] = useState(false)
+  const [showOperations, setShowOperations] = useState(false)
+  const [operationAmount, setOperationAmount] = useState(30) // 默认30分钟
+  const [operationDescription, setOperationDescription] = useState('')
+  const [borrowCategory, setBorrowCategory] = useState<BudgetCategory>(BudgetCategory.WORK)
 
   useEffect(() => {
     loadTimeBank()
@@ -89,6 +93,64 @@ export default function TimeBankPanel({ compact = false }: TimeBankPanelProps) {
       [TimeBankTransactionType.PENALTY]: 'text-red-400'
     }
     return colors[type] || 'text-gray-400'
+  }
+
+  // 手动存入时间
+  const handleSaveTime = async () => {
+    if (operationAmount <= 0 || !operationDescription.trim()) {
+      alert('请输入有效的时间和描述')
+      return
+    }
+
+    const success = await TimeBudgetService.saveToTimeBank(
+      operationAmount * 60, // 转换为秒
+      operationDescription.trim()
+    )
+
+    if (success) {
+      loadTimeBank()
+      setOperationAmount(30)
+      setOperationDescription('')
+      setShowOperations(false)
+    }
+  }
+
+  // 借用时间
+  const handleBorrowTime = async () => {
+    if (operationAmount <= 0 || !operationDescription.trim()) {
+      alert('请输入有效的时间和描述')
+      return
+    }
+
+    const success = await TimeBudgetService.borrowFromTimeBank(
+      operationAmount * 60, // 转换为秒
+      operationDescription.trim(),
+      borrowCategory
+    )
+
+    if (success) {
+      loadTimeBank()
+      setOperationAmount(30)
+      setOperationDescription('')
+      setShowOperations(false)
+    } else {
+      alert('借用失败，可能超出借用限额')
+    }
+  }
+
+  // 获取类别名称
+  const getCategoryName = (category: BudgetCategory): string => {
+    const names: Record<BudgetCategory, string> = {
+      [BudgetCategory.WORK]: '工作',
+      [BudgetCategory.MEETING]: '会议', 
+      [BudgetCategory.BREAK]: '休息',
+      [BudgetCategory.LEARNING]: '学习',
+      [BudgetCategory.PERSONAL]: '个人',
+      [BudgetCategory.EXERCISE]: '运动',
+      [BudgetCategory.COMMUTE]: '通勤',
+      [BudgetCategory.OTHER]: '其他'
+    }
+    return names[category] || category
   }
 
   if (!timeBank) {
@@ -161,6 +223,15 @@ export default function TimeBankPanel({ compact = false }: TimeBankPanelProps) {
           时间银行
         </h3>
         <div className="flex items-center space-x-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setShowOperations(!showOperations)}
+            className="text-cyan-400 border-cyan-400/50 hover:bg-cyan-400/10"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            操作
+          </Button>
           <div className="flex items-center space-x-1 px-2 py-1 bg-yellow-500/20 rounded-lg">
             <Award className="h-4 w-4 text-yellow-400" />
             <span className="text-sm text-yellow-400 font-semibold">
@@ -233,6 +304,82 @@ export default function TimeBankPanel({ compact = false }: TimeBankPanelProps) {
           <span>下一级: Level {timeBank.efficiency.level + 1}</span>
         </div>
       </div>
+
+      {/* 手动操作面板 */}
+      {showOperations && (
+        <Card className="bg-black/50 border-cyan-500/30 p-4 mb-4">
+          <h4 className="text-white font-medium mb-3 flex items-center">
+            <Coins className="h-4 w-4 mr-2 text-cyan-400" />
+            时间银行操作
+          </h4>
+          
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">时间(分钟)</label>
+                <input
+                  type="number"
+                  value={operationAmount}
+                  onChange={(e) => setOperationAmount(parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 bg-black/50 border border-white/20 rounded-lg text-white"
+                  min="1"
+                  max="480"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">借用类别</label>
+                <select
+                  value={borrowCategory}
+                  onChange={(e) => setBorrowCategory(e.target.value as BudgetCategory)}
+                  className="w-full px-3 py-2 bg-black/50 border border-white/20 rounded-lg text-white"
+                >
+                  {Object.values(BudgetCategory).map(cat => (
+                    <option key={cat} value={cat}>
+                      {getCategoryName(cat)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">描述</label>
+              <input
+                type="text"
+                value={operationDescription}
+                onChange={(e) => setOperationDescription(e.target.value)}
+                placeholder="操作描述..."
+                className="w-full px-3 py-2 bg-black/50 border border-white/20 rounded-lg text-white placeholder-gray-400"
+              />
+            </div>
+
+            <div className="flex space-x-2">
+              <Button
+                onClick={handleSaveTime}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+                disabled={!operationDescription.trim() || operationAmount <= 0}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                存入时间
+              </Button>
+              <Button
+                onClick={handleBorrowTime}
+                className="flex-1 bg-orange-600 hover:bg-orange-700"
+                disabled={!operationDescription.trim() || operationAmount <= 0}
+              >
+                <Minus className="h-4 w-4 mr-1" />
+                借用时间
+              </Button>
+            </div>
+
+            <div className="text-xs text-gray-400 pt-2 border-t border-white/10">
+              <p>• 借用上限: {formatTime(timeBank.settings.borrowLimit)}</p>
+              <p>• 当前已借用: {formatTime(timeBank.balance.borrowed)}</p>
+              <p>• 剩余可借用: {formatTime(Math.max(0, timeBank.settings.borrowLimit - timeBank.balance.borrowed))}</p>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* 统计数据 */}
       <div className="grid grid-cols-2 gap-3 mb-4">

@@ -728,6 +728,78 @@ export class TimeBudgetService {
   }
   
   /**
+   * 从时间银行借用时间
+   */
+  public async borrowFromTimeBank(
+    amount: number,
+    description: string,
+    category: BudgetCategory
+  ): Promise<boolean> {
+    if (!this.timeBank) {
+      await this.initializeTimeBank()
+    }
+    
+    if (amount > this.timeBank!.settings.borrowLimit) {
+      console.warn('借用时间超过限制')
+      return false
+    }
+    
+    if (this.timeBank!.balance.borrowed + amount > this.timeBank!.settings.borrowLimit) {
+      console.warn('总借用时间将超过限制')
+      return false
+    }
+    
+    await this.addToTimeBank(amount, TimeBankTransactionType.BORROW, description)
+    
+    // 将借用的时间添加到对应类别的预算中
+    const budgetId = `budget_${category}`
+    const budget = this.budgets.get(budgetId)
+    if (budget) {
+      budget.budgets.daily += amount
+      budget.updatedAt = new Date()
+      await this.saveBudgets()
+    }
+    
+    console.log(`💰 从时间银行借用 ${this.formatDuration(amount)} 用于 ${description}`)
+    return true
+  }
+
+  /**
+   * 手动存入时间银行
+   */
+  public async saveToTimeBank(
+    amount: number, 
+    description: string
+  ): Promise<boolean> {
+    if (amount <= 0) return false
+    
+    await this.addToTimeBank(amount, TimeBankTransactionType.SAVE, description)
+    console.log(`💰 手动存入时间银行 ${this.formatDuration(amount)}`)
+    return true
+  }
+
+  /**
+   * 获取未确认的告警
+   */
+  public getUnacknowledgedAlerts(): BudgetAlert[] {
+    return Array.from(this.alerts.values()).filter(alert => !alert.acknowledged)
+  }
+
+  /**
+   * 确认告警
+   */
+  public async acknowledgeAlert(alertId: string): Promise<boolean> {
+    const alert = this.alerts.get(alertId)
+    if (!alert) return false
+    
+    alert.acknowledged = true
+    alert.acknowledgedAt = new Date()
+    
+    console.log(`✅ 已确认告警: ${alert.message}`)
+    return true
+  }
+
+  /**
    * 生成报告
    */
   public async generateReport(
@@ -735,32 +807,226 @@ export class TimeBudgetService {
     startDate?: Date,
     endDate?: Date
   ): Promise<TimeBudgetReport> {
-    // TODO: 实现报告生成逻辑
+    const now = new Date()
+    const start = startDate || this.getReportStartDate(type, now)
+    const end = endDate || now
+    
+    // 计算分类统计
+    const categories: TimeBudgetReport['categories'] = []
+    let totalBudgeted = 0
+    let totalActual = 0
+    
+    for (const budget of this.budgets.values()) {
+      const budgetAmount = this.getBudgetAmountForPeriod(budget, type)
+      const actualAmount = this.getActualUsageForPeriod(budget, type, start, end)
+      const variance = actualAmount - budgetAmount
+      const variancePercent = budgetAmount > 0 ? (variance / budgetAmount) * 100 : 0
+      
+      categories.push({
+        category: budget.category,
+        budgeted: budgetAmount,
+        actual: actualAmount,
+        variance,
+        variancePercent
+      })
+      
+      totalBudgeted += budgetAmount
+      totalActual += actualAmount
+    }
+    
+    const totalVariance = totalActual - totalBudgeted
+    const efficiencyScore = totalBudgeted > 0 ? Math.round((totalBudgeted / totalActual) * 100) : 0
+    
+    // 分析超支和低利用类别
+    const overrunCategories = categories
+      .filter(c => c.variance > 0)
+      .map(c => this.getCategoryName(c.category))
+    
+    const underutilizedCategories = categories
+      .filter(c => c.variancePercent < -20) // 少用20%以上
+      .map(c => this.getCategoryName(c.category))
+    
+    // 生成洞察建议
+    const insights = this.generateInsights(categories, efficiencyScore)
+    
+    // 生成趋势数据
+    const trends = this.generateTrends(start, end)
+    
     const report: TimeBudgetReport = {
       id: this.generateReportId(),
-      period: {
-        type,
-        startDate: startDate || new Date(),
-        endDate: endDate || new Date()
-      },
-      categories: [],
+      period: { type, startDate: start, endDate: end },
+      categories,
       summary: {
-        totalBudgeted: 0,
-        totalActual: 0,
-        totalVariance: 0,
-        efficiencyScore: 0,
-        overrunCategories: [],
-        underutilizedCategories: []
+        totalBudgeted,
+        totalActual,
+        totalVariance,
+        efficiencyScore,
+        overrunCategories,
+        underutilizedCategories
       },
-      insights: [],
-      trends: {
-        dailyUsage: [],
-        categoryDistribution: []
-      },
+      insights,
+      trends,
       generatedAt: new Date()
     }
     
     return report
+  }
+
+  /**
+   * 获取报告开始日期
+   */
+  private getReportStartDate(type: 'daily' | 'weekly' | 'monthly', referenceDate: Date): Date {
+    const date = new Date(referenceDate)
+    
+    switch (type) {
+      case 'daily':
+        date.setHours(0, 0, 0, 0)
+        return date
+      case 'weekly':
+        const dayOfWeek = date.getDay()
+        date.setDate(date.getDate() - dayOfWeek)
+        date.setHours(0, 0, 0, 0)
+        return date
+      case 'monthly':
+        date.setDate(1)
+        date.setHours(0, 0, 0, 0)
+        return date
+    }
+  }
+
+  /**
+   * 获取特定周期的预算金额
+   */
+  private getBudgetAmountForPeriod(budget: TimeBudget, type: 'daily' | 'weekly' | 'monthly'): number {
+    switch (type) {
+      case 'daily':
+        return budget.budgets.daily
+      case 'weekly':
+        return budget.budgets.weekly
+      case 'monthly':
+        return budget.budgets.monthly
+    }
+  }
+
+  /**
+   * 获取特定周期的实际使用量
+   */
+  private getActualUsageForPeriod(
+    budget: TimeBudget, 
+    type: 'daily' | 'weekly' | 'monthly', 
+    start: Date, 
+    end: Date
+  ): number {
+    // 筛选指定时间范围内的追踪器
+    const relevantTrackers = Array.from(this.trackers.values()).filter(tracker => 
+      tracker.category === budget.category &&
+      tracker.startTime >= start &&
+      tracker.startTime <= end &&
+      tracker.status === TrackerStatus.COMPLETED
+    )
+    
+    return relevantTrackers.reduce((sum, tracker) => sum + tracker.activeDuration, 0)
+  }
+
+  /**
+   * 生成洞察建议
+   */
+  private generateInsights(
+    categories: TimeBudgetReport['categories'],
+    efficiencyScore: number
+  ): TimeBudgetReport['insights'] {
+    const insights: TimeBudgetReport['insights'] = []
+    
+    // 效率评估
+    if (efficiencyScore > 90) {
+      insights.push({
+        type: 'achievement',
+        message: '🎉 效率极佳！时间利用非常合理'
+      })
+    } else if (efficiencyScore < 70) {
+      insights.push({
+        type: 'warning',
+        message: '⚠️ 时间利用效率较低，建议优化时间分配'
+      })
+    }
+    
+    // 分析各类别
+    categories.forEach(category => {
+      if (category.variancePercent > 50) {
+        insights.push({
+          type: 'warning',
+          message: `${this.getCategoryName(category.category)}时间严重超支，建议调整预算或优化工作流程`,
+          category: category.category,
+          actionable: {
+            action: 'adjustBudget',
+            params: { category: category.category, suggestedIncrease: category.variance }
+          }
+        })
+      } else if (category.variancePercent < -30) {
+        insights.push({
+          type: 'suggestion',
+          message: `${this.getCategoryName(category.category)}时间利用不足，可以考虑增加相关活动`,
+          category: category.category
+        })
+      }
+    })
+    
+    return insights
+  }
+
+  /**
+   * 生成趋势数据
+   */
+  private generateTrends(start: Date, end: Date): TimeBudgetReport['trends'] {
+    // 生成每日使用量趋势
+    const dailyUsage: Array<{ date: Date; usage: number }> = []
+    const current = new Date(start)
+    
+    while (current <= end) {
+      const dayStart = new Date(current)
+      dayStart.setHours(0, 0, 0, 0)
+      const dayEnd = new Date(current)
+      dayEnd.setHours(23, 59, 59, 999)
+      
+      const dayTrackers = Array.from(this.trackers.values()).filter(tracker => 
+        tracker.startTime >= dayStart && 
+        tracker.startTime <= dayEnd &&
+        tracker.status === TrackerStatus.COMPLETED
+      )
+      
+      const dayUsage = dayTrackers.reduce((sum, tracker) => sum + tracker.activeDuration, 0)
+      
+      dailyUsage.push({
+        date: new Date(current),
+        usage: dayUsage
+      })
+      
+      current.setDate(current.getDate() + 1)
+    }
+    
+    // 生成分类分布
+    const categoryUsage = new Map<BudgetCategory, number>()
+    Array.from(this.trackers.values())
+      .filter(tracker => 
+        tracker.startTime >= start && 
+        tracker.startTime <= end &&
+        tracker.status === TrackerStatus.COMPLETED
+      )
+      .forEach(tracker => {
+        const current = categoryUsage.get(tracker.category) || 0
+        categoryUsage.set(tracker.category, current + tracker.activeDuration)
+      })
+    
+    const totalUsage = Array.from(categoryUsage.values()).reduce((sum, usage) => sum + usage, 0)
+    const categoryDistribution = Array.from(categoryUsage.entries()).map(([category, usage]) => ({
+      category,
+      percentage: totalUsage > 0 ? (usage / totalUsage) * 100 : 0
+    }))
+    
+    return {
+      dailyUsage,
+      categoryDistribution
+    }
   }
   
   /**

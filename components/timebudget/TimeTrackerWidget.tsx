@@ -32,23 +32,47 @@ export default function TimeTrackerWidget({
   const [currentCategory, setCurrentCategory] = useState(category)
   const [estimatedMinutes, setEstimatedMinutes] = useState(30)
 
-  // 更新计时器状态
+  // 更新计时器状态 - 改为每秒更新以获得精确显示
   useEffect(() => {
-    const interval = setInterval(() => {
+    const updateTimerState = () => {
       const state = TimeBudgetService.getTimerState()
       setTimerState(state)
       setIsTracking(state.isRunning)
       setIsPaused(state.isPaused)
       
-      if (state.taskName) {
+      if (state.taskName && state.taskName !== currentTaskName) {
         setCurrentTaskName(state.taskName)
       }
-      if (state.category) {
+      if (state.category && state.category !== currentCategory) {
         setCurrentCategory(state.category)
       }
-    }, 5000) // 每5秒更新一次，减少重渲染
+    }
 
-    return () => clearInterval(interval)
+    // 立即更新一次
+    updateTimerState()
+
+    // 如果正在追踪，每秒更新；否则每5秒更新
+    const getInterval = () => {
+      const state = TimeBudgetService.getTimerState()
+      return state.isRunning ? 1000 : 5000
+    }
+
+    let interval = setInterval(updateTimerState, getInterval())
+
+    // 监听追踪状态变化，动态调整更新频率
+    const checkInterval = setInterval(() => {
+      const newInterval = getInterval()
+      if ((newInterval === 1000 && interval._idleTimeout !== 1000) ||
+          (newInterval === 5000 && interval._idleTimeout !== 5000)) {
+        clearInterval(interval)
+        interval = setInterval(updateTimerState, newInterval)
+      }
+    }, 1000)
+
+    return () => {
+      clearInterval(interval)
+      clearInterval(checkInterval)
+    }
   }, [])
 
   // 开始追踪
