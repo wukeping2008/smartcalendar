@@ -10,6 +10,7 @@ import { useEventStore } from '../../lib/stores/event-store'
 import { EventCategory, Priority, EventStatus, EnergyLevel, ReminderType } from '../../types/event'
 import { AzureSpeechService } from '../../lib/services/AzureSpeechService'
 import type { IAudioService } from '../../lib/services/IAudioService'
+import VoiceInputFixed from '../voice/VoiceInputFixed'
 // import { TimeAnalyzer } from '../../lib/engines/TimeAnalyzer'
 // import { ScheduleOptimizer } from '../../lib/engines/ScheduleOptimizer'
 
@@ -570,18 +571,17 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
   if (!showForm) {
     return (
       <div className={`flex space-x-2 ${className}`}>
-        <Button 
-          onClick={isListening ? stopVoiceInput : startVoiceInput}
-          className={`flex-1 ${
-            isListening 
-              ? 'bg-red-600 hover:bg-red-700 animate-pulse' 
-              : 'bg-purple-600 hover:bg-purple-700'
-          }`}
+        {/* 使用 VoiceInputFixed 替代原有的语音输入功能 */}
+        <VoiceInputFixed
           size="sm"
-          disabled={!isVoiceSupported}
-        >
-          {isListening ? '🔴 停止录音' : '🎤 语音创建'}
-        </Button>
+          onResult={(text) => {
+            setVoiceTranscript(text)
+            setShowForm(true)
+            setShowVoiceConfirm(true)
+            parseVoiceInput(text)
+          }}
+          className="flex-1"
+        />
         <Button 
           onClick={() => setShowForm(true)}
           variant="outline"
@@ -624,20 +624,38 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
 
       {/* 基本信息 */}
       <div className="space-y-3">
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="事件标题..."
-          className="bg-slate-700 border-slate-600 text-white"
-        />
+        <div className="flex space-x-2">
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="事件标题..."
+            className="bg-slate-700 border-slate-600 text-white flex-1"
+          />
+          {/* 标题语音输入按钮 */}
+          <VoiceInputFixed
+            size="sm"
+            onResult={(text) => {
+              setTitle(text.trim())
+            }}
+          />
+        </div>
         
-        <Textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="事件描述..."
-          rows={2}
-          className="bg-slate-700 border-slate-600 text-white resize-none"
-        />
+        <div className="flex space-x-2">
+          <Textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="事件描述..."
+            rows={2}
+            className="bg-slate-700 border-slate-600 text-white resize-none flex-1"
+          />
+          {/* 描述语音输入按钮 */}
+          <VoiceInputFixed
+            size="sm"
+            onResult={(text) => {
+              setDescription(description + (description ? ' ' : '') + text.trim())
+            }}
+          />
+        </div>
 
         <div className="grid grid-cols-2 gap-2">
           <Select value={category} onValueChange={(value) => setCategory(value as EventCategory)}>

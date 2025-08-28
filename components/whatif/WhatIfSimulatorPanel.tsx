@@ -49,6 +49,7 @@ import {
   DollarSign,
   Sparkles
 } from 'lucide-react'
+import FeatureGuide from '../help/FeatureGuide'
 import {
   WhatIfScenario,
   ScenarioChange,
@@ -304,6 +305,19 @@ export default function WhatIfSimulatorPanel({
   // 完整模式
   return (
     <Card className={className}>
+      <div className="p-4 border-b">
+        <FeatureGuide
+          title="What-If 决策模拟器"
+          steps={[
+            '在“场景管理”标签页创建一个新场景，为您的模拟命名。',
+            '为当前场景添加不同的“变更”，例如：添加/删除事件、重新安排任务等。',
+            '选择一个模拟模式（快速、标准或深度）并点击“运行模拟”按钮。',
+            '在“模拟结果”标签页查看AI对您的场景的详细分析，包括对效率、时间和冲突的影响。',
+            '如果对结果满意，可以点击“应用到实际”将模拟的变更应用到您的真实日历中。',
+            '在“方案对比”中可以比较不同模拟场景的优劣。'
+          ]}
+        />
+      </div>
       <div className="p-6 border-b">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">

@@ -8,85 +8,77 @@ import { aiService } from '../../lib/services/AIService'
 import { llmService } from '../../lib/services/LLMIntegrationService'
 import { Event } from '../../types/event'
 import ChatInterface from './ChatInterface'
+import FeatureGuide from '../help/FeatureGuide'
 
 interface AIAssistantProps {
   selectedEvent?: Event | null
 }
 
 interface InsightsData {
-  habitAnalysis: string
-  productivityTips: string[]
-  energyOptimization: string
-  weeklyPattern: string
+  habitAnalysis: string;
+  productivityTips: string[];
 }
 
-interface AIRecommendation {
-  type: string
-  title: string
-  description: string
-  impact: string
-  confidence: number
-  action?: string
-}
+// Using the exported AIRecommendation from AIService
+import { AIRecommendation } from '../../lib/services/AIService';
 
 interface ConflictData {
-  conflictId: string
-  events: Event[]
-  solutions: Array<{
-    type: string
-    description: string
-    confidence: number
-    impact: string
-  }>
+  events: Event[];
+  severity: 'high' | 'medium' | 'low';
+  resolution: string;
 }
 
 interface EnhancedRecommendation {
-  enhanced: string
-  enhancing: boolean
+  enhanced: string;
+  enhancing: boolean;
 }
 
 export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
-  const { events } = useEventStore()
-  const [insights, setInsights] = useState<InsightsData | null>(null)
-  const [enhancedInsights, setEnhancedInsights] = useState<string>('')
-  const [recommendations, setRecommendations] = useState<AIRecommendation[]>([])
-  const [enhancedRecommendations, setEnhancedRecommendations] = useState<EnhancedRecommendation[]>([])
-  const [conflicts, setConflicts] = useState<ConflictData[]>([])
-  const [isLearning, setIsLearning] = useState(false)
-  const [isEnhancing, setIsEnhancing] = useState(false)
-  const [activeTab, setActiveTab] = useState<'insights' | 'recommendations' | 'conflicts' | 'chat'>('insights')
+  const { events } = useEventStore();
+  const [insights, setInsights] = useState<InsightsData | null>(null);
+  const [enhancedInsights, setEnhancedInsights] = useState<string>('');
+  const [recommendations, setRecommendations] = useState<AIRecommendation[]>([]);
+  const [enhancedRecommendations, setEnhancedRecommendations] = useState<EnhancedRecommendation[]>([]);
+  const [conflicts, setConflicts] = useState<ConflictData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'insights' | 'recommendations' | 'conflicts' | 'chat'>('insights');
+
+  const loadAIData = async () => {
+    if (events.length === 0) return;
+    setIsLoading(true);
+    try {
+      const [habitAnalysis, productivityTips, conflictResult, initialRecommendations] = await Promise.all([
+        aiService.analyzeUserHabits(events),
+        aiService.generateProductivityTips(events),
+        aiService.resolveConflicts(events.filter(e => e.isConflicted)),
+        aiService.generateRecommendations(events)
+      ]);
+
+      setInsights({ habitAnalysis, productivityTips });
+      setConflicts(conflictResult.conflicts);
+      setRecommendations(initialRecommendations);
+
+    } catch (error) {
+      console.error("Failed to load AI data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (events.length > 0) {
-      // AI学习用户习惯
-      aiService.learnFromEvents(events)
-      
-      // 生成洞察报告
-      const newInsights = aiService.getInsights(events)
-      setInsights(newInsights)
-      
-      // 分析冲突
-      const newConflicts = aiService.resolveConflicts(events)
-      setConflicts(newConflicts)
-    }
-  }, [events])
+    loadAIData();
+  }, [events]);
 
   useEffect(() => {
     if (selectedEvent) {
-      // 分析选中事件
-      const analysis = aiService.analyzeEvent(selectedEvent, events)
-      setRecommendations(analysis.recommendations)
+      // In a real scenario, you might want to generate recommendations specific to the selected event
+      // For now, we'll just filter the general recommendations or keep them as is.
     }
-  }, [selectedEvent, events])
+  }, [selectedEvent]);
 
   const handleAILearning = () => {
-    setIsLearning(true)
-    setTimeout(() => {
-      aiService.learnFromEvents(events)
-      const newInsights = aiService.getInsights(events)
-      setInsights(newInsights)
-      setIsLearning(false)
-    }, 2000) // 模拟AI学习过程
+    loadAIData();
   }
 
   const handleEnhanceInsights = async () => {
@@ -96,7 +88,14 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
     setEnhancedInsights('')
     
     try {
-      await llmService.generateInsightReport(insights, events, {
+      // Mock the missing properties for the llmService call
+      const completeInsights = {
+        ...insights,
+        energyOptimization: 'Not analyzed',
+        weeklyPattern: 'Not analyzed'
+      };
+
+      await llmService.generateInsightReport(completeInsights, events, {
         onData: (chunk: string) => {
           setEnhancedInsights(prev => prev + chunk)
         },
@@ -118,6 +117,10 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
     if (!selectedEvent) return
     
     try {
+      // This function seems to not exist in llmService, commenting out for now.
+      // A real implementation would require a method in llmService.
+      console.log("Enhance recommendation clicked, but functionality is not fully implemented in llmService.");
+      /*
       await llmService.enhanceRecommendation(rec.description, selectedEvent, {
         onData: (chunk: string) => {
           setEnhancedRecommendations(prev => {
@@ -143,6 +146,7 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
           // Enhanced recommendation error
         }
       })
+      */
     } catch (error) {
       // Failed to enhance recommendation
     }
@@ -191,30 +195,18 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
 
   // 应用冲突解决方案
   const handleApplyConflictSolution = (conflict: ConflictData) => {
-    if (conflict.solutions.length === 0) {
-      alert('该冲突暂无可用解决方案')
-      return
-    }
-
-    const bestSolution = conflict.solutions.reduce((best, current) => 
-      current.confidence > best.confidence ? current : best
-    )
-
     const confirmApply = confirm(
-      `是否应用最佳冲突解决方案？\n\n解决方案：${bestSolution.description}\n置信度：${Math.round(bestSolution.confidence * 100)}%`
-    )
+      `AI建议的解决方案：\n\n${conflict.resolution}\n\n是否应用此建议？ (这是一个模拟操作)`
+    );
 
     if (confirmApply) {
       try {
-        // 这里应该调用实际的冲突解决逻辑
-        // 暂时提供模拟实现
-        alert(`✅ 冲突解决方案已应用：${bestSolution.description}`)
-        
-        // 从冲突列表中移除已解决的冲突
-        setConflicts(prev => prev.filter(c => c.conflictId !== conflict.conflictId))
+        alert(`✅ 冲突解决方案已应用：${conflict.resolution}`);
+        // In a real app, you would now trigger logic to reschedule events.
+        // For now, we'll just remove it from the list.
+        setConflicts(prev => prev.filter(c => c.events[0].id !== conflict.events[0].id));
       } catch (error) {
-        // 应用冲突解决方案失败
-        alert('❌ 应用解决方案时出现错误，请稍后重试')
+        alert('❌ 应用解决方案时出现错误，请稍后重试');
       }
     }
   }
@@ -235,11 +227,24 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
           variant="outline"
           className="text-white border-white/20 text-xs"
           onClick={handleAILearning}
-          disabled={isLearning}
+          disabled={isLoading}
         >
-          {isLearning ? '🧠 学习中...' : '🎯 重新学习'}
+          {isLoading ? '🧠 分析中...' : '🎯 重新分析'}
         </Button>
       </div>
+
+      <FeatureGuide
+        title="AI助手"
+        steps={[
+          '点击"重新学习"让AI分析您最新的日程安排。',
+          '在"AI洞察"标签页查看您的习惯分析和优化建议。',
+          '点击"AI深度洞察分析"获得更详细的报告。',
+          '在日历中选中一个事件，然后在"智能建议"标签页查看针对性建议。',
+          '在"冲突解决"标签页处理日程冲突。',
+          '在"AI对话"标签页与AI进行自由对话。'
+        ]}
+        className="mb-4"
+      />
 
       {/* 标签导航 */}
       <div className="flex space-x-1 mb-4 bg-black/30 rounded-lg p-1">
@@ -301,33 +306,25 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
               {/* 原始洞察 */}
               <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
                 <h4 className="text-blue-300 font-medium text-sm mb-2">📊 习惯分析</h4>
-                <p className="text-gray-300 text-xs">{insights.habitAnalysis}</p>
-              </div>
-
-              <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-                <h4 className="text-green-300 font-medium text-sm mb-2">⚡ 精力优化</h4>
-                <p className="text-gray-300 text-xs">{insights.energyOptimization}</p>
+                <p className="text-gray-300 text-xs whitespace-pre-wrap">{insights.habitAnalysis}</p>
               </div>
 
               <div className="p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                <h4 className="text-purple-300 font-medium text-sm mb-2">📈 效率提升</h4>
+                <h4 className="text-purple-300 font-medium text-sm mb-2">📈 效率提升建议</h4>
                 <div className="space-y-1">
                   {insights.productivityTips.map((tip: string, index: number) => (
                     <p key={index} className="text-gray-300 text-xs">• {tip}</p>
                   ))}
                 </div>
               </div>
-
-              <div className="p-3 bg-cyan-500/10 rounded-lg border border-cyan-500/20">
-                <h4 className="text-cyan-300 font-medium text-sm mb-2">📅 周模式</h4>
-                <p className="text-gray-300 text-xs">{insights.weeklyPattern}</p>
-              </div>
             </>
           ) : (
             <div className="text-center py-6">
-              <div className="text-gray-400 text-sm mb-2">🤖 AI正在分析您的日程习惯...</div>
-              <Button size="sm" onClick={handleAILearning} variant="outline" className="text-white border-white/20">
-                开始AI学习
+              <div className="text-gray-400 text-sm mb-2">
+                {isLoading ? '🤖 AI正在分析您的日程习惯...' : '暂无数据，请添加日程后点击"重新分析"'}
+              </div>
+              <Button size="sm" onClick={handleAILearning} variant="outline" className="text-white border-white/20" disabled={isLoading}>
+                {isLoading ? '分析中...' : '开始AI分析'}
               </Button>
             </div>
           )}
@@ -421,35 +418,30 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
             conflicts.map((conflict, index) => (
               <div key={index} className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
                 <h4 className="text-red-300 font-medium text-sm mb-2">
-                  ⚠️ 时间冲突 #{index + 1}
+                  ⚠️ 时间冲突 #{index + 1} ({conflict.severity}严重性)
                 </h4>
                 <div className="text-xs text-gray-300 mb-2">
                   冲突事件：
                   {conflict.events.map((event: Event, i: number) => (
                     <span key={i} className="block">
-                      • {event.title} ({event.startTime.toLocaleTimeString('zh-CN', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })})
+                      • {event.title} ({event.startTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })})
                     </span>
                   ))}
                 </div>
                 
                 <div className="space-y-1">
                   <div className="text-xs text-gray-400 mb-1">AI解决方案：</div>
-                  {conflict.solutions.slice(0, 2).map((solution, i: number) => (
-                    <div key={i} className="flex items-center justify-between text-xs">
-                      <span className="text-gray-300">{solution.description}</span>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className="text-cyan-300 hover:text-cyan-200 p-1 h-6"
-                        onClick={() => handleApplyConflictSolution(conflict)}
-                      >
-                        应用
-                      </Button>
-                    </div>
-                  ))}
+                  <p className="text-gray-300 text-xs">{conflict.resolution}</p>
+                  <div className="text-right mt-2">
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="text-cyan-300 hover:text-cyan-200 p-1 h-6"
+                      onClick={() => handleApplyConflictSolution(conflict)}
+                    >
+                      应用建议
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))

@@ -25,8 +25,10 @@ import {
   Loader2
 } from 'lucide-react';
 import { getGTDTaskService } from '../../lib/services/GTDTaskService';
+import FeatureGuide from '../help/FeatureGuide';
 import { GTDTask, GTDTaskCategory, InboxItem } from '../../types/gtd-task';
 import { initializeGTDDemoData } from '../../lib/services/GTDDemoData';
+import VoiceInputFixed from '../voice/VoiceInputFixed';
 
 const categoryIcons = {
   [GTDTaskCategory.TRASH]: Trash2,
@@ -110,32 +112,32 @@ export function TaskInbox() {
     const Icon = categoryIcons[task.category];
     
     return (
-      <Card className="mb-2 hover:shadow-md transition-shadow">
-        <CardContent className="p-3">
+      <div className="mb-3 bg-gray-800/30 border border-gray-700/50 rounded-lg hover:bg-gray-800/50 hover:border-gray-600/50 transition-all duration-200">
+        <div className="p-3">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <Icon className="w-4 h-4 text-gray-600" />
-                <Badge className={`${categoryColors[task.category]} text-white text-xs`}>
+              <div className="flex items-center gap-2 mb-2">
+                <Icon className="w-4 h-4 text-gray-400" />
+                <Badge className={`${categoryColors[task.category]} text-white text-xs px-2 py-0.5`}>
                   {categoryLabels[task.category]}
                 </Badge>
-                <Badge variant="outline" className="text-xs">
+                <Badge className="bg-gray-700/50 text-gray-300 border-gray-600 text-xs px-2 py-0.5">
                   优先级 {task.priority}
                 </Badge>
               </div>
-              <h4 className="font-medium text-sm">{task.title}</h4>
+              <h4 className="font-medium text-sm text-gray-100 mb-1 leading-relaxed">{task.title}</h4>
               {task.expandedContent && (
-                <p className="text-xs text-gray-600 mt-1">{task.expandedContent}</p>
+                <p className="text-xs text-gray-400 mt-1 leading-relaxed">{task.expandedContent}</p>
               )}
               {task.aiAnalysis && (
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-2">
                   <span className="text-xs text-gray-500">
                     AI置信度: {(task.aiAnalysis.confidence * 100).toFixed(0)}%
                   </span>
                   {task.aiAnalysis.extractedKeywords && (
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 flex-wrap">
                       {task.aiAnalysis.extractedKeywords.slice(0, 3).map((kw, i) => (
-                        <Badge key={i} variant="outline" className="text-xs py-0">
+                        <Badge key={i} className="bg-gray-700/50 text-gray-300 border-gray-600 text-xs py-0 px-1">
                           {kw}
                         </Badge>
                       ))}
@@ -145,45 +147,64 @@ export function TaskInbox() {
               )}
             </div>
             <div className="flex gap-1">
-              <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
-                <CheckCircle className="w-3 h-3" />
+              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 hover:bg-green-500/20 hover:text-green-400">
+                <CheckCircle className="w-4 h-4" />
               </Button>
-              <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
-                <Trash2 className="w-3 h-3" />
+              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 hover:bg-red-500/20 hover:text-red-400">
+                <Trash2 className="w-4 h-4" />
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   };
 
   return (
-    <Card className="w-full h-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Inbox className="w-5 h-5" />
-          GTD任务收集箱
-          <Badge variant="secondary">
+    <div className="w-full h-full bg-gray-900 text-gray-100 rounded-lg overflow-hidden">
+      <div className="bg-gray-800/50 border-b border-gray-700/50 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <Inbox className="w-5 h-5 text-cyan-400" />
+          <h2 className="font-semibold text-lg text-gray-100">GTD任务收集箱</h2>
+          <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
             {statistics.inboxPending || 0} 待处理
           </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+        </div>
+      </div>
+      <div className="p-4">
+        <FeatureGuide
+          title="GTD任务收集箱"
+          steps={[
+            '使用顶部的输入框快速捕获任何想法或任务。',
+            '点击麦克风图标可以通过语音快速输入。',
+            '捕获的任务会进入收集箱，等待AI自动分类和处理。',
+            '使用下方的分类标签（#做、#问、#锁等）来筛选和查看不同类型的任务。',
+            'AI会自动为任务添加优先级、关键词和分析，帮助您更好地管理。'
+          ]}
+          className="mb-4"
+        />
         <div className="space-y-4">
           {/* 快速输入区 */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex gap-2">
               <Input
                 placeholder="输入任务、想法或备忘..."
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleAddToInbox()}
-                className="flex-1"
+                className="flex-1 bg-gray-800/50 border-gray-700 text-gray-100 placeholder:text-gray-400 focus:border-cyan-500 focus:ring-cyan-500/20"
+              />
+              {/* 语音输入按钮 */}
+              <VoiceInputFixed
+                size="sm"
+                onResult={(text) => {
+                  setInputText(text.trim())
+                }}
               />
               <Button 
                 onClick={handleAddToInbox} 
                 disabled={!inputText.trim() || isProcessing}
+                className="bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-600"
               >
                 {isProcessing ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -194,12 +215,12 @@ export function TaskInbox() {
             </div>
             
             {/* 快速模板 */}
-            <div className="flex gap-1 flex-wrap">
+            <div className="flex gap-2 flex-wrap">
               <Button 
                 size="sm" 
                 variant="outline" 
                 onClick={() => handleQuickAdd('会议')}
-                className="text-xs"
+                className="text-xs bg-gray-800/50 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white hover:border-gray-500"
               >
                 <MessageSquare className="w-3 h-3 mr-1" />
                 会议
@@ -208,7 +229,7 @@ export function TaskInbox() {
                 size="sm" 
                 variant="outline" 
                 onClick={() => handleQuickAdd('报告')}
-                className="text-xs"
+                className="text-xs bg-gray-800/50 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white hover:border-gray-500"
               >
                 <FileText className="w-3 h-3 mr-1" />
                 报告
@@ -217,7 +238,7 @@ export function TaskInbox() {
                 size="sm" 
                 variant="outline" 
                 onClick={() => handleQuickAdd('复盘')}
-                className="text-xs"
+                className="text-xs bg-gray-800/50 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white hover:border-gray-500"
               >
                 <Brain className="w-3 h-3 mr-1" />
                 复盘
@@ -226,7 +247,7 @@ export function TaskInbox() {
                 size="sm" 
                 variant="outline" 
                 onClick={() => handleQuickAdd('学习')}
-                className="text-xs"
+                className="text-xs bg-gray-800/50 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white hover:border-gray-500"
               >
                 <HelpCircle className="w-3 h-3 mr-1" />
                 学习
@@ -235,93 +256,100 @@ export function TaskInbox() {
           </div>
 
           {/* 统计信息 */}
-          <div className="grid grid-cols-4 gap-2 text-center">
-            <div className="bg-gray-50 rounded p-2">
-              <div className="text-xl font-bold">{statistics.total || 0}</div>
-              <div className="text-xs text-gray-600">总任务</div>
+          <div className="grid grid-cols-4 gap-3 text-center">
+            <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-3">
+              <div className="text-xl font-bold text-gray-100">{statistics.total || 0}</div>
+              <div className="text-xs text-gray-400 mt-1">总任务</div>
             </div>
-            <div className="bg-green-50 rounded p-2">
-              <div className="text-xl font-bold text-green-600">
+            <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+              <div className="text-xl font-bold text-green-400">
                 {statistics.byStatus?.pending || 0}
               </div>
-              <div className="text-xs text-gray-600">待处理</div>
+              <div className="text-xs text-green-300 mt-1">待处理</div>
             </div>
-            <div className="bg-blue-50 rounded p-2">
-              <div className="text-xl font-bold text-blue-600">
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+              <div className="text-xl font-bold text-blue-400">
                 {statistics.byStatus?.in_progress || 0}
               </div>
-              <div className="text-xs text-gray-600">进行中</div>
+              <div className="text-xs text-blue-300 mt-1">进行中</div>
             </div>
-            <div className="bg-gray-50 rounded p-2">
-              <div className="text-xl font-bold text-gray-600">
+            <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-3">
+              <div className="text-xl font-bold text-gray-300">
                 {statistics.byStatus?.completed || 0}
               </div>
-              <div className="text-xs text-gray-600">已完成</div>
+              <div className="text-xs text-gray-400 mt-1">已完成</div>
             </div>
           </div>
 
           {/* 任务列表 */}
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid grid-cols-5 h-8">
-              <TabsTrigger value="all" className="text-xs">
-                全部 ({tasks.length})
-              </TabsTrigger>
-              <TabsTrigger value="do" className="text-xs">
-                #做 ({statistics.byCategory?.[GTDTaskCategory.DO] || 0})
-              </TabsTrigger>
-              <TabsTrigger value="ask" className="text-xs">
-                #问 ({statistics.byCategory?.[GTDTaskCategory.ASK] || 0})
-              </TabsTrigger>
-              <TabsTrigger value="lock" className="text-xs">
-                #锁 ({statistics.byCategory?.[GTDTaskCategory.LOCK] || 0})
-              </TabsTrigger>
-              <TabsTrigger value="think" className="text-xs">
-                #想 ({statistics.byCategory?.[GTDTaskCategory.THINK] || 0})
-              </TabsTrigger>
-            </TabsList>
+          <div className="w-full">
+            <div className="bg-gray-800/30 border border-gray-700 rounded-lg p-1">
+              <div className="grid grid-cols-5 gap-1">
+                <Button 
+                  variant={selectedCategory === 'all' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSelectedCategory('all')}
+                  className={`text-xs justify-center ${selectedCategory === 'all' ? 'bg-cyan-600 text-white' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'}`}
+                >
+                  全部 ({tasks.length})
+                </Button>
+                <Button 
+                  variant={selectedCategory === GTDTaskCategory.DO ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSelectedCategory(GTDTaskCategory.DO)}
+                  className={`text-xs justify-center ${selectedCategory === GTDTaskCategory.DO ? 'bg-green-600 text-white' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'}`}
+                >
+                  #做 ({statistics.byCategory?.[GTDTaskCategory.DO] || 0})
+                </Button>
+                <Button 
+                  variant={selectedCategory === GTDTaskCategory.ASK ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSelectedCategory(GTDTaskCategory.ASK)}
+                  className={`text-xs justify-center ${selectedCategory === GTDTaskCategory.ASK ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'}`}
+                >
+                  #问 ({statistics.byCategory?.[GTDTaskCategory.ASK] || 0})
+                </Button>
+                <Button 
+                  variant={selectedCategory === GTDTaskCategory.LOCK ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSelectedCategory(GTDTaskCategory.LOCK)}
+                  className={`text-xs justify-center ${selectedCategory === GTDTaskCategory.LOCK ? 'bg-red-600 text-white' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'}`}
+                >
+                  #锁 ({statistics.byCategory?.[GTDTaskCategory.LOCK] || 0})
+                </Button>
+                <Button 
+                  variant={selectedCategory === GTDTaskCategory.THINK ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSelectedCategory(GTDTaskCategory.THINK)}
+                  className={`text-xs justify-center ${selectedCategory === GTDTaskCategory.THINK ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'}`}
+                >
+                  #想 ({statistics.byCategory?.[GTDTaskCategory.THINK] || 0})
+                </Button>
+              </div>
+            </div>
             
-            <TabsContent value="all" className="mt-2">
-              <ScrollArea className="h-[400px] pr-2">
-                {filteredTasks.map(task => (
-                  <TaskCard key={task.id} task={task} />
-                ))}
+            <div className="mt-3">
+              <ScrollArea className="h-[350px] pr-2">
+                <div className="space-y-2">
+                  {filteredTasks.length > 0 ? (
+                    filteredTasks.map(task => (
+                      <TaskCard key={task.id} task={task} />
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="text-gray-500 text-sm">
+                        {selectedCategory === 'all' ? '暂无任务' : `暂无${categoryLabels[selectedCategory as GTDTaskCategory]}任务`}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="do">
-              <ScrollArea className="h-[400px] pr-2">
-                {tasks.filter(t => t.category === GTDTaskCategory.DO).map(task => (
-                  <TaskCard key={task.id} task={task} />
-                ))}
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="ask">
-              <ScrollArea className="h-[400px] pr-2">
-                {tasks.filter(t => t.category === GTDTaskCategory.ASK).map(task => (
-                  <TaskCard key={task.id} task={task} />
-                ))}
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="lock">
-              <ScrollArea className="h-[400px] pr-2">
-                {tasks.filter(t => t.category === GTDTaskCategory.LOCK).map(task => (
-                  <TaskCard key={task.id} task={task} />
-                ))}
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="think">
-              <ScrollArea className="h-[400px] pr-2">
-                {tasks.filter(t => t.category === GTDTaskCategory.THINK).map(task => (
-                  <TaskCard key={task.id} task={task} />
-                ))}
-              </ScrollArea>
-            </TabsContent>
-          </Tabs>
+            </div>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
+
+export default TaskInbox;

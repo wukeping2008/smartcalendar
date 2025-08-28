@@ -8,7 +8,6 @@ import { Settings, Brain, HelpCircle, Sparkles } from 'lucide-react'
 import SmartEventCreator from '../../components/calendar/SmartEventCreator'
 import VoiceInputButton from '../../components/voice/VoiceInputButton'
 import TimeFlowGuide from '../../components/help/TimeFlowGuide'
-import FloatingTips from '../../components/help/FloatingTips'
 import FeatureGuideModal from '../../components/help/FeatureGuideModal'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -320,7 +319,7 @@ const initializeSampleEvents = (addEvent: (event: Omit<Event, 'id' | 'createdAt'
 }
 
 export default function HomePage() {
-  const { events, selectEvent, addEvent, deleteEvent } = useEventStore()
+  const { events, selectEvent, addEvent, deleteEvent, loadEvents, isLoaded } = useEventStore()
   const [currentTime] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
@@ -328,19 +327,26 @@ export default function HomePage() {
   const [viewMode, setViewMode] = useState<'flow' | 'calendar'>('calendar')
   const [showFeatureGuide, setShowFeatureGuide] = useState(false)
 
-  // 初始化样本数据（仅一次）
+  // 初始化：加载存储的事件或创建样本数据
   useEffect(() => {
-    // 首次访问时自动显示功能指南
-    const hasSeenGuide = localStorage.getItem('hasSeenV4Guide')
-    if (!hasSeenGuide) {
-      setShowFeatureGuide(true)
-      localStorage.setItem('hasSeenV4Guide', 'true')
+    // 不再自动显示功能指南，需要用户手动点击
+    // const hasSeenGuide = localStorage.getItem('hasSeenV4Guide')
+    // if (!hasSeenGuide) {
+    //   setShowFeatureGuide(true)
+    //   localStorage.setItem('hasSeenV4Guide', 'true')
+    // }
+    
+    // 加载存储的事件
+    if (!isLoaded) {
+      loadEvents().then(() => {
+        // 如果没有事件，创建样本数据
+        if (events.length === 0 && !initialized) {
+          initializeSampleEvents(addEvent)
+          setInitialized(true)
+        }
+      })
     }
-    if (!initialized && events.length === 0) {
-      initializeSampleEvents(addEvent)
-      setInitialized(true)
-    }
-  }, [initialized, events.length, addEvent])
+  }, [isLoaded, loadEvents, events.length, initialized, addEvent])
 
   const timeRange = {
     start: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 0, 0),
@@ -371,63 +377,67 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col">
-      {/* 头部导航 */}
-      <header className="bg-gray-900/90 backdrop-blur-md border-b border-gray-700/50 shadow-xl">
-        <div className="w-full px-6">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                智能日历系统
+      {/* 头部导航 - 响应式设计优化 */}
+      <header className="bg-gray-900/90 backdrop-blur-md border-b border-gray-700/50 shadow-xl sticky top-0 z-40">
+        <div className="w-full px-4 sm:px-6">
+          <div className="flex justify-between items-center py-3 sm:py-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                <span className="hidden sm:inline">智能日历系统</span>
+                <span className="sm:hidden">智能日历</span>
               </h1>
-              <div className="px-3 py-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full border border-cyan-500/30">
+              <div className="hidden sm:flex px-3 py-1 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full border border-cyan-500/30">
                 <span className="text-sm text-cyan-300 font-medium">
                   {viewMode === 'calendar' ? '📅 日历视图' : '🌊 时间流'}
                 </span>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-1 sm:space-x-4">
               <div className="flex bg-gray-800/50 rounded-lg border border-gray-600/50 p-1 shadow-inner">
                 <Button
                   size="sm"
                   variant={viewMode === 'calendar' ? 'default' : 'ghost'}
-                  className={viewMode === 'calendar' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white transition-safe'}
+                  className={viewMode === 'calendar' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg text-xs sm:text-sm px-2 sm:px-3' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white transition-safe text-xs sm:text-sm px-2 sm:px-3'}
                   onClick={() => setViewMode('calendar')}
                 >
-                  📅 日历视图
+                  <span className="sm:hidden">📅</span>
+                  <span className="hidden sm:inline">📅 日历视图</span>
                 </Button>
                 <Button
                   size="sm"
                   variant={viewMode === 'flow' ? 'default' : 'ghost'}
-                  className={viewMode === 'flow' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white transition-safe'}
+                  className={viewMode === 'flow' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg text-xs sm:text-sm px-2 sm:px-3' : 'text-gray-300 hover:bg-gray-700/50 hover:text-white transition-safe text-xs sm:text-sm px-2 sm:px-3'}
                   onClick={() => setViewMode('flow')}
                 >
-                  🌊 时间流
+                  <span className="sm:hidden">🌊</span>
+                  <span className="hidden sm:inline">🌊 时间流</span>
                 </Button>
               </div>
+              
               <Link 
                 href="/settings" 
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 hover:border-blue-400/50 text-white transition-safe hover:shadow-lg hover:shadow-blue-500/20"
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 hover:border-blue-400/50 text-white transition-safe hover:shadow-lg hover:shadow-blue-500/20"
               >
                 <Brain className="h-4 w-4" />
-                <span className="text-sm font-medium">AI助手</span>
+                <span className="text-xs sm:text-sm font-medium hidden sm:inline">AI助手</span>
               </Link>
               <Link 
                 href="/settings" 
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 hover:text-white transition-safe border border-gray-600/50 hover:border-gray-500/50"
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 hover:text-white transition-safe border border-gray-600/50 hover:border-gray-500/50"
               >
                 <Settings className="h-4 w-4" />
-                <span className="text-sm">设置</span>
+                <span className="text-xs sm:text-sm hidden sm:inline">设置</span>
               </Link>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => setShowFeatureGuide(true)}
-                className="flex items-center gap-2 text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 hover:border-gray-500/50 transition-safe"
+                className="flex items-center gap-1 sm:gap-2 text-gray-300 hover:text-white border-gray-600/50 hover:bg-gray-700/50 hover:border-gray-500/50 transition-safe px-2 sm:px-3"
               >
                 <HelpCircle className="h-4 w-4" />
-                <span className="text-sm">功能指南</span>
+                <span className="text-xs sm:text-sm hidden lg:inline">功能指南</span>
               </Button>
-              <div className="px-3 py-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full border border-purple-500/30">
+              <div className="hidden sm:flex px-3 py-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full border border-purple-500/30">
                 <span className="text-sm text-purple-300 font-medium">✨ v4.0</span>
               </div>
             </div>
@@ -435,9 +445,9 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* 主内容区域 - 全宽度，不再有固定侧边栏 */}
+      {/* 主内容区域 - 响应式优化 */}
       <main className="flex-1 relative overflow-hidden">
-          <div className="absolute inset-0 p-6">
+          <div className="absolute inset-0 p-3 sm:p-6">
             {viewMode === 'calendar' ? (
               /* 传统日历视图 - 主视图 */
               <>
@@ -445,6 +455,8 @@ export default function HomePage() {
                   initialDate={currentTime}
                   initialView="month"
                 />
+                
+                {/* 日历视图中的浮动语音按钮 - 仅在日历模式下显示 */}
                 
                 {/* 空状态提示 */}
                 {events.length === 0 && (
@@ -586,13 +598,7 @@ export default function HomePage() {
         }}
       />
 
-      {/* 浮动提示系统 */}
-      <FloatingTips 
-        currentView={viewMode === 'flow' ? 'flow-view' : 'calendar'}
-        isVisible={true}
-      />
-      
-      {/* v4.0 功能指南弹窗 */}
+      {/* v4.0 功能指南弹窗 - 只通过点击导航栏按钮显示 */}
       <FeatureGuideModal 
         isOpen={showFeatureGuide}
         onClose={() => setShowFeatureGuide(false)}

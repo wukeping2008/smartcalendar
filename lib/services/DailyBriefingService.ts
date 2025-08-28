@@ -206,9 +206,9 @@ class DailyBriefingService {
     }
 
     // 时间管理提醒
-    const trackers = await TimeBudgetService.getActiveTrackers()
-    if (trackers.length > 0) {
-      highlights.push(`⏱️ ${trackers.length}个任务正在计时`)
+    const activeTracker = TimeBudgetService.getActiveTracker()
+    if (activeTracker) {
+      highlights.push(`⏱️ 正在计时任务：${activeTracker.taskName}`)
     }
 
     // 如果没有亮点，添加励志信息
@@ -401,7 +401,9 @@ class DailyBriefingService {
    * 分析生产力
    */
   private async analyzeProductivity(date: Date): Promise<ProductivityInsight> {
-    const trackers = await TimeBudgetService.getDailyReport(date)
+    const todayTrackers = TimeBudgetService.getTodayTrackers()
+    const totalMinutes = todayTrackers.reduce((sum, tracker) => sum + Math.floor(tracker.activeDuration / 60), 0)
+    
     const tasks = await InboxService.getAllItems()
     const completedToday = tasks.filter(t => 
       t.status === 'completed' && 
@@ -414,8 +416,8 @@ class DailyBriefingService {
     if (completedToday > 5) score += 20
     else if (completedToday > 3) score += 10
     
-    if (trackers.totalMinutes > 360) score += 20 // 工作超过6小时
-    else if (trackers.totalMinutes > 240) score += 10 // 工作超过4小时
+    if (totalMinutes > 360) score += 20 // 工作超过6小时
+    else if (totalMinutes > 240) score += 10 // 工作超过4小时
 
     // 判断趋势
     const trend = score > 70 ? 'improving' : score > 50 ? 'stable' : 'declining'
@@ -423,7 +425,7 @@ class DailyBriefingService {
     // 生成分析
     const analysis = `今天的生产力${
       score > 70 ? '表现出色' : score > 50 ? '保持稳定' : '有待提升'
-    }。已完成${completedToday}项任务，工作时长${Math.round(trackers.totalMinutes / 60)}小时。`
+    }。已完成${completedToday}项任务，工作时长${Math.round(totalMinutes / 60)}小时。`
 
     // 建议
     const suggestions: string[] = []
@@ -431,7 +433,7 @@ class DailyBriefingService {
       suggestions.push('尝试使用番茄工作法提高专注度')
       suggestions.push('优先处理高价值任务')
     }
-    if (trackers.totalMinutes < 240) {
+    if (totalMinutes < 240) {
       suggestions.push('增加深度工作时间')
     }
 

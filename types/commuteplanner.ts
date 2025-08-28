@@ -190,7 +190,7 @@ export interface ActivityRequirements {
   privacy: boolean
   power: boolean
   stable: boolean
-  handsFrequency // 需要手的程度
+  handsFree: boolean // 需要手的程度
 }
 
 export enum FocusRequirement {

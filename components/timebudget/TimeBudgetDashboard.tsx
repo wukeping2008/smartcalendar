@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import TimeBudgetService from '../../lib/services/TimeBudgetService'
 import { TimeBudget, BudgetCategory, TimeTracker } from '../../types/timebudget'
+import FeatureGuide from '../help/FeatureGuide'
 
 interface TimeBudgetDashboardProps {
   compact?: boolean
@@ -96,35 +97,35 @@ export default function TimeBudgetDashboard({ compact = false }: TimeBudgetDashb
   if (compact) {
     // 紧凑模式
     return (
-      <Card className="bg-black/30 border-white/20 p-3">
-        <div className="flex items-center justify-between mb-3">
+      <div className="bg-gray-900/95 border border-gray-700/50 rounded-lg p-4 backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
-            <Target className="h-4 w-4 text-cyan-400" />
-            <span className="text-white font-semibold text-sm">时间预算</span>
+            <Target className="h-5 w-5 text-cyan-400" />
+            <span className="text-gray-100 font-semibold">时间预算</span>
           </div>
-          <span className="text-xs text-gray-400">
+          <span className="text-sm text-gray-400 font-mono">
             {formatDuration(stats.totalUsed)} / {formatDuration(stats.totalBudget)}
           </span>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           {budgets.slice(0, 3).map(budget => {
             const percent = (budget.usage.today / budget.budgets.daily) * 100
             const status = TimeBudgetService.getBudgetStatus(budget.category)
             
             return (
-              <div key={budget.id} className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span className={getCategoryColor(budget.category)}>
+              <div key={budget.id} className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className={`${getCategoryColor(budget.category)} font-medium`}>
                     {budget.name}
                   </span>
-                  <span className="text-gray-400">
+                  <span className="text-gray-300 font-mono">
                     {Math.round(percent)}%
                   </span>
                 </div>
-                <div className="w-full bg-black/50 rounded-full h-1.5">
+                <div className="w-full bg-gray-800/50 rounded-full h-2">
                   <div 
-                    className={`h-1.5 rounded-full transition-all ${getProgressColor(percent)}`}
+                    className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(percent)}`}
                     style={{ width: `${Math.min(100, percent)}%` }}
                   />
                 </div>
@@ -133,86 +134,97 @@ export default function TimeBudgetDashboard({ compact = false }: TimeBudgetDashb
           })}
         </div>
 
-        <div className="mt-3 pt-3 border-t border-white/10">
-          <div className="flex justify-between text-xs">
+        <div className="mt-4 pt-4 border-t border-gray-700/50">
+          <div className="flex justify-between text-sm">
             <span className="text-gray-400">今日效率</span>
-            <span className="text-cyan-400 font-semibold">{stats.efficiency}%</span>
+            <span className="text-cyan-400 font-semibold font-mono">{stats.efficiency}%</span>
           </div>
         </div>
-      </Card>
+      </div>
     )
   }
 
   // 完整模式
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 p-4">
+      <FeatureGuide
+        title="时间预算"
+        steps={[
+          '在此仪表盘查看您为不同活动类别（工作、会议、休息等）设定的预算。',
+          '顶部的统计卡片为您提供今日时间使用情况的快速概览。',
+          '“分类预算使用情况”部分详细显示了每个类别的预算消耗进度。',
+          '“今日时间记录”部分列出了今天所有被追踪的任务及其花费的时间。',
+          '数据会自动刷新，您也可以点击“刷新”按钮手动更新。'
+        ]}
+        className="mb-4"
+      />
       {/* 统计卡片 */}
-      <div className="grid grid-cols-4 gap-3">
-        <Card className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/30 p-3">
-          <div className="flex items-center justify-between">
-            <Clock className="h-5 w-5 text-cyan-400" />
-            <span className="text-xs text-cyan-400">今日</span>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <Clock className="h-6 w-6 text-cyan-400" />
+            <span className="text-sm text-cyan-400 font-medium">今日</span>
           </div>
-          <div className="mt-2">
-            <div className="text-2xl font-bold text-white">
+          <div>
+            <div className="text-2xl font-bold text-gray-100 font-mono">
               {formatDuration(stats.totalUsed)}
             </div>
-            <div className="text-xs text-gray-400">已使用</div>
+            <div className="text-sm text-gray-400 mt-1">已使用</div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/30 p-3">
-          <div className="flex items-center justify-between">
-            <Target className="h-5 w-5 text-green-400" />
-            <span className="text-xs text-green-400">剩余</span>
+        <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <Target className="h-6 w-6 text-green-400" />
+            <span className="text-sm text-green-400 font-medium">剩余</span>
           </div>
-          <div className="mt-2">
-            <div className="text-2xl font-bold text-white">
+          <div>
+            <div className="text-2xl font-bold text-gray-100 font-mono">
               {formatDuration(stats.remaining)}
             </div>
-            <div className="text-xs text-gray-400">可用时间</div>
+            <div className="text-sm text-gray-400 mt-1">可用时间</div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30 p-3">
-          <div className="flex items-center justify-between">
-            <Activity className="h-5 w-5 text-purple-400" />
-            <span className="text-xs text-purple-400">效率</span>
+        <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <Activity className="h-6 w-6 text-purple-400" />
+            <span className="text-sm text-purple-400 font-medium">效率</span>
           </div>
-          <div className="mt-2">
-            <div className="text-2xl font-bold text-white">
+          <div>
+            <div className="text-2xl font-bold text-gray-100 font-mono">
               {stats.efficiency}%
             </div>
-            <div className="text-xs text-gray-400">利用率</div>
+            <div className="text-sm text-gray-400 mt-1">利用率</div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="bg-gradient-to-br from-orange-500/10 to-yellow-500/10 border-orange-500/30 p-3">
-          <div className="flex items-center justify-between">
-            <CheckCircle className="h-5 w-5 text-orange-400" />
-            <span className="text-xs text-orange-400">完成</span>
+        <div className="bg-gradient-to-br from-orange-500/10 to-yellow-500/10 border border-orange-500/30 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <CheckCircle className="h-6 w-6 text-orange-400" />
+            <span className="text-sm text-orange-400 font-medium">完成</span>
           </div>
-          <div className="mt-2">
-            <div className="text-2xl font-bold text-white">
+          <div>
+            <div className="text-2xl font-bold text-gray-100 font-mono">
               {stats.completedTasks}
             </div>
-            <div className="text-xs text-gray-400">任务数</div>
+            <div className="text-sm text-gray-400 mt-1">任务数</div>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* 分类预算详情 */}
-      <Card className="bg-black/30 border-white/20 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-white font-semibold flex items-center">
-            <BarChart3 className="h-5 w-5 mr-2" />
+      <div className="bg-gray-900/95 border border-gray-700/50 rounded-lg p-6 backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-gray-100 font-semibold flex items-center text-lg">
+            <BarChart3 className="h-6 w-6 mr-3 text-cyan-400" />
             分类预算使用情况
           </h3>
           <Button
             size="sm"
-            variant="ghost"
+            variant="outline"
             onClick={() => setRefreshKey(k => k + 1)}
-            className="text-gray-400 hover:text-white"
+            className="text-gray-400 hover:text-gray-200 border-gray-600 hover:border-gray-500"
           >
             刷新
           </Button>
@@ -225,10 +237,10 @@ export default function TimeBudgetDashboard({ compact = false }: TimeBudgetDashb
             const remaining = Math.max(0, budget.budgets.daily - budget.usage.today)
             
             return (
-              <div key={budget.id} className="bg-black/50 rounded-lg p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-2">
-                    <span className={`text-lg ${getCategoryColor(budget.category)}`}>
+              <div key={budget.id} className="bg-gray-800/50 border border-gray-700/30 rounded-lg p-4 hover:bg-gray-800/70 transition-all duration-200">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <span className={`text-lg font-semibold ${getCategoryColor(budget.category)}`}>
                       {budget.name}
                     </span>
                     {status.status === 'warning' && (
@@ -242,23 +254,23 @@ export default function TimeBudgetDashboard({ compact = false }: TimeBudgetDashb
                     )}
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-white">
+                    <div className="text-sm text-gray-100 font-mono">
                       {formatDuration(budget.usage.today)} / {formatDuration(budget.budgets.daily)}
                     </div>
-                    <div className="text-xs text-gray-400">
+                    <div className="text-sm text-gray-400 mt-1">
                       剩余 {formatDuration(remaining)}
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs text-gray-400">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm text-gray-400">
                     <span>使用率</span>
-                    <span>{Math.round(percent)}%</span>
+                    <span className="font-mono">{Math.round(percent)}%</span>
                   </div>
-                  <div className="w-full bg-black/50 rounded-full h-2">
+                  <div className="w-full bg-gray-800/70 rounded-full h-3">
                     <div 
-                      className={`h-2 rounded-full transition-all ${getProgressColor(percent)}`}
+                      className={`h-3 rounded-full transition-all duration-300 ${getProgressColor(percent)}`}
                       style={{ width: `${Math.min(100, percent)}%` }}
                     />
                   </div>
@@ -279,39 +291,39 @@ export default function TimeBudgetDashboard({ compact = false }: TimeBudgetDashb
             )
           })}
         </div>
-      </Card>
+      </div>
 
       {/* 今日任务列表 */}
       {todayTrackers.length > 0 && (
-        <Card className="bg-black/30 border-white/20 p-4">
-          <h3 className="text-white font-semibold mb-3 flex items-center">
-            <Zap className="h-5 w-5 mr-2" />
+        <div className="bg-gray-900/95 border border-gray-700/50 rounded-lg p-6 backdrop-blur-sm">
+          <h3 className="text-gray-100 font-semibold mb-4 flex items-center text-lg">
+            <Zap className="h-6 w-6 mr-3 text-cyan-400" />
             今日时间记录
           </h3>
           
-          <div className="space-y-2 max-h-64 overflow-y-auto">
+          <div className="space-y-3 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800/50">
             {todayTrackers.map(tracker => (
-              <div key={tracker.id} className="flex items-center justify-between bg-black/50 rounded-lg p-2">
+              <div key={tracker.id} className="flex items-center justify-between bg-gray-800/50 border border-gray-700/30 rounded-lg p-3 hover:bg-gray-800/70 transition-all duration-200">
                 <div className="flex items-center space-x-3">
-                  <div className={`w-2 h-2 rounded-full ${
+                  <div className={`w-3 h-3 rounded-full ${
                     tracker.status === 'running' ? 'bg-green-400 animate-pulse' :
                     tracker.status === 'paused' ? 'bg-yellow-400' :
                     tracker.status === 'completed' ? 'bg-cyan-400' :
                     'bg-gray-400'
                   }`} />
                   <div>
-                    <div className="text-sm text-white">{tracker.taskName}</div>
-                    <div className="text-xs text-gray-400">
+                    <div className="text-sm text-gray-100 font-medium">{tracker.taskName}</div>
+                    <div className="text-sm text-gray-400 mt-1">
                       {getCategoryName(tracker.category)}
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm font-mono text-cyan-400">
+                  <div className="text-sm font-mono text-cyan-400 font-semibold">
                     {formatDuration(tracker.activeDuration)}
                   </div>
                   {tracker.estimatedDuration && (
-                    <div className="text-xs text-gray-400">
+                    <div className="text-sm text-gray-400 mt-1">
                       预估 {formatDuration(tracker.estimatedDuration)}
                     </div>
                   )}
@@ -319,7 +331,7 @@ export default function TimeBudgetDashboard({ compact = false }: TimeBudgetDashb
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       )}
     </div>
   )

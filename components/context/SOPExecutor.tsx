@@ -124,6 +124,11 @@ export default function SOPExecutor({
           enableVoice,
           theme: 'light'
         },
+        timing: {
+          startDelay: 0,
+          stepTimeout: 300,
+          totalTimeout: 3600
+        },
         behavior: {
           allowSkip: true,
           allowPause: true,

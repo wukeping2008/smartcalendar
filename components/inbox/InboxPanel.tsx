@@ -39,6 +39,7 @@ import {
   Timer
 } from 'lucide-react'
 import InboxService from '../../lib/services/InboxService'
+import FeatureGuide from '../help/FeatureGuide'
 import { 
   InboxItem, 
   TaskStatus, 
@@ -385,6 +386,18 @@ export default function InboxPanel({ className = '', onTaskSchedule }: InboxPane
           </Button>
         </div>
       </div>
+
+      <FeatureGuide
+        title="收集箱"
+        steps={[
+          '在输入框中快速记录您的想法或任务，按 Ctrl+Enter 或点击“+”按钮进行捕获。',
+          '使用麦克风按钮进行语音输入，快速记录您的想法。',
+          '点击“智能分流”按钮，让AI自动处理和分类收集箱中的所有项目。',
+          '对于单个项目，点击项目卡片展开详情，然后点击“分流”按钮进行处理。',
+          '使用顶部的过滤器（全部、收集箱、处理中等）快速查看不同状态的项目。'
+        ]}
+        className="mb-4"
+      />
 
       {/* 快速捕获 */}
       <div className="mb-4">

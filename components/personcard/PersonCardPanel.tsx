@@ -25,9 +25,11 @@ import {
   MoreVertical,
   Edit,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  Mic
 } from 'lucide-react'
 import { personCardService } from '../../lib/services/PersonCardService'
+import FeatureGuide from '../help/FeatureGuide'
 import {
   PersonCard,
   PersonCategory,
@@ -128,17 +130,35 @@ export function PersonCardPanel({ className = '' }: PersonCardPanelProps) {
           </Button>
         </div>
 
-        {/* 搜索栏 */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <Input
-            placeholder="搜索姓名、公司或标签..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+        {/* 搜索与操作 */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-grow">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
+              placeholder="手动搜索或点击麦克风语音输入..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Button size="icon" variant="outline" onClick={() => alert('语音搜索功能待实现')}>
+            <Mic className="w-4 h-4" />
+          </Button>
         </div>
       </div>
+
+      <FeatureGuide
+        title="人脉CRM"
+        steps={[
+          '在"总览"标签页查看关键指标和提醒。',
+          '在"联系人"标签页浏览、搜索和筛选您的人脉网络。',
+          '点击一个联系人卡片以查看或编辑详细信息。',
+          '在"提醒"标签页处理待办的联系任务和重要日期提醒。',
+          '在"分析"标签页获取关于您社交网络的AI洞察。',
+          '使用上方的搜索框通过手动或语音进行快速查找。'
+        ]}
+        className="m-4"
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
         <TabsList className="mx-4">

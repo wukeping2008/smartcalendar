@@ -10,7 +10,12 @@
       "Bash(cmd /c:*)",
       "Bash(npm run lint)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git log:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(start http://localhost:3003)",
+      "Bash(start http://localhost:3001)"
     ],
     "deny": []
   }

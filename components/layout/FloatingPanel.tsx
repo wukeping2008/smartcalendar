@@ -111,10 +111,12 @@ export function FloatingPanel({
         y: e.clientY - dragState.offset.y
       };
 
-      // 边界检查
+      // 边界检查 - 考虑头部导航栏高度和边距
+      const headerHeight = 70; // 头部导航栏高度
+      const minPadding = 10; // 最小边距
       const constrainedPosition = {
-        x: Math.max(0, Math.min(newPosition.x, window.innerWidth - panel.size.width)),
-        y: Math.max(0, Math.min(newPosition.y, window.innerHeight - panel.size.height))
+        x: Math.max(minPadding, Math.min(newPosition.x, window.innerWidth - panel.size.width - minPadding)),
+        y: Math.max(headerHeight, Math.min(newPosition.y, window.innerHeight - panel.size.height - minPadding))
       };
 
       onMove(constrainedPosition);
@@ -211,15 +213,15 @@ export function FloatingPanel({
   return (
     <div
       ref={panelRef}
-      className={`fixed bg-gray-900 border border-gray-700 rounded-lg shadow-xl overflow-hidden transition-shadow duration-200 ${
-        isActive ? 'shadow-2xl ring-2 ring-blue-500/30' : 'shadow-lg'
+      className={`fixed bg-gray-900/95 backdrop-blur-sm border border-gray-700/80 rounded-lg shadow-xl overflow-hidden transition-all duration-200 ${
+        isActive ? 'shadow-2xl ring-2 ring-blue-500/30 border-blue-500/50' : 'shadow-lg hover:shadow-xl'
       } ${className}`}
       style={{
         left: panel.position.x,
         top: panel.position.y,
         width: panel.size.width,
         height: panel.size.height,
-        zIndex: panel.zIndex
+        zIndex: Math.max(panel.zIndex, 50) // 确保最小 z-index 为 50
       }}
       onMouseDown={onFocus}
     >

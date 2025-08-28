@@ -1,11 +1,27 @@
 'use client'
 
-import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
+import React, { useRef, useMemo, useState, useEffect, Suspense, useCallback } from 'react'
 import { Canvas, useFrame, useThree, extend } from '@react-three/fiber'
-import { OrbitControls, PerspectiveCamera, shaderMaterial } from '@react-three/drei'
+import { 
+  OrbitControls, 
+  PerspectiveCamera, 
+  Text, 
+  Box,
+  Sphere,
+  Line,
+  Environment,
+  Float,
+  Trail,
+  MeshDistortMaterial,
+  Stars,
+  shaderMaterial
+} from '@react-three/drei'
 import * as THREE from 'three'
-import { Event, EventCategory, EnergyLevel } from '../../types/event'
+import { Event, EventCategory, EventStatus, Priority, EnergyLevel } from '../../types/event'
 import { TimeFlowConfig, FlowPosition, Particle, Ripple } from '../../types/timeflow'
+
+// 扩展Three.js材质 - 注释掉有问题的extend
+// extend({ MeshDistortMaterial })
 
 // 河流着色器材质
 const RiverMaterial = shaderMaterial(

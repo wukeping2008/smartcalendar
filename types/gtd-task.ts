@@ -12,6 +12,7 @@ export enum GTDTaskCategory {
 export interface GTDTask {
   id: string;
   title: string;
+  description?: string;        // 任务描述
   originalInput?: string;     // 原始输入文本
   expandedContent?: string;   // AI扩展后的内容
   category: GTDTaskCategory;
@@ -23,7 +24,7 @@ export interface GTDTask {
   updatedAt: Date;
   dueDate?: Date;
   scheduledDate?: Date;
-  completedDate?: Date;
+  completedAt?: Date;
   
   // 状态
   status: 'pending' | 'in_progress' | 'completed' | 'archived' | 'deleted';
@@ -97,4 +98,32 @@ export interface PersonContext {
   responseTime?: string;       // 典型响应时间
   communicationStyle?: string; // 沟通风格
   sopRules?: string[];         // 标准操作规程
+}
+
+export interface GTDProject {
+  id: string;
+  name: string;
+  description?: string;
+  status: 'active' | 'paused' | 'completed' | 'archived';
+  createdAt: Date;
+  updatedAt: Date;
+  completedAt?: Date;
+  dueDate?: Date;
+  
+  // 统计
+  totalTaskCount: number;
+  completedTaskCount: number;
+  progress: number; // 0-100
+  
+  // 关联
+  tags?: string[];
+  stakeholders?: string[]; // 相关人员
+  parentProjectId?: string;
+  childProjectIds?: string[];
+  
+  // 元数据
+  notes?: string;
+  attachments?: string[];
+  color?: string;
+  icon?: string;
 }

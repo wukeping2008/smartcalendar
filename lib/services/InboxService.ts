@@ -263,6 +263,13 @@ export class InboxService {
     
     return captured
   }
+
+  /**
+   * 获取所有收集箱项目
+   */
+  public getAllItems(): InboxItem[] {
+    return Array.from(this.items.values());
+  }
   
   /**
    * 分析任务

@@ -7,6 +7,7 @@ import { Input } from '../../src/components/ui/input'
 import { useEventStore } from '../../lib/stores/event-store'
 import { llmService, ChatMessage } from '../../lib/services/LLMIntegrationService'
 import { aiService } from '../../lib/services/AIService'
+import VoiceInputFixed from '../voice/VoiceInputFixed'
 
 interface ChatInterfaceProps {
   onClose?: () => void
@@ -230,6 +231,14 @@ export default function ChatInterface({ onClose }: ChatInterfaceProps) {
             placeholder="输入您的问题..."
             disabled={isLoading}
             className="flex-1 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400"
+          />
+          {/* 语音输入按钮 */}
+          <VoiceInputFixed
+            size="sm"
+            onResult={(text) => {
+              setInputText(inputText + (inputText ? ' ' : '') + text.trim())
+              inputRef.current?.focus()
+            }}
           />
           <Button
             onClick={handleSendMessage}

@@ -37,6 +37,7 @@ import {
   Target,
   Zap
 } from 'lucide-react'
+import FeatureGuide from '../help/FeatureGuide'
 import {
   DailyBriefing,
   EventBrief,
@@ -253,6 +254,17 @@ export default function DailyBriefingPanel({
   // 完整模式
   return (
     <Card className={`${className}`}>
+      <div className="p-4">
+        <FeatureGuide
+          title="今日简报"
+          steps={[
+            '这是您的每日AI生成的摘要，包含了日程、任务、市场和个人洞察。',
+            '使用顶部的标签页（概览、日程、任务等）来深入了解不同方面的信息。',
+            '点击右上角的喇叭图标，可以收听简报的语音播报。',
+            '简报内容是动态生成的，您可以随时点击“刷新”按钮获取最新信息。'
+          ]}
+        />
+      </div>
       {/* 头部 */}
       <div className="p-6 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="flex items-start justify-between mb-4">

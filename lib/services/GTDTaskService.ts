@@ -4,7 +4,8 @@ import {
   InboxItem, 
   TaskAutoCompletion,
   TaskClassificationRule,
-  PersonContext 
+  PersonContext,
+  GTDProject
 } from '../../types/gtd-task';
 import { getTaskAutoCompleteService } from './TaskAutoCompleteService';
 
@@ -14,6 +15,7 @@ export class GTDTaskService {
   private autoCompletions: Map<string, TaskAutoCompletion> = new Map();
   private classificationRules: TaskClassificationRule[] = [];
   private personContexts: Map<string, PersonContext> = new Map();
+  private projects: Map<string, GTDProject> = new Map();
 
   constructor() {
     this.initializeClassificationRules();
@@ -423,6 +425,95 @@ export class GTDTaskService {
       byStatus: statusCount,
       inboxPending: this.getInboxItems(true).length
     };
+  }
+
+  // ==================== 项目管理方法 ====================
+  
+  /**
+   * 创建新项目
+   */
+  async createProject(project: GTDProject): Promise<GTDProject> {
+    this.projects.set(project.id, project);
+    this.saveToStorage();
+    return project;
+  }
+
+  /**
+   * 获取所有项目
+   */
+  async getAllProjects(): Promise<GTDProject[]> {
+    return Array.from(this.projects.values());
+  }
+
+  /**
+   * 获取单个项目
+   */
+  async getProject(projectId: string): Promise<GTDProject | null> {
+    return this.projects.get(projectId) || null;
+  }
+
+  /**
+   * 更新项目
+   */
+  async updateProject(project: GTDProject): Promise<GTDProject> {
+    this.projects.set(project.id, project);
+    
+    // 更新项目统计
+    const projectTasks = Array.from(this.tasks.values()).filter(t => t.projectId === project.id);
+    project.totalTaskCount = projectTasks.length;
+    project.completedTaskCount = projectTasks.filter(t => t.status === 'completed').length;
+    project.progress = project.totalTaskCount > 0 
+      ? Math.round((project.completedTaskCount / project.totalTaskCount) * 100)
+      : 0;
+    
+    this.saveToStorage();
+    return project;
+  }
+
+  /**
+   * 删除项目
+   */
+  async deleteProject(projectId: string): Promise<void> {
+    // 删除项目下的所有任务
+    const projectTasks = Array.from(this.tasks.values()).filter(t => t.projectId === projectId);
+    projectTasks.forEach(task => {
+      this.tasks.delete(task.id);
+    });
+    
+    // 删除项目
+    this.projects.delete(projectId);
+    this.saveToStorage();
+  }
+
+  /**
+   * 获取项目的任务
+   */
+  async getProjectTasks(projectId: string): Promise<GTDTask[]> {
+    return Array.from(this.tasks.values()).filter(t => t.projectId === projectId);
+  }
+
+  /**
+   * 将任务分配到项目
+   */
+  async assignTaskToProject(taskId: string, projectId: string | null): Promise<GTDTask | null> {
+    const task = this.tasks.get(taskId);
+    if (task) {
+      task.projectId = projectId || undefined;
+      task.updatedAt = new Date();
+      this.tasks.set(taskId, task);
+      
+      // 更新项目统计
+      if (projectId) {
+        const project = this.projects.get(projectId);
+        if (project) {
+          await this.updateProject(project);
+        }
+      }
+      
+      this.saveToStorage();
+      return task;
+    }
+    return null;
   }
 }
 

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Event, EventCategory, Priority, EventStatus } from '../../types/event'
+import { Event, EventCategory, Priority, EventStatus, EnergyLevel } from '../../types/event'
 import { useEventStore } from '../../lib/stores/event-store'
 
 interface EventModalProps {

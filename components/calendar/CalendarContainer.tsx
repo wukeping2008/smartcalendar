@@ -4,8 +4,11 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import CalendarView from './CalendarView'
 import WeekView from './WeekView'
+import WeekViewCompact from './WeekViewCompact'
 import DayView from './DayView'
 import { Event } from '../../types/event'
+import VoiceInputFixed from '../voice/VoiceInputFixed'
+import VoiceEventCreator from '../voice/VoiceEventCreator'
 
 type ViewMode = 'day' | 'week' | 'month'
 
@@ -54,7 +57,7 @@ export default function CalendarContainer({
   }
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col relative">
       {/* 视图切换器 */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center space-x-2">
@@ -141,7 +144,7 @@ export default function CalendarContainer({
             )}
             
             {viewMode === 'week' && (
-              <WeekView
+              <WeekViewCompact
                 currentDate={currentDate}
                 onDateSelect={handleDateSelect}
                 onEventSelect={handleEventSelect}
@@ -157,6 +160,17 @@ export default function CalendarContainer({
             )}
           </>
         )}
+      </div>
+      
+      {/* 日历浮动语音创建按钮 */}
+      <div className="fixed bottom-8 right-8 z-40">
+        <VoiceEventCreator
+          size="lg"
+          onEventCreated={(eventId) => {
+            console.log('Event created via voice:', eventId)
+            // 事件创建成功后的回调
+          }}
+        />
       </div>
     </div>
   )

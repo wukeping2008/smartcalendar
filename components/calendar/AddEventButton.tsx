@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useEventStore } from '../../lib/stores/event-store'
-import { EventCategory, Priority, EventStatus } from '../../types/event'
+import { EventCategory, Priority, EventStatus, EnergyLevel } from '../../types/event'
 
 export default function AddEventButton() {
   const [showForm, setShowForm] = useState(false)

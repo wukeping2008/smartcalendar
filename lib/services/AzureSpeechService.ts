@@ -1,14 +1,5 @@
 import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk'
-import type { IAudioService, AudioDeviceInfo } from './IAudioService'
-
-interface VoiceInfo {
-  name: string
-  displayName: string
-  localName: string
-  shortName: string
-  gender: 'Male' | 'Female'
-  locale: string
-}
+import type { IAudioService, AudioDeviceInfo, VoiceInfo } from './IAudioService'
 
 export class AzureSpeechService implements IAudioService {
   private speechConfig: SpeechSDK.SpeechConfig | null = null
@@ -217,7 +208,24 @@ export class AzureSpeechService implements IAudioService {
   }
 
   async getAvailableVoices(): Promise<VoiceInfo[]> {
-    return []
+    // Mock implementation to satisfy the interface
+    return [
+      {
+        id: 'zh-CN-XiaoxiaoNeural',
+        name: 'zh-CN-XiaoxiaoNeural',
+        language: 'zh-CN',
+        gender: 'female',
+        locale: 'zh-CN',
+        isDefault: true,
+      },
+      {
+        id: 'zh-CN-YunxiNeural',
+        name: 'zh-CN-YunxiNeural',
+        language: 'zh-CN',
+        gender: 'male',
+        locale: 'zh-CN',
+      },
+    ];
   }
 
   getStatus(): {
