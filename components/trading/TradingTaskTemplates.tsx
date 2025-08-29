@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Button } from '../../src/components/ui/button'
+import { Card } from '../../src/components/ui/card'
 import { useEventStore } from '../../lib/stores/event-store'
 import { EventCategory, Priority, EventStatus, EnergyLevel } from '../../types/event'
 

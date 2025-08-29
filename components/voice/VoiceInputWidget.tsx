@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '../../src/components/ui/button'
+import { Card } from '../../src/components/ui/card'
+import { Badge } from '../../src/components/ui/badge'
 import { Mic, MicOff, Volume2, Loader2 } from 'lucide-react'
 import { useEventStore } from '../../lib/stores/event-store'
 import { EventCategory, Priority, EventStatus, EnergyLevel } from '../../types/event'

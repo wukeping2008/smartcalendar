@@ -4,8 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card } from '../../src/components/ui/card'
+import { Button } from '../../src/components/ui/button'
 import { 
   BarChart3, TrendingUp, TrendingDown, Calendar,
   FileText, Download, AlertTriangle, CheckCircle,

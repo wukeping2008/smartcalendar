@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
+import { Card } from '../../src/components/ui/card'
 import { MarketStatus } from '../../types/event'
 import { marketService, MarketOverview, MarketAlert } from '../../lib/services/RealTimeMarketService'
 

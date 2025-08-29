@@ -55,12 +55,23 @@ export interface Commitment {
 }
 
 /**
+ * 认知负载等级
+ */
+export enum CognitiveLoadLevel {
+  LOW = 'low',
+  MODERATE = 'moderate',
+  HIGH = 'high',
+  OVERLOAD = 'overload'
+}
+
+/**
  * 认知负载状态
  */
 export interface CognitiveLoad {
   current: number            // 当前负载值
   max: number               // 最大容量（默认7）
   threshold: number         // 警告阈值（默认5）
+  level: CognitiveLoadLevel  // 当前负载等级
   activeItems: CognitiveItem[]
   archivedItems: CognitiveItem[]
 }

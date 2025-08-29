@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '../../src/components/ui/button'
+import { Card } from '../../src/components/ui/card'
+import { Badge } from '../../src/components/ui/badge'
 import { useEventStore } from '../../lib/stores/event-store'
 import { Event, EventCategory, Priority, EnergyLevel } from '../../types/event'
 import { Clock, Calendar, AlertCircle, TrendingUp, Coffee } from 'lucide-react'
@@ -408,7 +408,7 @@ export default function WeekViewCompact({
                       endTime: new Date(date.setHours(10, 0, 0, 0)),
                       category: EventCategory.OTHER,
                       priority: Priority.MEDIUM,
-                      status: 'planned' as const,
+                      status: EventStatus.PLANNED,
                       position: { x: 0, y: 0, z: 0 },
                       size: { width: 200, height: 80, depth: 20 },
                       color: '#6b7280',

@@ -4,9 +4,9 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Card } from '../../src/components/ui/card'
+import { Button } from '../../src/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../src/components/ui/tabs'
 import { 
   Clock, Settings, FileText, Wallet,
   Play, Square, Activity

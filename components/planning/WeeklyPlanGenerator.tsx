@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useMemo, useCallback } from 'react'
-import { Card } from '@/components/ui/card'
+import { Card } from '../../src/components/ui/card'
 import { Event, EventCategory, Priority, EnergyLevel, EventStatus } from '../../types/event'
 import { useEventStore } from '../../lib/stores/event-store'
 

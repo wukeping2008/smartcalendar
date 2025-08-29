@@ -6,17 +6,17 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Slider } from '@/components/ui/slider'
-import { Switch } from '@/components/ui/switch'
-import { Progress } from '@/components/ui/progress'
+import { Card } from '../../src/components/ui/card'
+import { Button } from '../../src/components/ui/button'
+import { Badge } from '../../src/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../src/components/ui/tabs'
+import { ScrollArea } from '../../src/components/ui/scroll-area'
+import { Input } from '../../src/components/ui/input'
+import { Label } from '../../src/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../src/components/ui/select'
+import { Slider } from '../../src/components/ui/slider'
+import { Switch } from '../../src/components/ui/switch'
+import { Progress } from '../../src/components/ui/progress'
 import {
   Play,
   Pause,

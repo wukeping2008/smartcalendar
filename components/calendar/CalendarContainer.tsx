@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '../../src/components/ui/button'
 import CalendarView from './CalendarView'
 import WeekView from './WeekView'
 import WeekViewCompact from './WeekViewCompact'

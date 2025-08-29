@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '../../src/components/ui/button'
 import { X, ChevronRight, ChevronLeft, Sparkles, Brain, Layers, Inbox, Clock, Users, TrendingUp, Settings2 } from 'lucide-react'
 
 interface FeatureGuideModalProps {

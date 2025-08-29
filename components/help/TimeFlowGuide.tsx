@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../src/components/ui/dialog'
+import { Button } from '../../src/components/ui/button'
+import { Card } from '../../src/components/ui/card'
 
 interface GuideStep {
   title: string

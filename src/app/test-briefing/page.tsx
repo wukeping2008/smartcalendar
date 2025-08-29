@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import DailyBriefingPanel from '@/components/briefing/DailyBriefingPanel'
+import DailyBriefingPanel from '../../../components/briefing/DailyBriefingPanel'
 
 export default function TestBriefingPage() {
   return (

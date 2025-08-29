@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card } from '../../src/components/ui/card'
+import { Button } from '../../src/components/ui/button'
 import { useEventStore } from '../../lib/stores/event-store'
 import { aiService } from '../../lib/services/AIService'
 import { llmService } from '../../lib/services/LLMIntegrationService'

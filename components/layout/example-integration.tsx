@@ -5,8 +5,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Settings, Brain, HelpCircle, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Button } from '../../src/components/ui/button';
+import { Card } from '../../src/components/ui/card';
 
 // 现有组件
 import EnhancedFlowCanvas from '../../timeflow/FlowCanvas';

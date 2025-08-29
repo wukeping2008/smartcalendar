@@ -4,8 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card } from '../../src/components/ui/card'
+import { Button } from '../../src/components/ui/button'
 import { Play, Pause, Square, Clock, Target, TrendingUp } from 'lucide-react'
 import TimeBudgetService from '../../lib/services/TimeBudgetService'
 import { BudgetCategory, TrackerStatus, TimerState } from '../../types/timebudget'

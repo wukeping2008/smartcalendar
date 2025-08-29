@@ -14,7 +14,9 @@ import {
   Train,
   Move,
   Zap,
-  Brain
+  Brain,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import {
   PanelType,
@@ -36,21 +38,28 @@ const DEFAULT_TOOLBAR_CONFIG: IconToolbarConfig = {
 };
 
 const TOOLBAR_POSITION_KEY = 'iconToolbar_position';
+const TOOLBAR_COLLAPSED_KEY = 'iconToolbar_collapsed';
+const EDGE_THRESHOLD = 30; // 靠边阈值（像素）
+const HOVER_EXPAND_DELAY = 200; // 悬停展开延迟（毫秒）
 
 interface ToolbarPosition {
   x: number;
   y: number;
   isDragged: boolean;
+  isCollapsed?: boolean;
+  dockedSide?: 'left' | 'right' | null;
 }
 
 function getDefaultPosition(): ToolbarPosition {
   if (typeof window === 'undefined') {
-    return { x: 1200, y: 100, isDragged: false };
+    return { x: 1200, y: 100, isDragged: false, isCollapsed: false, dockedSide: null };
   }
   return {
     x: window.innerWidth - DEFAULT_TOOLBAR_CONFIG.width - 20,
     y: 100,
-    isDragged: false
+    isDragged: false,
+    isCollapsed: false,
+    dockedSide: null
   };
 }
 
@@ -58,12 +67,28 @@ function loadToolbarPosition(): ToolbarPosition {
     if (typeof window === 'undefined') return getDefaultPosition();
     try {
         const saved = localStorage.getItem(TOOLBAR_POSITION_KEY);
+        const collapsed = localStorage.getItem(TOOLBAR_COLLAPSED_KEY);
         if (saved) {
             const parsed = JSON.parse(saved) as ToolbarPosition;
             const validX = Math.max(10, Math.min(parsed.x, window.innerWidth - DEFAULT_TOOLBAR_CONFIG.width - 10));
             // 确保Y坐标不会在导航栏区域（最小70px）
             const validY = Math.max(70, Math.min(parsed.y, window.innerHeight - 300));
-            return { ...parsed, x: validX, y: validY };
+            
+            // 检查是否靠边
+            let dockedSide: 'left' | 'right' | null = null;
+            if (validX <= EDGE_THRESHOLD) {
+                dockedSide = 'left';
+            } else if (validX >= window.innerWidth - DEFAULT_TOOLBAR_CONFIG.width - EDGE_THRESHOLD) {
+                dockedSide = 'right';
+            }
+            
+            return { 
+                ...parsed, 
+                x: validX, 
+                y: validY,
+                isCollapsed: collapsed === 'true',
+                dockedSide
+            };
         }
     } catch (error) {
         // Failed to load toolbar position
@@ -75,6 +100,7 @@ function saveToolbarPosition(position: ToolbarPosition): void {
     if (typeof window === 'undefined') return;
     try {
         localStorage.setItem(TOOLBAR_POSITION_KEY, JSON.stringify(position));
+        localStorage.setItem(TOOLBAR_COLLAPSED_KEY, String(position.isCollapsed));
     } catch (error) {
         console.warn('Failed to save toolbar position:', error);
     }
@@ -241,6 +267,39 @@ function useDraggable() {
   const [position, setPosition] = useState<ToolbarPosition>(() => loadToolbarPosition());
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
+  const [isHovering, setIsHovering] = useState(false);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // 处理自动收起和展开
+  useEffect(() => {
+    if (position.dockedSide && !isDragging) {
+      if (isHovering) {
+        // 悬停时展开
+        if (hoverTimeoutRef.current) {
+          clearTimeout(hoverTimeoutRef.current);
+        }
+        hoverTimeoutRef.current = setTimeout(() => {
+          setPosition(prev => ({ ...prev, isCollapsed: false }));
+          saveToolbarPosition({ ...position, isCollapsed: false });
+        }, HOVER_EXPAND_DELAY);
+      } else {
+        // 离开时收起
+        if (hoverTimeoutRef.current) {
+          clearTimeout(hoverTimeoutRef.current);
+        }
+        hoverTimeoutRef.current = setTimeout(() => {
+          setPosition(prev => ({ ...prev, isCollapsed: true }));
+          saveToolbarPosition({ ...position, isCollapsed: true });
+        }, 500);
+      }
+    }
+    
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, [isHovering, position.dockedSide, isDragging]);
   
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('.drag-handle')) {
@@ -252,10 +311,28 @@ function useDraggable() {
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!isDragging || !dragStart) return;
-    const newX = Math.max(10, Math.min(e.clientX - dragStart.x, window.innerWidth - DEFAULT_TOOLBAR_CONFIG.width - 10));
-    // 确保不会移动到导航栏区域（保留70px的顶部空间）
+    let newX = e.clientX - dragStart.x;
     const newY = Math.max(70, Math.min(e.clientY - dragStart.y, window.innerHeight - 300));
-    setPosition({ x: newX, y: newY, isDragged: true });
+    
+    // 检查是否靠近边缘
+    let dockedSide: 'left' | 'right' | null = null;
+    if (newX <= EDGE_THRESHOLD) {
+      newX = 0;
+      dockedSide = 'left';
+    } else if (newX >= window.innerWidth - DEFAULT_TOOLBAR_CONFIG.width - EDGE_THRESHOLD) {
+      newX = window.innerWidth - DEFAULT_TOOLBAR_CONFIG.width;
+      dockedSide = 'right';
+    } else {
+      newX = Math.max(10, Math.min(newX, window.innerWidth - DEFAULT_TOOLBAR_CONFIG.width - 10));
+    }
+    
+    setPosition({ 
+      x: newX, 
+      y: newY, 
+      isDragged: true,
+      isCollapsed: false, // 拖动时展开
+      dockedSide
+    });
   };
 
   const handleMouseUp = () => {
@@ -279,7 +356,13 @@ function useDraggable() {
     }
   }, [isDragging, position, dragStart]);
 
-  return { position, isDragging, handleMouseDown };
+  return { 
+    position, 
+    isDragging, 
+    handleMouseDown,
+    isHovering,
+    setIsHovering
+  };
 }
 
 interface IconToolbarProps {
@@ -290,8 +373,30 @@ interface IconToolbarProps {
   className?: string;
 }
 
-function ToolbarItem({ config, isActive, onClick }: { config: Omit<PanelConfig, 'component'>; isActive: boolean; onClick: () => void; }) {
+function ToolbarItem({ config, isActive, onClick, isCollapsed }: { 
+  config: Omit<PanelConfig, 'component'>; 
+  isActive: boolean; 
+  onClick: () => void;
+  isCollapsed: boolean;
+}) {
   const IconComponent = config.icon;
+  
+  if (isCollapsed) {
+    return (
+      <button
+        onClick={onClick}
+        className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 ${
+          isActive 
+            ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 shadow-md' 
+            : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+        }`}
+        title={`${config.title} - ${config.description} (${config.shortcut})`}
+      >
+        <IconComponent size={18} />
+      </button>
+    );
+  }
+  
   return (
     <button
       onClick={onClick}
@@ -311,7 +416,7 @@ function ToolbarItem({ config, isActive, onClick }: { config: Omit<PanelConfig, 
 
 export function IconToolbar({ activePanelIds, onPanelClick, getSmartPriority, config: userConfig, className = '' }: IconToolbarProps) {
   const config = { ...DEFAULT_TOOLBAR_CONFIG, ...userConfig };
-  const { position, isDragging, handleMouseDown } = useDraggable();
+  const { position, isDragging, handleMouseDown, isHovering, setIsHovering } = useDraggable();
 
   const sortedPanelTypes = useMemo(() => {
     return Object.keys(PANEL_CONFIGS).sort((a, b) => {
@@ -321,39 +426,85 @@ export function IconToolbar({ activePanelIds, onPanelClick, getSmartPriority, co
     }) as PanelType[];
   }, [getSmartPriority]);
 
+  const isCollapsed = position.isCollapsed && position.dockedSide && !isHovering && !isDragging;
+  const toolbarWidth = isCollapsed ? 60 : config.width;
+  
+  // 计算实际位置（收起时需要调整）
+  const actualX = position.dockedSide === 'right' && isCollapsed 
+    ? window.innerWidth - 60 
+    : position.x;
+
   return (
-    <div
-      className={`fixed z-50 transition-shadow duration-200 ${isDragging ? 'shadow-2xl' : 'shadow-lg'} ${className}`}
-      style={{ 
-        left: position.x,
-        top: position.y,
-        width: config.width,
-        cursor: isDragging ? 'grabbing' : 'auto',
-        // 防止工具栏移动到导航栏区域
-        maxHeight: 'calc(100vh - 20px)'
-      }}
-      onMouseDown={handleMouseDown}
-    >
-      <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-xl shadow-lg p-2">
-        <div className="drag-handle cursor-grab p-3 flex items-center justify-center hover:bg-gray-800 rounded-lg transition-colors" title="拖拽移动工具栏">
-          <Move className="w-5 h-5 text-gray-400 hover:text-gray-200" />
-        </div>
-        <div className="w-full h-px bg-gray-700 my-1" />
-        <div className="flex flex-col gap-2">
-          {sortedPanelTypes.map(panelType => {
-            const panelConfig = PANEL_CONFIGS[panelType];
-            const isActive = activePanelIds.includes(panelType);
-            return (
-              <ToolbarItem
-                key={panelType}
-                config={panelConfig}
-                isActive={isActive}
-                onClick={() => onPanelClick(panelType)}
-              />
-            );
-          })}
+    <>
+      {/* 悬停触发区域 - 仅在收起时显示 */}
+      {position.isCollapsed && position.dockedSide && (
+        <div
+          className="fixed z-40"
+          style={{
+            left: position.dockedSide === 'left' ? 0 : undefined,
+            right: position.dockedSide === 'right' ? 0 : undefined,
+            top: position.y,
+            width: '20px',
+            height: '400px'
+          }}
+          onMouseEnter={() => setIsHovering(true)}
+        />
+      )}
+      
+      <div
+        className={`fixed z-50 transition-all duration-300 ${isDragging ? 'shadow-2xl' : 'shadow-lg'} ${className}`}
+        style={{ 
+          left: actualX,
+          top: position.y,
+          width: toolbarWidth,
+          cursor: isDragging ? 'grabbing' : 'auto',
+          maxHeight: 'calc(100vh - 20px)',
+          transform: isCollapsed && position.dockedSide === 'left' ? 'translateX(-10px)' : 
+                    isCollapsed && position.dockedSide === 'right' ? 'translateX(10px)' : 'none'
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
+        <div className={`bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-xl shadow-lg p-2 transition-all duration-300`}>
+          {/* 拖拽手柄 */}
+          <div className="drag-handle cursor-grab p-3 flex items-center justify-center hover:bg-gray-800 rounded-lg transition-colors" title="拖拽移动工具栏">
+            {isCollapsed ? (
+              position.dockedSide === 'left' ? <ChevronRight className="w-5 h-5 text-gray-400" /> : <ChevronLeft className="w-5 h-5 text-gray-400" />
+            ) : (
+              <Move className="w-5 h-5 text-gray-400 hover:text-gray-200" />
+            )}
+          </div>
+          
+          <div className="w-full h-px bg-gray-700 my-1" />
+          
+          {/* 工具栏项目 */}
+          <div className={`flex ${isCollapsed ? 'flex-col items-center' : 'flex-col'} gap-2`}>
+            {sortedPanelTypes.map(panelType => {
+              const panelConfig = PANEL_CONFIGS[panelType];
+              const isActive = activePanelIds.includes(panelType);
+              return (
+                <ToolbarItem
+                  key={panelType}
+                  config={panelConfig}
+                  isActive={isActive}
+                  onClick={() => onPanelClick(panelType)}
+                  isCollapsed={isCollapsed}
+                />
+              );
+            })}
+          </div>
+          
+          {/* 靠边指示器 */}
+          {position.dockedSide && !isDragging && (
+            <div className={`absolute top-1/2 -translate-y-1/2 transition-opacity duration-300 ${isHovering ? 'opacity-0' : 'opacity-100'}`}>
+              <div className={`w-1 h-20 bg-cyan-500/30 rounded-full ${
+                position.dockedSide === 'left' ? '-left-1' : '-right-1'
+              }`} />
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </>
   );
 }

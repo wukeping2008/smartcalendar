@@ -6,10 +6,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Card } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Card } from '../../src/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../src/components/ui/tabs'
+import { Badge } from '../../src/components/ui/badge'
+import { Button } from '../../src/components/ui/button'
 import { 
   Brain,
   Shield,

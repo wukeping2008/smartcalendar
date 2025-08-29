@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { Card } from '@/components/ui/card'
+import { Card } from '../../src/components/ui/card'
 import { WorkHoursBudget, EnergyLevel, EventCategory } from '../../types/event'
 import { useEventStore } from '../../lib/stores/event-store'
 
