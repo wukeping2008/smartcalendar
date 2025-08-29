@@ -10,8 +10,26 @@ import { Mic, MicOff, CheckCircle, XCircle, Volume2, AlertCircle } from 'lucide-
 export default function TestVoicePage() {
   const [isSupported, setIsSupported] = useState<boolean | null>(null)
   const [lastResult, setLastResult] = useState('')
-  const [testResults, setTestResults] = useState<any[]>([])
-  const [browserInfo, setBrowserInfo] = useState<any>({})
+  interface TestResult {
+    id: number
+    timestamp: string
+    text: string
+    success: boolean
+    type?: string
+  }
+  
+  interface BrowserInfo {
+    userAgent?: string
+    language?: string
+    platform?: string
+    hasWebkitSpeech?: boolean
+    hasSpeechRecognition?: boolean
+    hasMediaDevices?: boolean
+    azureConfigured?: boolean
+  }
+  
+  const [testResults, setTestResults] = useState<TestResult[]>([])
+  const [browserInfo, setBrowserInfo] = useState<BrowserInfo>({})
 
   useEffect(() => {
     // 检查浏览器支持
@@ -59,11 +77,11 @@ export default function TestVoicePage() {
       }
       setTestResults(prev => [result, ...prev])
       stream.getTracks().forEach(track => track.stop())
-    } catch (error: any) {
+    } catch (error) {
       const result = {
         id: Date.now(),
         timestamp: new Date().toLocaleString(),
-        text: `麦克风权限测试失败: ${error.message}`,
+        text: `麦克风权限测试失败: ${error instanceof Error ? error.message : String(error)}`,
         success: false,
         type: 'microphone'
       }
@@ -200,10 +218,10 @@ export default function TestVoicePage() {
               <div>
                 <p className="font-medium">语音测试指令:</p>
                 <ul className="text-sm mt-1 space-y-1 ml-4">
-                  <li>• "创建明天9点的会议"</li>
-                  <li>• "安排后天下午3点见客户"</li>
-                  <li>• "提醒我下周一交报告"</li>
-                  <li>• "今天晚上8点运动"</li>
+                  <li>• {"创建明天9点的会议"}</li>
+                  <li>• {"安排后天下午3点见客户"}</li>
+                  <li>• {"提醒我下周一交报告"}</li>
+                  <li>• {"今天晚上8点运动"}</li>
                 </ul>
               </div>
             </div>

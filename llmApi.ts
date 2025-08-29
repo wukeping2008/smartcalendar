@@ -88,14 +88,14 @@
                   onData(content);
                 }
               } catch (e) {
-                console.error('Error parsing SSE data:', e);
+                // Error parsing SSE data
                 // 如果不是JSON格式，可能是纯文本
                 if (line.slice(6) && onData) {
                   onData(line.slice(6));
                 }
               }
             } else if (line === 'data: [DONE]' || line.includes('"done":true') || line.includes('"finished":true')) {
-              // console.log('[ done]-435')
+              // Stream completed
               return;
             }
           });
@@ -105,7 +105,7 @@
       return readChunk();
     })
     .catch(error => {
-      console.error('SSE请求失败:', error.message);
+      // SSE request failed
       onError && onError(error);
     });
     return {

@@ -89,7 +89,7 @@ class WhatIfSimulator {
 
   private constructor() {
     this.simulationConfig = this.getDefaultConfig()
-    console.log('🔮 What-If Simulator initialized')
+    // What-If Simulator initialized
   }
 
   static getInstance(): WhatIfSimulator {
@@ -987,7 +987,7 @@ class WhatIfSimulator {
       
       return true
     } catch (error) {
-      console.error('Failed to apply scenario:', error)
+      // Failed to apply scenario
       return false
     }
   }

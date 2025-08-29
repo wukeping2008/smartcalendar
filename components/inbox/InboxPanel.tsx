@@ -201,7 +201,7 @@ export default function InboxPanel({ className = '', onTaskSchedule }: InboxPane
         handleTriage(newItem.id)
       }, 500)
     } catch (error) {
-      console.error('Failed to capture item:', error)
+      // Failed to capture item
     } finally {
       setIsCapturing(false)
     }
@@ -229,7 +229,7 @@ export default function InboxPanel({ className = '', onTaskSchedule }: InboxPane
         showTriageResult(result)
       }
     } catch (error) {
-      console.error('Failed to triage item:', error)
+      // Failed to triage item
     } finally {
       setIsProcessing(false)
     }
@@ -243,9 +243,9 @@ export default function InboxPanel({ className = '', onTaskSchedule }: InboxPane
       loadItems()
       
       // 显示统计
-      console.log(`分流完成: ${results.length} 个项目`)
+      // 分流完成: results.length 个项目
     } catch (error) {
-      console.error('Failed to triage all:', error)
+      // Failed to triage all
     } finally {
       setIsProcessing(false)
     }
@@ -253,7 +253,7 @@ export default function InboxPanel({ className = '', onTaskSchedule }: InboxPane
 
   const showTriageResult = (result: TriageResult) => {
     // TODO: 显示分流结果通知
-    console.log('Triage result:', result)
+    // Triage result: result
   }
 
   const startVoiceInput = () => {

@@ -6,6 +6,7 @@ import CalendarView from './CalendarView'
 import WeekView from './WeekView'
 import WeekViewCompact from './WeekViewCompact'
 import DayView from './DayView'
+import EnhancedDayView from './EnhancedDayView'
 import { Event } from '../../types/event'
 import VoiceInputFixed from '../voice/VoiceInputFixed'
 import VoiceEventCreator from '../voice/VoiceEventCreator'
@@ -19,7 +20,7 @@ interface CalendarContainerProps {
 
 export default function CalendarContainer({
   initialDate = new Date(),
-  initialView = 'month'
+  initialView = 'day'  // 默认改为日视图
 }: CalendarContainerProps) {
   const [currentDate, setCurrentDate] = useState(initialDate)
   const [viewMode, setViewMode] = useState<ViewMode>(initialView)
@@ -57,9 +58,9 @@ export default function CalendarContainer({
   }
 
   return (
-    <div className="w-full h-full flex flex-col relative">
-      {/* 视图切换器 */}
-      <div className="mb-4 flex items-center justify-between">
+    <div className="w-full h-full flex flex-col">
+      {/* 视图切换器 - 固定高度 */}
+      <div className="flex-shrink-0 mb-2 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           {/* 视图模式按钮组 */}
           <div className="bg-black/30 backdrop-blur-sm rounded-lg p-1 flex space-x-1">
@@ -68,12 +69,12 @@ export default function CalendarContainer({
               variant={viewMode === 'day' && !showDayView ? 'default' : 'ghost'}
               className={`${
                 viewMode === 'day' && !showDayView
-                  ? 'bg-cyan-500 text-white hover:bg-cyan-600'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-600 hover:to-blue-600 shadow-lg'
                   : 'text-white hover:bg-white/10'
-              }`}
+              } px-4`}
               onClick={() => handleViewChange('day')}
             >
-              日
+              今日
             </Button>
             <Button
               size="sm"
@@ -125,12 +126,15 @@ export default function CalendarContainer({
         </div>
       </div>
 
-      {/* 日历视图内容 */}
-      <div className="flex-1 min-h-0">
+      {/* 日历视图内容 - 占满剩余空间 */}
+      <div className="flex-1 min-h-0 overflow-hidden">
         {showDayView ? (
-          <DayView
+          <EnhancedDayView
             selectedDate={dayViewDate}
-            onBack={handleBackFromDayView}
+            onDateChange={(date) => {
+              setDayViewDate(date)
+              setCurrentDate(date)
+            }}
             onEventSelect={handleEventSelect}
           />
         ) : (
@@ -152,25 +156,14 @@ export default function CalendarContainer({
             )}
             
             {viewMode === 'day' && (
-              <DayView
+              <EnhancedDayView
                 selectedDate={currentDate}
-                onBack={() => handleViewChange('month')}
+                onDateChange={setCurrentDate}
                 onEventSelect={handleEventSelect}
               />
             )}
           </>
         )}
-      </div>
-      
-      {/* 日历浮动语音创建按钮 */}
-      <div className="fixed bottom-8 right-8 z-40">
-        <VoiceEventCreator
-          size="lg"
-          onEventCreated={(eventId) => {
-            console.log('Event created via voice:', eventId)
-            // 事件创建成功后的回调
-          }}
-        />
       </div>
     </div>
   )

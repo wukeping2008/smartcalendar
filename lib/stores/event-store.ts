@@ -58,6 +58,7 @@ interface EventStore {
   // 持久化方法
   loadEvents: () => Promise<void>
   clearAllEvents: () => Promise<void>
+  removeDuplicates: () => void
 }
 
 // 生成唯一ID
@@ -411,10 +412,43 @@ export const useEventStore = create<EventStore>()(
           state.hoveredEventId = null
         })
         
+        // 同时清除IndexedDB中的数据
+        await storageService.clearAllEvents()
+        
         // All events cleared from memory
       } catch (error) {
         // Failed to clear events
       }
-    }
+    },
+    
+    // 移除重复事件（基于标题、开始时间和结束时间）
+    removeDuplicates: () => set((state) => {
+      const uniqueEvents = new Map<string, Event>()
+      
+      state.events.forEach(event => {
+        // 创建唯一键：标题+开始时间+结束时间
+        const key = `${event.title}_${event.startTime.getTime()}_${event.endTime.getTime()}`
+        
+        // 如果还没有这个事件，或者这个事件的ID更新，则保留
+        if (!uniqueEvents.has(key) || event.updatedAt > uniqueEvents.get(key)!.updatedAt) {
+          uniqueEvents.set(key, event)
+        }
+      })
+      
+      // 更新事件列表为去重后的结果
+      state.events = Array.from(uniqueEvents.values())
+      
+      // 清理选中的事件ID
+      state.selectedEventIds = state.selectedEventIds.filter(id => 
+        state.events.some(e => e.id === id)
+      )
+      
+      // 持久化去重后的数据
+      storageService.clearAllEvents().then(() => {
+        state.events.forEach(event => {
+          storageService.saveEvent(event)
+        })
+      })
+    })
   }))
 )

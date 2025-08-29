@@ -390,10 +390,10 @@ export class WarmGuidanceService {
   private setupEventListeners() {
     // 监听用户行为事件
     if (typeof window !== 'undefined') {
-      // 页面加载完成
-      window.addEventListener('load', () => {
-        this.checkAndStartTours()
-      })
+      // 页面加载完成 - 禁用自动启动引导
+      // window.addEventListener('load', () => {
+      //   this.checkAndStartTours()
+      // })
 
       // 用户交互跟踪
       document.addEventListener('click', (e) => {

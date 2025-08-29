@@ -37,7 +37,9 @@ import {
   Target,
   Zap
 } from 'lucide-react'
-import FeatureGuide from '../help/FeatureGuide'
+import { PanelGuide, PanelHelpButton } from '../ui/panel-guide'
+import { PANEL_GUIDES } from '../../config/panel-guides'
+import { PanelType } from '../../types/floating-panel'
 import {
   DailyBriefing,
   EventBrief,
@@ -61,6 +63,7 @@ export default function DailyBriefingPanel({
   const [loading, setLoading] = useState(true)
   const [activeSection, setActiveSection] = useState<BriefingSection>(BriefingSection.SUMMARY)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [showGuide, setShowGuide] = useState(false)
 
   useEffect(() => {
     loadBriefing()
@@ -77,7 +80,7 @@ export default function DailyBriefingPanel({
         dailyBriefingService.markAsRead(todayBriefing.id)
       }
     } catch (error) {
-      console.error('Failed to load briefing:', error)
+      // Failed to load briefing
     } finally {
       setLoading(false)
     }
@@ -254,17 +257,12 @@ export default function DailyBriefingPanel({
   // 完整模式
   return (
     <Card className={`${className}`}>
-      <div className="p-4">
-        <FeatureGuide
-          title="今日简报"
-          steps={[
-            '这是您的每日AI生成的摘要，包含了日程、任务、市场和个人洞察。',
-            '使用顶部的标签页（概览、日程、任务等）来深入了解不同方面的信息。',
-            '点击右上角的喇叭图标，可以收听简报的语音播报。',
-            '简报内容是动态生成的，您可以随时点击“刷新”按钮获取最新信息。'
-          ]}
-        />
-      </div>
+      {/* 统一的功能指南 */}
+      <PanelGuide
+        {...PANEL_GUIDES[PanelType.DAILY_BRIEFING]}
+        isOpen={showGuide}
+        onClose={() => setShowGuide(false)}
+      />
       {/* 头部 */}
       <div className="p-6 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="flex items-start justify-between mb-4">
@@ -285,6 +283,7 @@ export default function DailyBriefingPanel({
             <Button size="sm" variant="outline" onClick={handleRefresh}>
               <RefreshCw className="w-4 h-4" />
             </Button>
+            <PanelHelpButton onClick={() => setShowGuide(!showGuide)} />
           </div>
         </div>
 

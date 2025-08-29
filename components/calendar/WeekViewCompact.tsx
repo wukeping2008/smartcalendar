@@ -178,9 +178,9 @@ export default function WeekViewCompact({
   }, [weekEvents])
 
   return (
-    <div className="w-full h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-xl p-4 flex flex-col">
+    <div className="w-full h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-xl p-4 flex flex-col overflow-hidden">
       {/* 头部导航和统计 */}
-      <div className="mb-4">
+      <div className="mb-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-4">
             <h2 className="text-xl font-bold text-white">
@@ -236,7 +236,7 @@ export default function WeekViewCompact({
       </div>
 
       {/* 主体内容 - 一周7天平铺 */}
-      <div className="flex-1 grid grid-cols-7 gap-2 min-h-0">
+      <div className="flex-1 grid grid-cols-7 gap-2 overflow-hidden">
         {weekDates.map((date, dayIndex) => {
           const dayStats = getDayStats(dayIndex)
           const dayEvents = eventsByDay[dayIndex] || []
@@ -254,11 +254,11 @@ export default function WeekViewCompact({
                   : 'border-gray-700/30'
               } ${
                 isExpanded ? 'col-span-2 row-span-2 z-10' : ''
-              } hover:border-gray-600/50`}
+              } hover:border-gray-600/50 min-h-0`}
             >
               {/* 日期头部 */}
               <div
-                className={`px-3 py-2 border-b cursor-pointer ${
+                className={`px-3 py-2 border-b cursor-pointer flex-shrink-0 ${
                   isToday(date)
                     ? 'bg-cyan-500/10 border-cyan-500/30'
                     : 'border-gray-700/30 hover:bg-white/5'
@@ -308,7 +308,7 @@ export default function WeekViewCompact({
               </div>
 
               {/* 事件列表 */}
-              <div className="flex-1 overflow-y-auto p-2 space-y-1 min-h-0">
+              <div className="flex-1 overflow-y-auto p-2 space-y-1 min-h-0 custom-scrollbar">
                 {dayEvents.length === 0 ? (
                   <div className="h-full flex items-center justify-center">
                     <p className="text-xs text-gray-500">暂无安排</p>
@@ -393,7 +393,7 @@ export default function WeekViewCompact({
               </div>
 
               {/* 快速添加按钮 */}
-              <div className="p-2 border-t border-gray-700/30">
+              <div className="p-2 border-t border-gray-700/30 flex-shrink-0">
                 <Button
                   size="sm"
                   variant="ghost"

@@ -12,7 +12,9 @@ import {
 } from 'lucide-react'
 import TimeBudgetService from '../../lib/services/TimeBudgetService'
 import { TimeBudget, BudgetCategory, TimeTracker } from '../../types/timebudget'
-import FeatureGuide from '../help/FeatureGuide'
+import { PanelGuide, PanelHelpButton } from '../ui/panel-guide'
+import { PANEL_GUIDES } from '../../config/panel-guides'
+import { PanelType } from '../../types/floating-panel'
 
 interface TimeBudgetDashboardProps {
   compact?: boolean
@@ -22,6 +24,7 @@ export default function TimeBudgetDashboard({ compact = false }: TimeBudgetDashb
   const [budgets, setBudgets] = useState<TimeBudget[]>([])
   const [todayTrackers, setTodayTrackers] = useState<TimeTracker[]>([])
   const [refreshKey, setRefreshKey] = useState(0)
+  const [showGuide, setShowGuide] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -147,16 +150,11 @@ export default function TimeBudgetDashboard({ compact = false }: TimeBudgetDashb
   // 完整模式
   return (
     <div className="space-y-6 p-4">
-      <FeatureGuide
-        title="时间预算"
-        steps={[
-          '在此仪表盘查看您为不同活动类别（工作、会议、休息等）设定的预算。',
-          '顶部的统计卡片为您提供今日时间使用情况的快速概览。',
-          '“分类预算使用情况”部分详细显示了每个类别的预算消耗进度。',
-          '“今日时间记录”部分列出了今天所有被追踪的任务及其花费的时间。',
-          '数据会自动刷新，您也可以点击“刷新”按钮手动更新。'
-        ]}
-        className="mb-4"
+      {/* 统一的功能指南 */}
+      <PanelGuide
+        {...PANEL_GUIDES[PanelType.TIME_BUDGET]}
+        isOpen={showGuide}
+        onClose={() => setShowGuide(false)}
       />
       {/* 统计卡片 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -220,14 +218,17 @@ export default function TimeBudgetDashboard({ compact = false }: TimeBudgetDashb
             <BarChart3 className="h-6 w-6 mr-3 text-cyan-400" />
             分类预算使用情况
           </h3>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setRefreshKey(k => k + 1)}
-            className="text-gray-400 hover:text-gray-200 border-gray-600 hover:border-gray-500"
-          >
-            刷新
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setRefreshKey(k => k + 1)}
+              className="text-gray-400 hover:text-gray-200 border-gray-600 hover:border-gray-500"
+            >
+              刷新
+            </Button>
+            <PanelHelpButton onClick={() => setShowGuide(!showGuide)} />
+          </div>
         </div>
 
         <div className="space-y-3">

@@ -25,7 +25,9 @@ import {
   Loader2
 } from 'lucide-react';
 import { getGTDTaskService } from '../../lib/services/GTDTaskService';
-import FeatureGuide from '../help/FeatureGuide';
+import { PanelGuide, PanelHelpButton } from '../ui/panel-guide';
+import { PANEL_GUIDES } from '../../config/panel-guides';
+import { PanelType } from '../../types/floating-panel';
 import { GTDTask, GTDTaskCategory, InboxItem } from '../../types/gtd-task';
 import { initializeGTDDemoData } from '../../lib/services/GTDDemoData';
 import VoiceInputFixed from '../voice/VoiceInputFixed';
@@ -64,6 +66,7 @@ const categoryColors = {
 };
 
 export function TaskInbox() {
+  const [showGuide, setShowGuide] = useState(false);
   const [inputText, setInputText] = useState('');
   const [inboxItems, setInboxItems] = useState<InboxItem[]>([]);
   const [tasks, setTasks] = useState<GTDTask[]>([]);
@@ -163,25 +166,23 @@ export function TaskInbox() {
   return (
     <div className="w-full h-full bg-gray-900 text-gray-100 rounded-lg overflow-hidden">
       <div className="bg-gray-800/50 border-b border-gray-700/50 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Inbox className="w-5 h-5 text-cyan-400" />
-          <h2 className="font-semibold text-lg text-gray-100">GTD任务收集箱</h2>
-          <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
-            {statistics.inboxPending || 0} 待处理
-          </Badge>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Inbox className="w-5 h-5 text-cyan-400" />
+            <h2 className="font-semibold text-lg text-gray-100">GTD任务收集箱</h2>
+            <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
+              {statistics.inboxPending || 0} 待处理
+            </Badge>
+          </div>
+          <PanelHelpButton onClick={() => setShowGuide(!showGuide)} />
         </div>
       </div>
       <div className="p-4">
-        <FeatureGuide
-          title="GTD任务收集箱"
-          steps={[
-            '使用顶部的输入框快速捕获任何想法或任务。',
-            '点击麦克风图标可以通过语音快速输入。',
-            '捕获的任务会进入收集箱，等待AI自动分类和处理。',
-            '使用下方的分类标签（#做、#问、#锁等）来筛选和查看不同类型的任务。',
-            'AI会自动为任务添加优先级、关键词和分析，帮助您更好地管理。'
-          ]}
-          className="mb-4"
+        {/* 统一的功能指南 */}
+        <PanelGuide
+          {...PANEL_GUIDES[PanelType.GTD_INBOX]}
+          isOpen={showGuide}
+          onClose={() => setShowGuide(false)}
         />
         <div className="space-y-4">
           {/* 快速输入区 */}

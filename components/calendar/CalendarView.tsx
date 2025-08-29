@@ -134,7 +134,7 @@ export default function CalendarView({
 
 
   return (
-    <div className="w-full h-full bg-black/30 backdrop-blur-sm rounded-xl border border-white/10 p-6">
+    <div className="w-full h-full bg-black/30 backdrop-blur-sm rounded-xl border border-white/10 p-6 flex flex-col overflow-hidden">
       {/* 日历头部 */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
@@ -179,7 +179,7 @@ export default function CalendarView({
       </div>
 
       {/* 日历网格 */}
-      <div className="grid grid-cols-7 gap-1 flex-1">
+      <div className="grid grid-cols-7 gap-1 flex-1 overflow-auto">
         {days.map((day, index) => (
           <div
             key={index}

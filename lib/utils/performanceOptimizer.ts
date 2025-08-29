@@ -8,7 +8,7 @@ import React from 'react'
 /**
  * Debounce function execution
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -25,7 +25,7 @@ export function debounce<T extends (...args: any[]) => any>(
 /**
  * Throttle function execution
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
@@ -45,7 +45,7 @@ export function throttle<T extends (...args: any[]) => any>(
 /**
  * Request animation frame wrapper
  */
-export function rafThrottle<T extends (...args: any[]) => any>(
+export function rafThrottle<T extends (...args: unknown[]) => unknown>(
   func: T
 ): (...args: Parameters<T>) => void {
   let rafId: number | null = null
@@ -63,7 +63,7 @@ export function rafThrottle<T extends (...args: any[]) => any>(
 /**
  * Batch state updates
  */
-export function batchUpdates<T>(
+export function batchUpdates(
   updates: Array<() => void>,
   delay: number = 0
 ): Promise<void> {
@@ -78,13 +78,14 @@ export function batchUpdates<T>(
 /**
  * Lazy load component wrapper
  */
-export function lazyWithPreload<T extends React.ComponentType<any>>(
+export function lazyWithPreload<T extends React.ComponentType<unknown>>(
   importFunc: () => Promise<{ default: T }>
 ) {
   const Component = React.lazy(importFunc)
   
   // Add preload method
-  ;(Component as any).preload = importFunc
+  // @ts-expect-error - Adding preload method
+  Component.preload = importFunc
   
   return Component
 }
@@ -99,7 +100,8 @@ export function isLowEndDevice(): boolean {
   }
   
   // Check for device memory (if available)
-  const deviceMemory = (navigator as any).deviceMemory
+  // @ts-expect-error - deviceMemory is not in TypeScript types yet
+  const deviceMemory = navigator.deviceMemory
   if (deviceMemory && deviceMemory < 4) {
     return true
   }
@@ -116,7 +118,7 @@ export function isLowEndDevice(): boolean {
 /**
  * Optimize render with React.memo comparison
  */
-export function shallowEqual(objA: any, objB: any): boolean {
+export function shallowEqual(objA: unknown, objB: unknown): boolean {
   if (objA === objB) return true
   
   if (!objA || !objB) return false

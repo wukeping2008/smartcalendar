@@ -51,7 +51,7 @@ class DailyBriefingService {
   private constructor() {
     this.preferences = this.loadPreferences()
     this.initializeAutoGeneration()
-    console.log('📰 Daily Briefing Service initialized')
+    // Daily Briefing Service initialized
   }
 
   static getInstance(): DailyBriefingService {

@@ -337,6 +337,28 @@ class StorageService {
     })
   }
 
+  /**
+   * 清除所有事件
+   */
+  async clearAllEvents(): Promise<void> {
+    const db = await this.ensureDB()
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([this.config.stores.events], 'readwrite')
+      const store = transaction.objectStore(this.config.stores.events)
+      const request = store.clear()
+      
+      request.onsuccess = () => {
+        // All events cleared successfully
+        resolve()
+      }
+      
+      request.onerror = () => {
+        // Failed to clear events
+        reject(request.error)
+      }
+    })
+  }
+
   // ==================== AI决策相关操作 ====================
 
   /**

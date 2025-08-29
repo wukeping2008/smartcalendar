@@ -21,6 +21,8 @@ import WhatIfSimulatorPanel from '../whatif/WhatIfSimulatorPanel';
 import PersonCardPanel from '../personcard/PersonCardPanel';
 import CommutePlannerPanel from '../commute/CommutePlannerPanel';
 import { TaskInbox } from '../gtd/TaskInbox';
+import TradingFocusPanel from '../trading/TradingFocusPanel';
+import CognitiveManagementPanel from '../cognitive/CognitiveManagementPanel';
 
 interface FloatingPanelSystemProps {
   className?: string;
@@ -42,7 +44,9 @@ const PANEL_COMPONENTS: Record<PanelType, React.ComponentType<any>> = {
   [PanelType.WHAT_IF]: WhatIfSimulatorPanel,
   [PanelType.PERSON_CARD]: PersonCardPanel,
   [PanelType.COMMUTE_PLANNER]: CommutePlannerPanel,
-  [PanelType.GTD_INBOX]: TaskInbox
+  [PanelType.GTD_INBOX]: TaskInbox,
+  [PanelType.TRADING_FOCUS]: TradingFocusPanel,
+  [PanelType.COGNITIVE_MANAGEMENT]: CognitiveManagementPanel
 };
 
 export function FloatingPanelSystem({ 

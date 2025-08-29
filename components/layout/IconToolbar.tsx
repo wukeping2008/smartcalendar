@@ -12,7 +12,9 @@ import {
   FileText,
   GitBranch,
   Train,
-  Move
+  Move,
+  Zap,
+  Brain
 } from 'lucide-react';
 import {
   PanelType,
@@ -59,11 +61,12 @@ function loadToolbarPosition(): ToolbarPosition {
         if (saved) {
             const parsed = JSON.parse(saved) as ToolbarPosition;
             const validX = Math.max(10, Math.min(parsed.x, window.innerWidth - DEFAULT_TOOLBAR_CONFIG.width - 10));
-            const validY = Math.max(10, Math.min(parsed.y, window.innerHeight - 300));
+            // 确保Y坐标不会在导航栏区域（最小70px）
+            const validY = Math.max(70, Math.min(parsed.y, window.innerHeight - 300));
             return { ...parsed, x: validX, y: validY };
         }
     } catch (error) {
-        console.warn('Failed to load toolbar position:', error);
+        // Failed to load toolbar position
     }
     return getDefaultPosition();
 }
@@ -203,6 +206,34 @@ export const PANEL_CONFIGS: Record<PanelType, Omit<PanelConfig, 'component'>> = 
     canMinimize: true,
     priority: PanelPriority.HIGH,
     description: 'GTD任务管理·智能分类·自动补全'
+  },
+  [PanelType.TRADING_FOCUS]: {
+    id: PanelType.TRADING_FOCUS,
+    title: 'Trading专注',
+    icon: Zap,
+    shortcut: 'Alt+T',
+    defaultSize: { width: 700, height: 850 },
+    minSize: { width: 500, height: 600 },
+    resizable: true,
+    draggable: true,
+    canPin: true,
+    canMinimize: true,
+    priority: PanelPriority.CRITICAL,
+    description: '交易专注模式·1分钟决策·屏蔽干扰'
+  },
+  [PanelType.COGNITIVE_MANAGEMENT]: {
+    id: PanelType.COGNITIVE_MANAGEMENT,
+    title: '认知管理',
+    icon: Brain,
+    shortcut: 'Alt+C',
+    defaultSize: { width: 650, height: 800 },
+    minSize: { width: 500, height: 600 },
+    resizable: true,
+    draggable: true,
+    canPin: true,
+    canMinimize: true,
+    priority: PanelPriority.HIGH,
+    description: '认知带宽监控·智能拒绝·ROI决策'
   }
 };
 
@@ -222,7 +253,8 @@ function useDraggable() {
   const handleMouseMove = (e: MouseEvent) => {
     if (!isDragging || !dragStart) return;
     const newX = Math.max(10, Math.min(e.clientX - dragStart.x, window.innerWidth - DEFAULT_TOOLBAR_CONFIG.width - 10));
-    const newY = Math.max(10, Math.min(e.clientY - dragStart.y, window.innerHeight - 300));
+    // 确保不会移动到导航栏区域（保留70px的顶部空间）
+    const newY = Math.max(70, Math.min(e.clientY - dragStart.y, window.innerHeight - 300));
     setPosition({ x: newX, y: newY, isDragged: true });
   };
 
@@ -291,18 +323,20 @@ export function IconToolbar({ activePanelIds, onPanelClick, getSmartPriority, co
 
   return (
     <div
-      className={`fixed z-30 transition-shadow duration-200 ${isDragging ? 'shadow-2xl' : 'shadow-lg'} ${className}`}
+      className={`fixed z-50 transition-shadow duration-200 ${isDragging ? 'shadow-2xl' : 'shadow-lg'} ${className}`}
       style={{ 
         left: position.x,
         top: position.y,
         width: config.width,
-        cursor: isDragging ? 'grabbing' : 'auto'
+        cursor: isDragging ? 'grabbing' : 'auto',
+        // 防止工具栏移动到导航栏区域
+        maxHeight: 'calc(100vh - 20px)'
       }}
       onMouseDown={handleMouseDown}
     >
       <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-xl shadow-lg p-2">
-        <div className="drag-handle cursor-grab p-2 flex items-center justify-center" title="拖拽工具栏">
-          <Move className="w-4 h-4 text-gray-500" />
+        <div className="drag-handle cursor-grab p-3 flex items-center justify-center hover:bg-gray-800 rounded-lg transition-colors" title="拖拽移动工具栏">
+          <Move className="w-5 h-5 text-gray-400 hover:text-gray-200" />
         </div>
         <div className="w-full h-px bg-gray-700 my-1" />
         <div className="flex flex-col gap-2">

@@ -31,7 +31,9 @@ export enum PanelType {
   WHAT_IF = 'what-if',
   PERSON_CARD = 'person-card',
   COMMUTE_PLANNER = 'commute-planner',
-  GTD_INBOX = 'gtd-inbox'
+  GTD_INBOX = 'gtd-inbox',
+  TRADING_FOCUS = 'trading-focus',
+  COGNITIVE_MANAGEMENT = 'cognitive-management'
 }
 
 // 面板位置类型

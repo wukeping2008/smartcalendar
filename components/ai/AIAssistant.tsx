@@ -8,7 +8,9 @@ import { aiService } from '../../lib/services/AIService'
 import { llmService } from '../../lib/services/LLMIntegrationService'
 import { Event } from '../../types/event'
 import ChatInterface from './ChatInterface'
-import FeatureGuide from '../help/FeatureGuide'
+import { PanelGuide, PanelHelpButton } from '../ui/panel-guide'
+import { PANEL_GUIDES } from '../../config/panel-guides'
+import { PanelType } from '../../types/floating-panel'
 
 interface AIAssistantProps {
   selectedEvent?: Event | null
@@ -43,6 +45,7 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [activeTab, setActiveTab] = useState<'insights' | 'recommendations' | 'conflicts' | 'chat'>('insights');
+  const [showGuide, setShowGuide] = useState(false);
 
   const loadAIData = async () => {
     if (events.length === 0) return;
@@ -218,32 +221,31 @@ export default function AIAssistant({ selectedEvent }: AIAssistantProps) {
     { key: 'chat', label: '💬 AI对话', count: null }
   ]
 
+  const guideConfig = PANEL_GUIDES[PanelType.AI_ASSISTANT];
+
   return (
-    <Card className="bg-black/30 border-white/20 p-4">
+    <Card className="bg-black/30 border-white/20 p-4 relative">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-white font-semibold">🤖 AI智能助手</h3>
-        <Button
-          size="sm"
-          variant="outline"
-          className="text-white border-white/20 text-xs"
-          onClick={handleAILearning}
-          disabled={isLoading}
-        >
-          {isLoading ? '🧠 分析中...' : '🎯 重新分析'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-white border-white/20 text-xs"
+            onClick={handleAILearning}
+            disabled={isLoading}
+          >
+            {isLoading ? '🧠 分析中...' : '🎯 重新分析'}
+          </Button>
+          <PanelHelpButton onClick={() => setShowGuide(!showGuide)} />
+        </div>
       </div>
 
-      <FeatureGuide
-        title="AI助手"
-        steps={[
-          '点击"重新学习"让AI分析您最新的日程安排。',
-          '在"AI洞察"标签页查看您的习惯分析和优化建议。',
-          '点击"AI深度洞察分析"获得更详细的报告。',
-          '在日历中选中一个事件，然后在"智能建议"标签页查看针对性建议。',
-          '在"冲突解决"标签页处理日程冲突。',
-          '在"AI对话"标签页与AI进行自由对话。'
-        ]}
-        className="mb-4"
+      {/* 统一的功能指南 */}
+      <PanelGuide
+        {...guideConfig}
+        isOpen={showGuide}
+        onClose={() => setShowGuide(false)}
       />
 
       {/* 标签导航 */}

@@ -272,7 +272,7 @@ export const usePreferenceStore = create<PreferenceStore>()(
           set(settings)
           return true
         } catch (error) {
-          console.error('Failed to import settings:', error)
+          // Failed to import settings
           return false
         }
       }

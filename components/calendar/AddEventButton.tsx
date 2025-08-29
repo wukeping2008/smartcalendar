@@ -3,10 +3,23 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Plus } from 'lucide-react'
 import { useEventStore } from '../../lib/stores/event-store'
 import { EventCategory, Priority, EventStatus, EnergyLevel } from '../../types/event'
 
-export default function AddEventButton() {
+interface AddEventButtonProps {
+  className?: string
+  size?: 'default' | 'sm' | 'lg' | 'icon'
+  defaultDate?: Date
+  iconOnly?: boolean
+}
+
+export default function AddEventButton({ 
+  className = '', 
+  size = 'default',
+  defaultDate,
+  iconOnly = false
+}: AddEventButtonProps) {
   const [showForm, setShowForm] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -108,10 +121,11 @@ export default function AddEventButton() {
   return (
     <Button 
       onClick={() => setShowForm(true)}
-      className="w-full bg-purple-600 hover:bg-purple-700" 
-      size="sm"
+      className={className}
+      size={size}
     >
-      ➕ 新建事件
+      <Plus className={iconOnly ? "w-6 h-6" : "w-4 h-4 mr-2"} />
+      {!iconOnly && "新建事件"}
     </Button>
   )
 }

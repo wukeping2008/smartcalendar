@@ -135,7 +135,7 @@ export default function WhatIfSimulatorPanel({
       // 自动运行模拟
       await handleRunSimulation(scenario.id)
     } catch (error) {
-      console.error('Failed to apply preset:', error)
+      // Failed to apply preset
     }
   }
 
@@ -172,7 +172,7 @@ export default function WhatIfSimulatorPanel({
         loadScenarios()
       }
     } catch (error) {
-      console.error('Simulation failed:', error)
+      // Simulation failed
     } finally {
       setIsSimulating(false)
     }
@@ -197,7 +197,7 @@ export default function WhatIfSimulatorPanel({
       setComparison(result)
       setActiveTab('comparison')
     } catch (error) {
-      console.error('Comparison failed:', error)
+      // Comparison failed
     }
   }
 

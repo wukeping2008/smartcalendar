@@ -15,7 +15,12 @@
       "Bash(npx tsc:*)",
       "Bash(npm install:*)",
       "Bash(start http://localhost:3003)",
-      "Bash(start http://localhost:3001)"
+      "Bash(start http://localhost:3001)",
+      "Bash(rm:*)",
+      "Bash(del:*)",
+      "Bash(npm run build:*)",
+      "Bash(start http://localhost:3002/test)",
+      "Bash(move:*)"
     ],
     "deny": []
   }
