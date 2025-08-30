@@ -70,6 +70,7 @@ export const useCognitiveStore = create<CognitiveStore>()(
         current: 0,
         max: 7,
         threshold: 5,
+        level: 'low' as any,
         activeItems: [],
         archivedItems: []
       },

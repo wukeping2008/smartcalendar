@@ -1,17 +1,17 @@
-import { VoiceRecognitionEngine, VoiceCommand, VoiceResponse } from '../../types/voice'
+import { VoiceCommand } from '../../types/voice'
 import { Event, EventCategory, Priority, EventStatus, Reminder, ReminderType } from '../../types/event'
 
 // 扩展Web Speech API类型定义
 interface ExtendedWindow extends Window {
-  webkitSpeechRecognition?: typeof SpeechRecognition
-  SpeechRecognition?: typeof SpeechRecognition
+  webkitSpeechRecognition?: any
+  SpeechRecognition?: any
 }
 
 declare const window: ExtendedWindow
 
 // 语音识别服务类
 export class VoiceService {
-  private recognition: SpeechRecognition | null = null
+  private recognition: any | null = null
   private synthesis: SpeechSynthesis
   private isListening = false
   private onResultCallback?: (result: string) => void
@@ -408,36 +408,48 @@ export class VoiceCommandParser {
     // 创建事件命令
     if (normalizedText.includes('创建') || normalizedText.includes('新建') || normalizedText.includes('添加')) {
       return {
-        type: 'create_event',
+        id: `create_${Date.now()}`,
+        pattern: 'create_event',
+        text: normalizedText,
         parameters: { text: normalizedText },
-        confidence: 0.8
+        confidence: 0.8,
+        timestamp: new Date()
       }
     }
 
     // 查看命令
     if (normalizedText.includes('查看') || normalizedText.includes('显示')) {
       return {
-        type: 'view_events',
+        id: `view_${Date.now()}`,
+        pattern: 'view_events',
+        text: normalizedText,
         parameters: { filter: normalizedText },
-        confidence: 0.7
+        confidence: 0.7,
+        timestamp: new Date()
       }
     }
 
     // 删除命令
     if (normalizedText.includes('删除') || normalizedText.includes('取消')) {
       return {
-        type: 'delete_event',
+        id: `delete_${Date.now()}`,
+        pattern: 'delete_event',
+        text: normalizedText,
         parameters: { text: normalizedText },
-        confidence: 0.6
+        confidence: 0.6,
+        timestamp: new Date()
       }
     }
 
     // 切换视图命令
     if (normalizedText.includes('切换') || normalizedText.includes('改变视图')) {
       return {
-        type: 'switch_view',
+        id: `switch_${Date.now()}`,
+        pattern: 'switch_view',
+        text: normalizedText,
         parameters: { view: normalizedText.includes('传统') ? 'calendar' : 'flow' },
-        confidence: 0.9
+        confidence: 0.9,
+        timestamp: new Date()
       }
     }
 

@@ -506,7 +506,7 @@ class WhatIfSimulator {
     // 任务指标
     const totalTasks = tasks.length
     const completedTasks = tasks.filter(t => t.status === 'completed').length
-    const pendingTasks = tasks.filter(t => t.status === 'pending').length
+    const pendingTasks = tasks.filter(t => (t as any).status === 'pending').length
     const overdueTasks = tasks.filter(t => 
       t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'completed'
     ).length
@@ -1133,7 +1133,7 @@ class WhatIfSimulator {
    */
   private calculateFocusTime(events: Event[]): number {
     return events
-      .filter(e => e.category === EventCategory.WORK || e.category === EventCategory.LEARNING)
+      .filter(e => e.category === EventCategory.WORK || (e.category as any) === 'LEARNING')
       .reduce((sum, e) => {
         const duration = (new Date(e.endTime).getTime() - 
                          new Date(e.startTime).getTime()) / (1000 * 60 * 60)
@@ -1176,7 +1176,7 @@ class WhatIfSimulator {
       }, 0)
     
     const personalHours = events
-      .filter(e => e.category === EventCategory.PERSONAL || e.category === EventCategory.HEALTH)
+      .filter(e => e.category === EventCategory.PERSONAL || (e.category as any) === 'HEALTH')
       .reduce((sum, e) => {
         const duration = (new Date(e.endTime).getTime() - 
                          new Date(e.startTime).getTime()) / (1000 * 60 * 60)
@@ -1308,7 +1308,7 @@ class WhatIfSimulator {
    * 添加随机扰动（用于蒙特卡洛）
    */
   private addRandomPerturbation(scenario: WhatIfScenario): WhatIfScenario {
-    const perturbed = this.cloneState(scenario) as any
+    const perturbed = JSON.parse(JSON.stringify(scenario)) as WhatIfScenario
     
     // 随机调整任务持续时间 ±20%
     perturbed.baselineState.events.forEach((event: Event) => {

@@ -311,7 +311,7 @@ export function useFloatingPanels(): UseFloatingPanelsReturn {
     );
   }, [state.panels]);
 
-  const getNextPosition = useCallback(() => {
+  const getNextPanelPosition = useCallback(() => {
     return getNextPosition(state.panels);
   }, [state.panels]);
 
@@ -394,6 +394,6 @@ export function useFloatingPanels(): UseFloatingPanelsReturn {
     getActivePanels,
     getSmartPriority,
     isAnyPanelOpen,
-    getNextPosition
+    getNextPosition: getNextPanelPosition
   };
 }

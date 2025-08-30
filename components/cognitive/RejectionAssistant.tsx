@@ -399,7 +399,7 @@ export default function RejectionAssistant({
               <li>• 简要说明原因，不必过度解释</li>
               <li>• 提供替代方案或推荐他人</li>
               <li>• 保持礼貌但坚定的语气</li>
-              <li>• 避免留下"下次"的承诺</li>
+              <li>• 避免留下&ldquo;下次&rdquo;的承诺</li>
             </ul>
           </Card>
         </TabsContent>

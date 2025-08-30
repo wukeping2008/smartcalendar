@@ -296,7 +296,7 @@ export class InboxService {
     // AI增强分析
     if (this.config.ai.enableNLP) {
       try {
-        const aiAnalysis = await this.aiService.analyzeText(content)
+        const aiAnalysis = await this.aiService.parseNaturalLanguageCommand(content)
         
         // 提取日期
         analysis.extractedDates = this.extractDates(content)
@@ -493,8 +493,8 @@ export class InboxService {
     
     const words = content.match(/[\u4e00-\u9fa5]+|[a-zA-Z]+/g) || []
     const keywords = words
-      .filter(word => word.length > 1 && !stopWords.includes(word))
-      .filter((word, index, self) => self.indexOf(word) === index) // 去重
+      .filter((word: string) => word.length > 1 && !stopWords.includes(word))
+      .filter((word: string, index: number, self: string[]) => self.indexOf(word) === index) // 去重
       .slice(0, 10) // 最多10个关键词
     
     return keywords

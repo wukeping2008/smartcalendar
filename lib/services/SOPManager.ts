@@ -166,7 +166,7 @@ export class SOPManager {
         } as FlowchartSOP
       
       default:
-        throw new Error(`Unsupported SOP type: ${data.type}`)
+        throw new Error(`Unsupported SOP type: ${(data as any).type}`)
     }
   }
   
@@ -208,9 +208,9 @@ export class SOPManager {
       }
     }
     
-    this.sops.set(sopId, updatedSOP)
+    this.sops.set(sopId, updatedSOP as SOP)
     await this.saveSOPs()
-    return updatedSOP
+    return updatedSOP as SOP
   }
   
   /**
@@ -271,7 +271,7 @@ export class SOPManager {
         percentComplete: 0
       },
       context: {
-        triggeredBy,
+        triggeredBy: triggeredBy as ('manual' | 'automatic' | 'scheduled'),
         executor: 'current_user' // TODO: 获取当前用户
       },
       stepRecords: [],
@@ -386,8 +386,8 @@ export class SOPManager {
       
       // 记录完成
       record.status = StepStatus.COMPLETED
-      record.completedAt = new Date()
-      record.duration = (record.completedAt.getTime() - record.startedAt.getTime()) / 1000
+      ;(record as any).completedAt = new Date()
+      ;(record as any).duration = ((record as any).completedAt.getTime() - (record as any).startedAt.getTime()) / 1000
       
       // 更新进度
       execution.progress.completedSteps++

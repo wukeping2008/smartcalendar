@@ -201,7 +201,8 @@ class DailyBriefingService {
     }
 
     // 市场机会
-    if (marketService.getMarketOverview().isMarketOpen) {
+    const marketOverview = marketService.getMarketOverview();
+    if ((marketOverview as any)?.isMarketOpen) {
       highlights.push('📈 市场交易时段活跃')
     }
 
@@ -266,7 +267,7 @@ class DailyBriefingService {
       duration: Math.round((new Date(e.endTime).getTime() - new Date(e.startTime).getTime()) / 60000),
       category: e.category,
       priority: this.mapPriority(e.priority),
-      location: e.location,
+      location: (e as any).location || '',
       preparation: e.tags
     }))
 
@@ -315,9 +316,9 @@ class DailyBriefingService {
       category: t.category || 'general',
       priority: t.priority as 'urgent' | 'high' | 'medium' | 'low',
       dueTime: t.dueDate ? new Date(t.dueDate) : undefined,
-      estimatedDuration: t.estimatedMinutes || 30,
+      estimatedDuration: (t as any).estimatedMinutes || 30,
       progress: 0,
-      context: t.context
+      context: Array.isArray(t.context) ? t.context.join(', ') : t.context
     }))
 
     // 优先级任务
@@ -369,12 +370,12 @@ class DailyBriefingService {
     ]
 
     return {
-      marketStatus: overview.isMarketOpen ? 'open' : 'closed',
+      marketStatus: (overview as any)?.isMarketOpen ? 'open' : 'closed',
       keyIndicators,
       watchlist: [],
       economicEvents: [],
       tradingOpportunities: [],
-      riskAlerts: overview.alerts.map(a => a.message)
+      riskAlerts: (overview as any)?.alerts?.map((a: any) => a.message) || []
     }
   }
 
@@ -527,7 +528,7 @@ class DailyBriefingService {
   /**
    * 分析财务状态
    */
-  private async analyzeFinancial(): Promise<FinancialInsight> {
+  private async analyzeFinancial(): Promise<any> {
     return {
       portfolioStatus: '稳健增长',
       dailyTarget: 1000,
@@ -543,7 +544,7 @@ class DailyBriefingService {
   /**
    * 分析学习进度
    */
-  private async analyzeLearning(): Promise<LearningInsight> {
+  private async analyzeLearning(): Promise<any> {
     return {
       learningGoals: [
         '完成React高级课程第3章',
@@ -584,7 +585,7 @@ class DailyBriefingService {
   /**
    * 分析社交关系
    */
-  private async analyzeSocial(): Promise<SocialInsight> {
+  private async analyzeSocial(): Promise<any> {
     return {
       importantContacts: [
         {

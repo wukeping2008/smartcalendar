@@ -501,7 +501,7 @@ export default function ROICalculator({
           <p className="text-xs text-gray-600">
             <Info className="w-3 h-3 inline mr-1" />
             ROI计算器帮助您量化评估每个承诺的价值。记住：时间是您最宝贵的资产，
-            每个"是"都意味着对其他机会说"不"。
+            每个&ldquo;是&rdquo;都意味着对其他机会说&ldquo;不&rdquo;。
           </p>
         </Card>
       </div>

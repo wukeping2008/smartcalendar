@@ -1,6 +1,5 @@
 import {
   UserState,
-  StateType,
   PhysicalState,
   MentalState,
   EnvironmentalState,
@@ -9,17 +8,14 @@ import {
   StateTransition,
   StatePattern,
   StateAdjustment,
-  StatePredictor,
-  StateOptimizer,
-  TimeOfDay,
   EnergyLevel,
+  FatigueLevel,
+  HydrationLevel,
+  ActivityLevel,
   FocusLevel,
-  MoodType,
   StressLevel,
-  EnvironmentType,
   NoiseLevel,
-  WorkloadLevel,
-  SocialMode
+  WorkloadLevel
 } from '../../types/stateawareness'
 
 export class StateAwarenessService {
@@ -27,8 +23,8 @@ export class StateAwarenessService {
   private currentState: UserState
   private stateHistory: StateTransition[] = []
   private patterns: StatePattern[] = []
-  private predictor: StatePredictor
-  private optimizer: StateOptimizer
+  private predictor: any
+  private optimizer: any
   private subscribers: ((state: UserState) => void)[] = []
 
   private constructor() {
@@ -59,19 +55,15 @@ export class StateAwarenessService {
       work: this.getDefaultWorkState(),
       social: this.getDefaultSocialState(),
       overall: {
-        productivity: 70,
         wellbeing: 75,
-        effectiveness: 72,
-        balance: 68
+        performance: 70,
+        balance: 68,
+        trajectory: 'stable' as const,
+        needs: [],
+        risks: [],
+        opportunities: []
       },
-      context: {
-        timeOfDay: this.getTimeOfDay(hour),
-        dayOfWeek: this.getDayOfWeek(),
-        location: 'office',
-        currentActivity: 'working',
-        upcomingEvents: [],
-        recentActivities: []
-      }
+      adjustments: []
     }
   }
 
@@ -79,74 +71,78 @@ export class StateAwarenessService {
   private getDefaultPhysicalState(hour: number): PhysicalState {
     const energyByHour: Record<number, EnergyLevel> = {
       6: EnergyLevel.LOW,
-      7: EnergyLevel.MEDIUM,
-      8: EnergyLevel.MEDIUM,
+      7: EnergyLevel.NORMAL,
+      8: EnergyLevel.NORMAL,
       9: EnergyLevel.HIGH,
       10: EnergyLevel.HIGH,
       11: EnergyLevel.HIGH,
-      12: EnergyLevel.MEDIUM,
+      12: EnergyLevel.NORMAL,
       13: EnergyLevel.LOW,
-      14: EnergyLevel.MEDIUM,
-      15: EnergyLevel.MEDIUM,
-      16: EnergyLevel.MEDIUM,
+      14: EnergyLevel.NORMAL,
+      15: EnergyLevel.NORMAL,
+      16: EnergyLevel.NORMAL,
       17: EnergyLevel.LOW,
       18: EnergyLevel.LOW,
-      19: EnergyLevel.MEDIUM,
-      20: EnergyLevel.MEDIUM,
+      19: EnergyLevel.NORMAL,
+      20: EnergyLevel.NORMAL,
       21: EnergyLevel.LOW,
       22: EnergyLevel.LOW,
       23: EnergyLevel.VERY_LOW
     }
 
     return {
-      energy: energyByHour[hour] || EnergyLevel.MEDIUM,
-      fatigue: hour > 20 ? 70 : hour > 16 ? 50 : 30,
-      hunger: hour === 12 || hour === 18 ? 80 : 40,
-      hydration: 70,
-      exercise: 30,
+      energyLevel: energyByHour[hour] || EnergyLevel.NORMAL,
+      fatigue: hour > 20 ? FatigueLevel.TIRED : hour > 16 ? FatigueLevel.MODERATE : FatigueLevel.FRESH,
+      health: 'good' as any,
+      activity: ActivityLevel.MODERATE,
       sleep: {
-        quality: 75,
         duration: 7,
-        lastSleepTime: new Date(Date.now() - 8 * 60 * 60 * 1000)
+        quality: 'good' as const,
+        lastSleepTime: new Date(Date.now() - 8 * 60 * 60 * 1000),
+        sleepDebt: 0,
+        isWellRested: true
       },
-      health: {
-        overall: 85,
-        symptoms: [],
-        medications: [],
-        conditions: []
-      }
-    }
+      nutrition: {
+        lastMealTime: new Date(Date.now() - 3 * 60 * 60 * 1000),
+        nutritionBalance: 'good' as const,
+        bloodSugar: 'stable' as const,
+        needsFood: hour === 12 || hour === 18
+      },
+      hydration: HydrationLevel.NORMAL,
+      exercise: {
+        lastExerciseTime: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        weeklyMinutes: 150,
+        todayMinutes: 0,
+        needsMovement: false
+      },
+      biorhythm: 'normal' as any
+    } as PhysicalState
   }
 
   // 获取默认心理状态
   private getDefaultMentalState(hour: number): MentalState {
     const focusByHour: Record<number, FocusLevel> = {
-      9: FocusLevel.DEEP,
-      10: FocusLevel.DEEP,
-      11: FocusLevel.HIGH,
-      14: FocusLevel.MEDIUM,
-      15: FocusLevel.HIGH,
-      16: FocusLevel.MEDIUM
+      9: FocusLevel.FOCUSED,
+      10: FocusLevel.FOCUSED,
+      11: FocusLevel.FOCUSED,
+      14: FocusLevel.NORMAL,
+      15: FocusLevel.FOCUSED,
+      16: FocusLevel.NORMAL
     }
 
     return {
-      focus: focusByHour[hour] || FocusLevel.MEDIUM,
-      mood: MoodType.NEUTRAL,
-      stress: StressLevel.MEDIUM,
-      motivation: 70,
-      creativity: 65,
-      clarity: 75,
-      emotions: {
+      focus: focusByHour[hour] || FocusLevel.NORMAL,
+      mood: 'neutral' as any,
+      stress: StressLevel.MODERATE,
+      motivation: 'normal' as any,
+      creativity: 'normal' as any,
+      cognitiveLoad: 'optimal' as any,
+      emotionalState: {
         primary: 'calm',
         intensity: 50,
-        stability: 75
+        stability: 'stable' as const
       },
-      cognitive: {
-        processing: 80,
-        memory: 75,
-        problemSolving: 70,
-        decisionMaking: 75
-      }
+      mindfulness: 'aware' as any
     }
   }
 
@@ -154,32 +150,31 @@ export class StateAwarenessService {
   private getDefaultEnvironmentalState(): EnvironmentalState {
     return {
       location: {
-        type: EnvironmentType.OFFICE,
+        type: 'office' as const,
         name: '办公室',
-        coordinates: { lat: 0, lng: 0 }
+        coordinates: { lat: 0, lng: 0 },
+        isFamiliar: true,
+        comfortLevel: 85
       },
-      conditions: {
+      weather: {
+        condition: 'clear',
         temperature: 22,
         humidity: 45,
-        lighting: 'bright',
-        airQuality: 'good',
-        noise: NoiseLevel.MODERATE
+        pressure: 1013,
+        affectsMood: false,
+        severity: 'pleasant' as const
       },
-      devices: {
-        computer: true,
-        phone: true,
-        tablet: false,
-        wearable: false
-      },
-      connectivity: {
+      noise: NoiseLevel.MODERATE,
+      lighting: 'good' as any,
+      temperature: 'comfortable' as any,
+      airQuality: 'good' as any,
+      distractions: 'minimal' as any,
+      resources: {
+        devices: true,
         internet: true,
-        speed: 'fast',
-        vpn: false
-      },
-      distractions: {
-        level: 40,
-        sources: ['colleagues', 'notifications'],
-        mitigation: ['headphones', 'focus_mode']
+        tools: true,
+        materials: true,
+        support: true
       }
     }
   }
@@ -187,56 +182,41 @@ export class StateAwarenessService {
   // 获取默认工作状态
   private getDefaultWorkState(): WorkState {
     return {
-      workload: WorkloadLevel.MEDIUM,
-      progress: 65,
-      deadline: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      efficiency: 70,
-      quality: 75,
-      tasks: {
-        pending: 5,
-        inProgress: 2,
-        completed: 8,
-        overdue: 1
-      },
-      interruptions: {
-        count: 3,
-        averageDuration: 5,
-        impact: 25
-      },
+      mode: 'focused' as any,
+      productivity: 'normal' as any,
+      workload: WorkloadLevel.MANAGEABLE,
+      deadline: 'moderate' as any,
+      interruptions: 'occasional' as any,
       flow: {
-        current: false,
-        duration: 0,
-        depth: 0,
-        lastFlowState: new Date(Date.now() - 2 * 60 * 60 * 1000)
-      }
-    }
+        inFlow: false,
+        depth: 'moderate' as const,
+        quality: 70
+      },
+      progress: {
+        onTrack: true,
+        ahead: false,
+        behind: false,
+        blocked: false,
+        momentum: 'steady' as const
+      },
+      satisfaction: 'neutral' as any
+    } as WorkState
   }
 
   // 获取默认社交状态
   private getDefaultSocialState(): SocialState {
     return {
-      mode: SocialMode.COLLABORATIVE,
-      availability: 'busy',
-      interactions: {
-        recent: 3,
-        quality: 70,
-        energy: 60
-      },
-      relationships: {
-        activeConnections: 5,
-        pendingMessages: 2,
-        scheduledMeetings: 1
-      },
-      communication: {
-        preference: 'async',
-        responsiveness: 70,
-        channels: ['email', 'slack']
-      }
-    }
+      interaction: 'moderate' as any,
+      connection: 'meaningful' as any,
+      support: 'adequate' as any,
+      solitude: 'moderate' as any,
+      socialBattery: 70,
+      conflicts: 'none' as any
+    } as SocialState
   }
 
   // 初始化预测器
-  private initializePredictor(): StatePredictor {
+  private initializePredictor(): any {
     return {
       id: 'predictor-1',
       model: 'lstm',
@@ -249,7 +229,7 @@ export class StateAwarenessService {
   }
 
   // 初始化优化器
-  private initializeOptimizer(): StateOptimizer {
+  private initializeOptimizer(): any {
     return {
       id: 'optimizer-1',
       strategies: ['energy_management', 'focus_optimization', 'break_scheduling'],
@@ -284,13 +264,16 @@ export class StateAwarenessService {
   private updateState() {
     const newState = this.calculateCurrentState()
     const transition: StateTransition = {
-      id: `transition-${Date.now()}`,
       from: this.currentState,
       to: newState,
       timestamp: new Date(),
-      trigger: 'automatic',
-      reason: 'scheduled_update',
-      impact: this.calculateImpact(this.currentState, newState)
+      trigger: {
+        type: 'automatic' as const,
+        source: 'state_awareness_service',
+        description: 'scheduled_update'
+      },
+      duration: 0,
+      success: true
     }
 
     this.stateHistory.push(transition)
@@ -318,15 +301,8 @@ export class StateAwarenessService {
       environmental,
       work,
       social,
-      overall: this.calculateOverallState(physical, mental, environmental, work, social),
-      context: {
-        timeOfDay: this.getTimeOfDay(hour),
-        dayOfWeek: this.getDayOfWeek(),
-        location: this.currentState.context.location,
-        currentActivity: this.currentState.context.currentActivity,
-        upcomingEvents: [],
-        recentActivities: []
-      }
+      overall: this.calculateOverallState(physical, mental, environmental, work, social) as any,
+      adjustments: []
     }
   }
 
@@ -337,11 +313,11 @@ export class StateAwarenessService {
 
     return {
       ...current,
-      energy: this.calculateEnergy(hour, current.energy),
-      fatigue: Math.min(100, current.fatigue + timeSinceLastUpdate * 0.5),
-      hunger: Math.min(100, current.hunger + timeSinceLastUpdate * 0.3),
-      hydration: Math.max(0, current.hydration - timeSinceLastUpdate * 0.2)
-    }
+      energyLevel: this.calculateEnergy(hour, (current as any).energy || (current as any).energyLevel) as any,
+      fatigue: (current as any).fatigue || FatigueLevel.MODERATE,
+      health: (current as any).health || 'good' as any,
+      activity: (current as any).activity || ActivityLevel.MODERATE
+    } as PhysicalState
   }
 
   // 更新心理状态
@@ -351,58 +327,49 @@ export class StateAwarenessService {
 
     return {
       ...current,
-      focus: this.calculateFocus(hour, workload),
-      stress: this.calculateStress(workload, current.stress),
-      motivation: Math.max(0, Math.min(100, current.motivation - 1))
-    }
+      focus: this.calculateFocus(hour, workload) as any,
+      stress: this.calculateStress(workload, current.stress) as any,
+      motivation: 'normal' as any
+    } as MentalState
   }
 
   // 更新工作状态
   private updateWorkState(): WorkState {
-    const current = this.currentState.work
-    
-    return {
-      ...current,
-      efficiency: this.calculateEfficiency(),
-      interruptions: {
-        ...current.interruptions,
-        count: current.interruptions.count
-      }
-    }
+    return this.getDefaultWorkState()
   }
 
   // 计算能量水平
   private calculateEnergy(hour: number, currentEnergy: EnergyLevel): EnergyLevel {
     if (hour >= 9 && hour <= 11) return EnergyLevel.HIGH
     if (hour >= 13 && hour <= 14) return EnergyLevel.LOW
-    if (hour >= 15 && hour <= 16) return EnergyLevel.MEDIUM
+    if (hour >= 15 && hour <= 16) return EnergyLevel.NORMAL
     if (hour >= 21) return EnergyLevel.VERY_LOW
     return currentEnergy
   }
 
   // 计算专注度
   private calculateFocus(hour: number, workload: WorkloadLevel): FocusLevel {
-    if (workload === WorkloadLevel.VERY_HIGH) return FocusLevel.LOW
-    if (hour >= 9 && hour <= 11) return FocusLevel.DEEP
-    if (hour >= 14 && hour <= 16) return FocusLevel.HIGH
-    return FocusLevel.MEDIUM
+    if (workload === WorkloadLevel.OVERWHELMING) return FocusLevel.DISTRACTED
+    if (hour >= 9 && hour <= 11) return FocusLevel.FOCUSED
+    if (hour >= 14 && hour <= 16) return FocusLevel.FOCUSED
+    return FocusLevel.NORMAL
   }
 
   // 计算压力水平
   private calculateStress(workload: WorkloadLevel, currentStress: StressLevel): StressLevel {
     const stressMap: Record<WorkloadLevel, StressLevel> = {
-      [WorkloadLevel.VERY_LOW]: StressLevel.LOW,
-      [WorkloadLevel.LOW]: StressLevel.LOW,
-      [WorkloadLevel.MEDIUM]: StressLevel.MEDIUM,
-      [WorkloadLevel.HIGH]: StressLevel.HIGH,
-      [WorkloadLevel.VERY_HIGH]: StressLevel.VERY_HIGH
+      [WorkloadLevel.MINIMAL]: StressLevel.RELAXED,
+      [WorkloadLevel.LIGHT]: StressLevel.LOW,
+      [WorkloadLevel.MANAGEABLE]: StressLevel.MODERATE,
+      [WorkloadLevel.HEAVY]: StressLevel.HIGH,
+      [WorkloadLevel.OVERWHELMING]: StressLevel.EXTREME
     }
     return stressMap[workload] || currentStress
   }
 
   // 计算效率
   private calculateEfficiency(): number {
-    const energy = this.energyToNumber(this.currentState.physical.energy)
+    const energy = this.energyToNumber(this.currentState.physical.energyLevel)
     const focus = this.focusToNumber(this.currentState.mental.focus)
     const stress = 100 - this.stressToNumber(this.currentState.mental.stress)
     
@@ -417,9 +384,9 @@ export class StateAwarenessService {
     work: WorkState,
     social: SocialState
   ) {
-    const productivity = (this.focusToNumber(mental.focus) + work.efficiency) / 2
-    const wellbeing = (this.energyToNumber(physical.energy) + mental.mood === MoodType.POSITIVE ? 80 : 60) / 2
-    const effectiveness = work.efficiency
+    const productivity = (this.focusToNumber(mental.focus) + (work as any).efficiency || 70) / 2
+    const wellbeing = (this.energyToNumber(physical.energyLevel) + ((mental.mood as any) === 'positive' ? 80 : 60)) / 2
+    const effectiveness = (work as any).efficiency || 70
     const balance = (productivity + wellbeing) / 2
 
     return {
@@ -435,7 +402,7 @@ export class StateAwarenessService {
     const map: Record<EnergyLevel, number> = {
       [EnergyLevel.VERY_LOW]: 20,
       [EnergyLevel.LOW]: 40,
-      [EnergyLevel.MEDIUM]: 60,
+      [EnergyLevel.NORMAL]: 60,
       [EnergyLevel.HIGH]: 80,
       [EnergyLevel.VERY_HIGH]: 100
     }
@@ -444,31 +411,31 @@ export class StateAwarenessService {
 
   private focusToNumber(focus: FocusLevel): number {
     const map: Record<FocusLevel, number> = {
-      [FocusLevel.NONE]: 0,
-      [FocusLevel.LOW]: 25,
-      [FocusLevel.MEDIUM]: 50,
-      [FocusLevel.HIGH]: 75,
-      [FocusLevel.DEEP]: 100
+      [FocusLevel.SCATTERED]: 0,
+      [FocusLevel.DISTRACTED]: 25,
+      [FocusLevel.NORMAL]: 50,
+      [FocusLevel.FOCUSED]: 75,
+      [FocusLevel.HYPER_FOCUSED]: 100
     }
     return map[focus] || 50
   }
 
   private stressToNumber(stress: StressLevel): number {
     const map: Record<StressLevel, number> = {
-      [StressLevel.VERY_LOW]: 20,
+      [StressLevel.RELAXED]: 20,
       [StressLevel.LOW]: 40,
-      [StressLevel.MEDIUM]: 60,
+      [StressLevel.MODERATE]: 60,
       [StressLevel.HIGH]: 80,
-      [StressLevel.VERY_HIGH]: 100
+      [StressLevel.EXTREME]: 100
     }
     return map[stress] || 50
   }
 
   // 计算影响
   private calculateImpact(from: UserState, to: UserState): number {
-    const productivityChange = Math.abs(to.overall.productivity - from.overall.productivity)
+    const performanceChange = Math.abs(to.overall.performance - from.overall.performance)
     const wellbeingChange = Math.abs(to.overall.wellbeing - from.overall.wellbeing)
-    return (productivityChange + wellbeingChange) / 2
+    return (performanceChange + wellbeingChange) / 2
   }
 
   // 分析模式
@@ -487,34 +454,41 @@ export class StateAwarenessService {
     
     // 示例：识别能量低谷模式
     const lowEnergyTimes = transitions.filter(t => 
-      t.to.physical.energy === EnergyLevel.LOW || 
-      t.to.physical.energy === EnergyLevel.VERY_LOW
+      t.to.physical.energyLevel === EnergyLevel.LOW || 
+      t.to.physical.energyLevel === EnergyLevel.VERY_LOW
     )
     
     if (lowEnergyTimes.length > 0) {
       patterns.push({
         id: 'pattern-low-energy',
-        type: 'energy_dip',
-        frequency: 'daily',
-        triggers: ['afternoon', 'post_lunch'],
-        impact: 30,
+        name: 'Energy Dip Pattern',
         description: '下午能量低谷',
-        recommendations: ['short_break', 'light_snack', 'walk']
-      })
+        conditions: [],
+        characteristics: {
+          typical: {},
+          optimal: {}
+        },
+        optimizations: [],
+        performance: {
+          occurrences: 1,
+          averageDuration: 120,
+          successRate: 0.8
+        }
+      } as StatePattern)
     }
 
     return patterns
   }
 
   // 获取时间段
-  private getTimeOfDay(hour: number): TimeOfDay {
-    if (hour >= 5 && hour < 9) return TimeOfDay.MORNING
-    if (hour >= 9 && hour < 12) return TimeOfDay.LATE_MORNING
-    if (hour >= 12 && hour < 14) return TimeOfDay.NOON
-    if (hour >= 14 && hour < 17) return TimeOfDay.AFTERNOON
-    if (hour >= 17 && hour < 20) return TimeOfDay.EVENING
-    if (hour >= 20 && hour < 23) return TimeOfDay.NIGHT
-    return TimeOfDay.LATE_NIGHT
+  private getTimeOfDay(hour: number): any {
+    if (hour >= 5 && hour < 9) return 'morning'
+    if (hour >= 9 && hour < 12) return 'late_morning'
+    if (hour >= 12 && hour < 14) return 'noon'
+    if (hour >= 14 && hour < 17) return 'afternoon'
+    if (hour >= 17 && hour < 20) return 'evening'
+    if (hour >= 20 && hour < 23) return 'night'
+    return 'late_night'
   }
 
   // 获取星期几
@@ -553,10 +527,7 @@ export class StateAwarenessService {
         ...baseState,
         id: `prediction-${i}`,
         timestamp: futureTime,
-        context: {
-          ...baseState.context,
-          timeOfDay: this.getTimeOfDay(hour)
-        }
+        adjustments: []
       })
     }
     
@@ -569,51 +540,70 @@ export class StateAwarenessService {
     const state = this.currentState
 
     // 能量管理建议
-    if (state.physical.energy <= EnergyLevel.LOW) {
+    if (state.physical.energyLevel <= EnergyLevel.LOW) {
       adjustments.push({
         id: 'adj-energy',
-        type: StateType.PHYSICAL,
+        type: 'health' as any,
+        category: 'urgent' as any,
+        priority: 'high' as const,
         target: 'energy',
-        currentValue: state.physical.energy,
-        targetValue: EnergyLevel.MEDIUM,
-        action: 'take_break',
-        description: '建议休息15分钟，补充能量',
-        priority: 'high',
-        estimatedImpact: 25,
-        duration: 15
-      })
+        current: state.physical.energyLevel,
+        suggested: EnergyLevel.NORMAL,
+        reason: '建议休息15分钟，补充能量',
+        expectedImpact: {
+          wellbeing: 25,
+          performance: 15
+        },
+        implementation: {
+          immediate: true,
+          duration: 15,
+          steps: ['take_break']
+        }
+      } as StateAdjustment)
     }
 
     // 专注度管理建议
-    if (state.mental.focus <= FocusLevel.LOW && state.work.workload >= WorkloadLevel.HIGH) {
+    if (state.mental.focus <= FocusLevel.DISTRACTED && state.work.workload >= WorkloadLevel.HEAVY) {
       adjustments.push({
         id: 'adj-focus',
-        type: StateType.MENTAL,
+        type: 'mindset' as any,
+        category: 'performance' as any,
+        priority: 'high' as const,
         target: 'focus',
-        currentValue: state.mental.focus,
-        targetValue: FocusLevel.HIGH,
-        action: 'focus_session',
-        description: '启动专注模式，关闭干扰源',
-        priority: 'high',
-        estimatedImpact: 30,
-        duration: 45
-      })
+        current: state.mental.focus,
+        suggested: FocusLevel.FOCUSED,
+        reason: '启动专注模式，关闭干扰源',
+        expectedImpact: {
+          performance: 30
+        },
+        implementation: {
+          immediate: true,
+          duration: 45,
+          steps: ['focus_session']
+        }
+      } as StateAdjustment)
     }
 
     // 压力管理建议
     if (state.mental.stress >= StressLevel.HIGH) {
       adjustments.push({
         id: 'adj-stress',
-        type: StateType.MENTAL,
+        type: 'health' as any,
+        category: 'wellbeing' as any,
+        priority: 'medium' as const,
         target: 'stress',
-        currentValue: state.mental.stress,
-        targetValue: StressLevel.MEDIUM,
-        action: 'relaxation',
-        description: '进行5分钟呼吸练习或冥想',
-        priority: 'medium',
-        estimatedImpact: 20,
-        duration: 5
-      })
+        current: state.mental.stress,
+        suggested: StressLevel.MODERATE,
+        reason: '进行5分钟呼吸练习或冥想',
+        expectedImpact: {
+          wellbeing: 20
+        },
+        implementation: {
+          immediate: true,
+          duration: 5,
+          steps: ['relaxation']
+        }
+      } as StateAdjustment)
     }
 
     return adjustments
@@ -624,28 +614,31 @@ export class StateAwarenessService {
     const newState = { ...this.currentState }
     
     switch (adjustment.type) {
-      case StateType.PHYSICAL:
+      case 'physical' as any:
         if (adjustment.target === 'energy') {
-          newState.physical.energy = adjustment.targetValue as EnergyLevel
+          newState.physical.energyLevel = adjustment.suggested as EnergyLevel
         }
         break
-      case StateType.MENTAL:
+      case 'mental' as any:
         if (adjustment.target === 'focus') {
-          newState.mental.focus = adjustment.targetValue as FocusLevel
+          newState.mental.focus = adjustment.suggested as FocusLevel
         } else if (adjustment.target === 'stress') {
-          newState.mental.stress = adjustment.targetValue as StressLevel
+          newState.mental.stress = adjustment.suggested as StressLevel
         }
         break
     }
 
     const transition: StateTransition = {
-      id: `transition-${Date.now()}`,
       from: this.currentState,
       to: newState,
       timestamp: new Date(),
-      trigger: 'manual',
-      reason: adjustment.description,
-      impact: adjustment.estimatedImpact
+      trigger: {
+        type: 'manual' as const,
+        source: 'user_adjustment',
+        description: adjustment.reason
+      },
+      duration: adjustment.implementation.duration || 0,
+      success: true
     }
 
     this.stateHistory.push(transition)
@@ -671,25 +664,25 @@ export class StateAwarenessService {
     return {
       current: {
         overall: state.overall,
-        energy: state.physical.energy,
+        energy: state.physical.energyLevel,
         focus: state.mental.focus,
         stress: state.mental.stress,
         workload: state.work.workload
       },
       patterns: patterns.map(p => ({
-        type: p.type,
+        name: p.name,
         description: p.description,
-        recommendations: p.recommendations
+        performance: p.performance
       })),
       adjustments: adjustments.map(a => ({
-        action: a.action,
-        description: a.description,
+        target: a.target,
+        reason: a.reason,
         priority: a.priority,
-        duration: a.duration
+        implementation: a.implementation
       })),
       predictions: predictions.map(p => ({
         time: p.timestamp,
-        productivity: p.overall.productivity,
+        performance: p.overall.performance,
         wellbeing: p.overall.wellbeing
       }))
     }

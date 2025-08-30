@@ -23,7 +23,7 @@ interface EventStore {
   }
   
   // 操作方法
-  addEvent: (event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>) => void
+  addEvent: (event: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>) => Event
   updateEvent: (id: string, updates: Partial<Event>) => void
   deleteEvent: (id: string) => void
   duplicateEvent: (id: string) => void
@@ -90,53 +90,58 @@ export const useEventStore = create<EventStore>()(
     },
     
     // 添加事件
-    addEvent: (eventData) => set((state) => {
-      const now = new Date()
-      const newEvent: Event = {
-        ...eventData,
-        id: generateId(),
-        createdAt: now,
-        updatedAt: now,
-        // 默认时间流属性
-        position: eventData.position || { x: 0, y: 0, z: 0 },
-        size: eventData.size || { width: 200, height: 80, depth: 20 },
-        color: eventData.color || '#6366f1',
-        opacity: eventData.opacity || 0.8,
-        // 默认交互状态
-        isSelected: false,
-        isDragging: false,
-        isHovered: false,
-        isConflicted: false,
-        // 工时预算和精力管理默认值
-        energyRequired: eventData.energyRequired,
-        estimatedDuration: eventData.estimatedDuration,
-        isMarketProtected: eventData.isMarketProtected || false,
-        flexibilityScore: eventData.flexibilityScore || 50,
-        // 默认数组
-        tags: eventData.tags || [],
-        reminders: eventData.reminders || []
-      }
-      
-      // 检查冲突
-      const conflictingEvents = state.events.filter(event => 
-        hasTimeConflict(newEvent, event)
-      )
-      
-      if (conflictingEvents.length > 0) {
-        newEvent.isConflicted = true
-        // 标记冲突的事件
-        conflictingEvents.forEach(event => {
-          event.isConflicted = true
+    addEvent: (eventData) => {
+      let createdEvent: Event
+      set((state) => {
+        const now = new Date()
+        const newEvent: Event = {
+          ...eventData,
+          id: generateId(),
+          createdAt: now,
+          updatedAt: now,
+          // 默认时间流属性
+          position: eventData.position || { x: 0, y: 0, z: 0 },
+          size: eventData.size || { width: 200, height: 80, depth: 20 },
+          color: eventData.color || '#6366f1',
+          opacity: eventData.opacity || 0.8,
+          // 默认交互状态
+          isSelected: false,
+          isDragging: false,
+          isHovered: false,
+          isConflicted: false,
+          // 工时预算和精力管理默认值
+          energyRequired: eventData.energyRequired,
+          estimatedDuration: eventData.estimatedDuration,
+          isMarketProtected: eventData.isMarketProtected || false,
+          flexibilityScore: eventData.flexibilityScore || 50,
+          // 默认数组
+          tags: eventData.tags || [],
+          reminders: eventData.reminders || []
+        }
+        
+        // 检查冲突
+        const conflictingEvents = state.events.filter(event => 
+          hasTimeConflict(newEvent, event)
+        )
+        
+        if (conflictingEvents.length > 0) {
+          newEvent.isConflicted = true
+          // 标记冲突的事件
+          conflictingEvents.forEach(event => {
+            event.isConflicted = true
+          })
+        }
+        
+        state.events.push(newEvent)
+        createdEvent = newEvent
+        
+        // 异步保存到StorageService
+        storageService.saveEvent(newEvent).catch((error) => {
+          // Failed to save event to storage
         })
-      }
-      
-      state.events.push(newEvent)
-      
-      // 异步保存到StorageService
-      storageService.saveEvent(newEvent).catch((error) => {
-        // Failed to save event to storage
       })
-    }),
+      return createdEvent!
+    },
     
     // 更新事件
     updateEvent: (id, updates) => set((state) => {

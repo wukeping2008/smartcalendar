@@ -20,13 +20,13 @@ export enum PanelPriority {
 // 面板类型枚举
 export enum PanelType {
   AI_ASSISTANT = 'ai-assistant',
-  // CALENDAR = 'calendar', // Redundant with main view
+  CALENDAR = 'calendar',
   MARKET_STATUS = 'market-status',
-  // TIME_FLOW = 'time-flow', // Redundant with main view
+  TIME_FLOW = 'time-flow',
   VOICE_INPUT = 'voice-input',
-  // INBOX = 'inbox', // Merged into GTD_INBOX
+  INBOX = 'inbox',
   TIME_BUDGET = 'time-budget',
-  // RELATIONSHIPS = 'relationships', // 已合并到PERSON_CARD
+  RELATIONSHIPS = 'relationships',
   DAILY_BRIEFING = 'daily-briefing',
   WHAT_IF = 'what-if',
   PERSON_CARD = 'person-card',

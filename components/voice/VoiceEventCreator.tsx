@@ -178,28 +178,28 @@ export default function VoiceEventCreator({
       const parsedCommand = await aiService.parseNaturalLanguageCommand(text)
       console.log('AI解析结果:', parsedCommand)
       
-      if (parsedCommand && parsedCommand.title) {
+      if (parsedCommand && (parsedCommand as any).title) {
         // 创建事件
         const eventData = {
-          title: parsedCommand.title,
-          description: parsedCommand.description || `语音创建：${text}`,
-          startTime: parsedCommand.startTime ? new Date(parsedCommand.startTime) : new Date(Date.now() + 60 * 60 * 1000),
-          endTime: parsedCommand.endTime ? new Date(parsedCommand.endTime) : new Date(Date.now() + 2 * 60 * 60 * 1000),
-          category: parsedCommand.category || EventCategory.OTHER,
-          priority: parsedCommand.priority || Priority.MEDIUM,
+          title: (parsedCommand as any).title,
+          description: (parsedCommand as any).description || `语音创建：${text}`,
+          startTime: (parsedCommand as any).startTime ? new Date((parsedCommand as any).startTime) : new Date(Date.now() + 60 * 60 * 1000),
+          endTime: (parsedCommand as any).endTime ? new Date((parsedCommand as any).endTime) : new Date(Date.now() + 2 * 60 * 60 * 1000),
+          category: (parsedCommand as any).category || EventCategory.OTHER,
+          priority: (parsedCommand as any).priority || Priority.MEDIUM,
           status: EventStatus.PLANNED,
           position: { x: 0, y: 0, z: 0 },
           size: { width: 200, height: 80, depth: 20 },
-          color: getCategoryColor(parsedCommand.category || EventCategory.OTHER),
+          color: getCategoryColor((parsedCommand as any).category || EventCategory.OTHER),
           opacity: 0.8,
           isSelected: false,
           isDragging: false,
           isHovered: false,
           isConflicted: false,
-          tags: parsedCommand.tags || ['语音创建'],
-          reminders: parsedCommand.reminders || [],
-          energyRequired: parsedCommand.energyRequired || EnergyLevel.MEDIUM,
-          estimatedDuration: parsedCommand.estimatedDuration || 60,
+          tags: (parsedCommand as any).tags || ['语音创建'],
+          reminders: (parsedCommand as any).reminders || [],
+          energyRequired: (parsedCommand as any).energyRequired || EnergyLevel.MEDIUM,
+          estimatedDuration: (parsedCommand as any).estimatedDuration || 60,
           isMarketProtected: false,
           flexibilityScore: 70
         }

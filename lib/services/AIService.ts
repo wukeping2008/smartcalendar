@@ -571,7 +571,7 @@ class AIService {
     return `
 当前时间：${context.time.toLocaleString()}
 精力水平：${context.energyLevel}
-最近完成：${context.recentEvents.slice(0, 2).map(e => e.title).join('、')}
+最近完成：${context.recentEvents.slice(0, 2).map((e: any) => e.title).join('、')}
 ${context.marketStatus ? `市场状态：${context.marketStatus.volatility}波动` : ''}
 `
   }
@@ -674,6 +674,40 @@ ${preferences.tradingFocus ? '- 需要保护交易时间' : ''}
       '⏰ 为重要任务预留黄金时间',
       '🎯 每天设定3个关键目标'
     ]
+  }
+
+  /**
+   * 与Claude进行对话
+   */
+  async chatWithClaude(message: string, context?: any): Promise<string> {
+    const messages: ChatMessage[] = [
+      {
+        role: 'system',
+        content: `你是一个智能日历助手，帮助用户管理时间和任务。你可以：
+1. 解答日程管理问题
+2. 提供生产力建议
+3. 分析时间安排
+4. 协助事件创建和修改
+
+请用简洁、友好的语调回答问题。${context ? `\n\n当前上下文：${JSON.stringify(context, null, 2)}` : ''}`
+      },
+      {
+        role: 'user',
+        content: message
+      }
+    ];
+
+    return new Promise((resolve, reject) => {
+      llmService.chat(messages, {
+        onComplete: (response) => {
+          resolve(response.content);
+        },
+        onError: (error) => {
+          console.error('Claude chat error:', error);
+          reject(new Error('Claude服务暂时不可用，请稍后再试'));
+        }
+      });
+    });
   }
 
   /**

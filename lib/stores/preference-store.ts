@@ -242,7 +242,7 @@ export const usePreferenceStore = create<PreferenceStore>()(
       
       applyPreset: (preset) => set((state) => ({
         ...state,
-        ...presets[preset]
+        ...(presets[preset] as any)
       })),
       
       resetToDefaults: () => set(defaultPreferences),

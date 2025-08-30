@@ -168,7 +168,7 @@ export default function FullFeaturesDemo() {
                 <TabsTrigger value="bank">时间银行</TabsTrigger>
               </TabsList>
               <TabsContent value="tracker" className="mt-6">
-                <TimeTrackerWidget mode="full" />
+                <TimeTrackerWidget />
               </TabsContent>
               <TabsContent value="budget" className="mt-6">
                 <TimeBudgetDashboard />

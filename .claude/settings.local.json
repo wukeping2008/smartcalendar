@@ -21,7 +21,9 @@
       "Bash(npm run build:*)",
       "Bash(start http://localhost:3002/test)",
       "Bash(move:*)",
-      "Bash(npx depcheck:*)"
+      "Bash(npx depcheck:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": []
   }

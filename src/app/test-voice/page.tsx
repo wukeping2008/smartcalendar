@@ -36,7 +36,7 @@ export default function TestVoicePage() {
     const checkSupport = () => {
       const hasWebkitSpeech = 'webkitSpeechRecognition' in window
       const hasSpeechRecognition = 'SpeechRecognition' in window
-      const hasMediaDevices = navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+      const hasMediaDevices = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
       
       setIsSupported(hasWebkitSpeech || hasSpeechRecognition)
       

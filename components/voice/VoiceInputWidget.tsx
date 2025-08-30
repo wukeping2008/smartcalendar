@@ -328,7 +328,7 @@ export default function VoiceInputWidget({
         )}
       </Button>
       
-      {showTranscript && transcript && variant !== 'floating' && (
+      {showTranscript && transcript && (variant as string) !== 'floating' && (
         <div className="ml-2 px-3 py-1 bg-gray-800/50 rounded text-sm text-gray-300">
           {transcript}
         </div>

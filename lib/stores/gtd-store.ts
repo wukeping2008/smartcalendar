@@ -4,11 +4,37 @@ import { immer } from 'zustand/middleware/immer'
 import { 
   GTDTask, 
   GTDProject, 
-  GTDContext, 
-  GTDTaskType,
-  GTDPriority,
-  ProcessingStatus 
+  GTDTaskCategory
 } from '../../types/gtd-task'
+
+// 添加缺失的类型定义
+export interface GTDContext {
+  id: string
+  name: string
+  description?: string
+  color?: string
+}
+
+export enum GTDTaskType {
+  INBOX = 'inbox',
+  NEXT_ACTION = 'next_action',
+  SOMEDAY = 'someday',
+  WAITING_FOR = 'waiting_for',
+  PROJECT = 'project'
+}
+
+export enum GTDPriority {
+  LOW = 1,
+  MEDIUM = 2,
+  HIGH = 3,
+  URGENT = 4,
+  CRITICAL = 5
+}
+
+export enum ProcessingStatus {
+  UNPROCESSED = 'unprocessed',
+  PROCESSED = 'processed'
+}
 
 interface GTDStore {
   // 状态
@@ -30,14 +56,14 @@ interface GTDStore {
   deleteContext: (id: string) => void
   
   // 查询
-  getTasksByType: (type: GTDTaskType) => GTDTask[]
+  getTasksByType: (type: GTDTaskCategory) => GTDTask[]
   getTasksByProject: (projectId: string) => GTDTask[]
   getTasksByContext: (context: string) => GTDTask[]
   
   // 批量操作
   clearCompletedTasks: () => void
   moveToSomeday: (taskIds: string[]) => void
-  processInboxItem: (taskId: string, decision: GTDTaskType, projectId?: string) => void
+  processInboxItem: (taskId: string, decision: GTDTaskCategory, projectId?: string) => void
 }
 
 const generateId = (): string => {
@@ -58,7 +84,7 @@ export const useGTDStore = create<GTDStore>()(
           id: generateId(),
           createdAt: now,
           updatedAt: now,
-          completed: false
+          completedAt: undefined
         }
         state.tasks.push(newTask)
       }),
@@ -106,7 +132,7 @@ export const useGTDStore = create<GTDStore>()(
         state.tasks.forEach(task => {
           if (task.projectId === id) {
             task.projectId = undefined
-            task.type = GTDTaskType.INBOX
+            task.category = GTDTaskCategory.TRASH
           }
         })
       }),
@@ -134,7 +160,7 @@ export const useGTDStore = create<GTDStore>()(
       }),
       
       getTasksByType: (type) => {
-        return get().tasks.filter(t => t.type === type && !t.completed)
+        return get().tasks.filter(t => t.category === type && t.status !== 'completed')
       },
       
       getTasksByProject: (projectId) => {
@@ -142,18 +168,18 @@ export const useGTDStore = create<GTDStore>()(
       },
       
       getTasksByContext: (context) => {
-        return get().tasks.filter(t => t.contexts?.includes(context))
+        return get().tasks.filter(t => t.tags?.includes(context))
       },
       
       clearCompletedTasks: () => set((state) => {
-        state.tasks = state.tasks.filter(t => !t.completed)
+        state.tasks = state.tasks.filter(t => t.status !== 'completed')
       }),
       
       moveToSomeday: (taskIds) => set((state) => {
         taskIds.forEach(id => {
           const task = state.tasks.find(t => t.id === id)
           if (task) {
-            task.type = GTDTaskType.SOMEDAY
+            task.category = GTDTaskCategory.STORE
             task.updatedAt = new Date()
           }
         })
@@ -162,8 +188,8 @@ export const useGTDStore = create<GTDStore>()(
       processInboxItem: (taskId, decision, projectId) => set((state) => {
         const task = state.tasks.find(t => t.id === taskId)
         if (task) {
-          task.type = decision
-          task.processingStatus = ProcessingStatus.PROCESSED
+          task.category = decision as any
+          task.status = 'in_progress'
           task.projectId = projectId
           task.updatedAt = new Date()
         }

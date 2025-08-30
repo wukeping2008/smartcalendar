@@ -381,11 +381,11 @@ class AIDecisionEngine {
 
     try {
       // 使用AI服务生成智能建议
-      const aiInsight = await aiService.parseNaturalLanguage(
+      const aiInsight = await aiService.parseNaturalLanguageCommand(
         '基于当前用户的时间使用模式和市场情况，提供3个具体的时间管理优化建议'
       )
 
-      if (aiInsight.command && aiInsight.params) {
+      if ((aiInsight as any).command && (aiInsight as any).params) {
         recommendations.push({
           id: `ai_insight_${Date.now()}`,
           type: 'productivity',
@@ -590,7 +590,6 @@ class AIDecisionEngine {
   }
 }
 
-// 导出单例和类型
+// 导出单例
 export const aiDecisionEngine = AIDecisionEngine.getInstance()
-export type { DecisionContext, SmartRecommendation, IntelligentInsight }
 export default AIDecisionEngine

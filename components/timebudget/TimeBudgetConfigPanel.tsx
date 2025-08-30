@@ -93,7 +93,7 @@ export default function TimeBudgetConfigPanel({ onClose }: TimeBudgetConfigPanel
   // 更新预算设置
   const updateBudgetSetting = (budgetId: string, field: keyof TimeBudget['budgets'], value: number) => {
     const current = editingBudgets.get(budgetId) || {}
-    const budgets = current.budgets || {}
+    const budgets = current.budgets || { daily: 0, weekly: 0, monthly: 0 }
     
     setEditingBudgets(prev => new Map(prev).set(budgetId, {
       ...current,
@@ -107,7 +107,7 @@ export default function TimeBudgetConfigPanel({ onClose }: TimeBudgetConfigPanel
   // 更新告警设置
   const updateAlertSetting = (budgetId: string, field: keyof TimeBudget['alerts'], value: number | boolean) => {
     const current = editingBudgets.get(budgetId) || {}
-    const alerts = current.alerts || {}
+    const alerts = current.alerts || { warningThreshold: 80, criticalThreshold: 95, enabled: true }
     
     setEditingBudgets(prev => new Map(prev).set(budgetId, {
       ...current,

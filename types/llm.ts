@@ -61,9 +61,61 @@ export interface SpeechRecognitionErrorEvent extends Event {
   message?: string;
 }
 
+// 语音识别类型定义
+export interface ISpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  maxAlternatives: number;
+  grammars: any; // SpeechGrammarList
+  serviceURI: string;
+  start(): void;
+  stop(): void;
+  abort(): void;
+  onstart: ((this: ISpeechRecognition, ev: Event) => any) | null;
+  onend: ((this: ISpeechRecognition, ev: Event) => any) | null;
+  onerror: ((this: ISpeechRecognition, ev: SpeechRecognitionErrorEvent) => any) | null;
+  onresult: ((this: ISpeechRecognition, ev: SpeechRecognitionEvent) => any) | null;
+  onaudiostart: ((this: ISpeechRecognition, ev: Event) => any) | null;
+  onaudioend: ((this: ISpeechRecognition, ev: Event) => any) | null;
+  onsoundstart: ((this: ISpeechRecognition, ev: Event) => any) | null;
+  onsoundend: ((this: ISpeechRecognition, ev: Event) => any) | null;
+  onspeechstart: ((this: ISpeechRecognition, ev: Event) => any) | null;
+  onspeechend: ((this: ISpeechRecognition, ev: Event) => any) | null;
+  onnomatch: ((this: ISpeechRecognition, ev: SpeechRecognitionEvent) => any) | null;
+}
+
+export interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+  message?: string;
+}
+
+export interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+export interface SpeechRecognitionResultList {
+  readonly length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+export interface SpeechRecognitionResult {
+  readonly length: number;
+  readonly isFinal: boolean;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+export interface SpeechRecognitionAlternative {
+  readonly transcript: string;
+  readonly confidence: number;
+}
+
 export interface ExtendedWindow extends Window {
-  SpeechRecognition?: typeof SpeechRecognition;
-  webkitSpeechRecognition?: typeof SpeechRecognition;
+  SpeechRecognition?: any;
+  webkitSpeechRecognition?: any;
 }
 
 // AI服务响应类型

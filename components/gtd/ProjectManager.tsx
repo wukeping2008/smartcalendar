@@ -55,7 +55,7 @@ export default function ProjectManager({ className = '' }: ProjectManagerProps) 
   }
 
   const loadTasks = async () => {
-    const allTasks = await gtdService.getAllTasks()
+    const allTasks = await gtdService.getTasks()
     setTasks(allTasks)
   }
 

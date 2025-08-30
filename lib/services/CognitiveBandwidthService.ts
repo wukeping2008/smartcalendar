@@ -5,6 +5,7 @@
 
 import {
   CognitiveLoad,
+  CognitiveLoadLevel,
   CognitiveItem,
   Commitment,
   CommitmentType,
@@ -92,6 +93,7 @@ class CognitiveBandwidthService {
       current: 0,
       max: this.MAX_COGNITIVE_LOAD,
       threshold: this.WARNING_THRESHOLD,
+      level: CognitiveLoadLevel.LOW,
       activeItems: [],
       archivedItems: []
     }

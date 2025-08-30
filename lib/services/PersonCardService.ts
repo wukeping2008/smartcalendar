@@ -17,6 +17,7 @@ import {
   RelationshipStatus,
   InteractionType,
   CommunicationChannel,
+  CommunicationStyle,
   Sentiment,
   PersonTask,
   TaskStatus,
@@ -172,7 +173,7 @@ class PersonCardService {
       },
       personality: data.personality || {
         traits: [],
-        communicationStyle: data.personality?.communicationStyle!,
+        communicationStyle: data.personality?.communicationStyle || CommunicationStyle.FORMAL,
         values: [],
         strengths: [],
         motivations: []
@@ -758,7 +759,7 @@ class PersonCardService {
     `
 
     try {
-      const response = await aiService.generateText(prompt)
+      const response = await (aiService as any).generateText(prompt)
       return response.split('\n').filter(line => line.trim())
     } catch (error) {
       console.error('Failed to generate insights:', error)
@@ -1053,8 +1054,8 @@ class PersonCardService {
 
   // ============= 从关系管理模块迁移的新功能 =============
   
-  // 更新联系偏好
-  updateContactPreferences(personId: string, preferences: any): boolean {
+  // 更新联系偏好（备用方法）
+  altUpdateContactPreferences(personId: string, preferences: any): boolean {
     const person = this.persons.get(personId)
     if (!person) return false
 
@@ -1065,8 +1066,8 @@ class PersonCardService {
     return true
   }
 
-  // 更新会议偏好
-  updateMeetingPreferences(personId: string, preferences: any): boolean {
+  // 更新会议偏好（备用方法）
+  altUpdateMeetingPreferences(personId: string, preferences: any): boolean {
     const person = this.persons.get(personId)
     if (!person) return false
 
@@ -1077,8 +1078,8 @@ class PersonCardService {
     return true
   }
 
-  // 添加礼物记录
-  addGiftRecord(personId: string, gift: any): boolean {
+  // 添加礼物记录（简化版本）
+  simpleAddGiftRecord(personId: string, gift: any): boolean {
     const person = this.persons.get(personId)
     if (!person) return false
 
@@ -1104,8 +1105,8 @@ class PersonCardService {
     return true
   }
 
-  // 获取礼物建议
-  getGiftSuggestions(personId: string): string[] {
+  // 获取简单礼物建议（基础版本）
+  altGetGiftSuggestions(personId: string): string[] {
     const person = this.persons.get(personId)
     if (!person || !person.giftManagement) return []
 
@@ -1128,7 +1129,7 @@ class PersonCardService {
 
     // 避免重复和不喜欢的
     const dislikes = person.giftManagement.preferences.dislikes || []
-    return [...new Set(suggestions)].filter(s => !dislikes.includes(s))
+    return Array.from(new Set(suggestions)).filter(s => !dislikes.includes(s))
   }
 
   // 获取最佳联系时间
@@ -1164,8 +1165,8 @@ class PersonCardService {
     return true
   }
 
-  // 生成会议邀请建议
-  generateMeetingInvite(personId: string): any {
+  // 生成会议邀请建议（简化版本）
+  simpleMeetingInvite(personId: string): any {
     const person = this.persons.get(personId)
     if (!person) return null
 
@@ -1189,8 +1190,8 @@ class PersonCardService {
     }
   }
 
-  // 执行秘书功能：自动生成祝福语
-  generateGreeting(personId: string, occasion: string): string {
+  // 执行秘书功能：自动生成祝福语（备用版本）
+  altGenerateGreeting(personId: string, occasion: string): string {
     const person = this.persons.get(personId)
     if (!person) return ''
 

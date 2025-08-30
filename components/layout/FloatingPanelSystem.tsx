@@ -30,16 +30,24 @@ interface FloatingPanelSystemProps {
   onTaskSchedule?: (task: any) => void;
 }
 
+// 占位符组件
+const PlaceholderComponent = ({ panelType }: { panelType: string }) => (
+  <div className="p-4">
+    <h3 className="text-lg font-semibold">面板开发中</h3>
+    <p className="text-gray-600">面板 "{panelType}" 正在开发中，敬请期待...</p>
+  </div>
+)
+
 // 面板内容映射
 const PANEL_COMPONENTS: Record<PanelType, React.ComponentType<any>> = {
   [PanelType.AI_ASSISTANT]: AIAssistant,
-  // [PanelType.CALENDAR]: CalendarContainer,
+  [PanelType.CALENDAR]: (props: any) => <PlaceholderComponent panelType="calendar" {...props} />,
   [PanelType.MARKET_STATUS]: MarketStatusBar,
-  // [PanelType.TIME_FLOW]: EnhancedFlowCanvas,
+  [PanelType.TIME_FLOW]: (props: any) => <PlaceholderComponent panelType="time-flow" {...props} />,
   [PanelType.VOICE_INPUT]: VoiceInputButton,
-  // [PanelType.INBOX]: InboxPanel, // Merged into GTD_INBOX
+  [PanelType.INBOX]: (props: any) => <PlaceholderComponent panelType="inbox" {...props} />,
   [PanelType.TIME_BUDGET]: TimeBudgetDashboard,
-  // [PanelType.RELATIONSHIPS]: RelationshipManager, // 已合并到PersonCardPanel
+  [PanelType.RELATIONSHIPS]: (props: any) => <PlaceholderComponent panelType="relationships" {...props} />,
   [PanelType.DAILY_BRIEFING]: DailyBriefingPanel,
   [PanelType.WHAT_IF]: WhatIfSimulatorPanel,
   [PanelType.PERSON_CARD]: PersonCardPanel,

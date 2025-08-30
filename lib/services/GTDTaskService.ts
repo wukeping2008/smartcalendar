@@ -107,7 +107,7 @@ export class GTDTaskService {
             updatedAt: new Date(task.updatedAt),
             dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
             scheduledDate: task.scheduledDate ? new Date(task.scheduledDate) : undefined,
-            completedDate: task.completedDate ? new Date(task.completedDate) : undefined
+            completedAt: (task as any).completedAt ? new Date((task as any).completedAt) : undefined
           });
         });
       }
@@ -182,7 +182,7 @@ export class GTDTaskService {
         id: this.generateId(),
         title: this.extractTitle(expanded || item.rawText),
         originalInput: item.rawText,
-        expandedContent: expanded,
+        expandedContent: expanded || undefined,
         category,
         priority,
         source: item.source,

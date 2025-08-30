@@ -9,18 +9,18 @@ import { Button } from '../../src/components/ui/button';
 import { Card } from '../../src/components/ui/card';
 
 // 现有组件
-import EnhancedFlowCanvas from '../../timeflow/FlowCanvas';
-import CalendarContainer from '../../calendar/CalendarContainer';
-import SmartEventCreator from '../../calendar/SmartEventCreator';
-import FloatingTips from '../../help/FloatingTips';
-import FeatureGuideModal from '../../help/FeatureGuideModal';
+import EnhancedFlowCanvas from '../timeflow/FlowCanvas';
+import CalendarContainer from '../calendar/CalendarContainer';
+import SmartEventCreator from '../calendar/SmartEventCreator';
+import FloatingTips from '../help/FloatingTips';
+import FeatureGuideModal from '../help/FeatureGuideModal';
 
 // 新的浮动面板系统
 import { FloatingPanelSystem } from './FloatingPanelSystem';
 
 // 类型和状态
-import { Event } from '../../../types/event';
-import { useEventStore } from '../../../lib/stores/event-store';
+import { Event } from '../../types/event';
+import { useEventStore } from '../../lib/stores/event-store';
 
 export default function EnhancedHomePage() {
   const { events, selectEvent, addEvent, deleteEvent } = useEventStore();
@@ -157,11 +157,11 @@ export default function EnhancedHomePage() {
                       start: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 0, 0),
                       end: new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate(), 23, 59)
                     }}
-                    onEventSelect={(event) => {
+                    onEventSelect={(event: Event) => {
                       setSelectedEvent(event);
                       selectEvent(event.id);
                     }}
-                    onEventDrag={(eventId, newPosition) => {
+                    onEventDrag={(eventId: string, newPosition: any) => {
                       // Event dragged
                     }}
                     riverFlow={{

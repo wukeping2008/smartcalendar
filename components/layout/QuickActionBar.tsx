@@ -122,7 +122,7 @@ export default function QuickActionBar({ className = '' }: QuickActionBarProps) 
                     
                     {/* 语音输入 */}
                     <VoiceInputFixed
-                      size="default"
+                      size="md"
                       onResult={(text) => {
                         console.log('语音输入:', text)
                       }}

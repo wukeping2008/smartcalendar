@@ -63,8 +63,8 @@ interface SpeechGrammarList {
 
 // Extend window object
 interface ExtendedWindow extends Window {
-  webkitSpeechRecognition?: { new(): SpeechRecognition };
-  SpeechRecognition?: { new(): SpeechRecognition };
+  webkitSpeechRecognition?: any;
+  SpeechRecognition?: any;
 }
 
 declare const window: ExtendedWindow;

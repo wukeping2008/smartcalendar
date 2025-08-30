@@ -16,7 +16,8 @@ import {
   Zap,
   Brain,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Calendar
 } from 'lucide-react';
 import {
   PanelType,
@@ -107,6 +108,62 @@ function saveToolbarPosition(position: ToolbarPosition): void {
 }
 
 export const PANEL_CONFIGS: Record<PanelType, Omit<PanelConfig, 'component'>> = {
+  [PanelType.CALENDAR]: {
+    id: PanelType.CALENDAR,
+    title: '日历视图',
+    icon: Calendar,
+    shortcut: 'Alt+C',
+    defaultSize: { width: 800, height: 600 },
+    minSize: { width: 400, height: 300 },
+    resizable: true,
+    draggable: true,
+    canPin: true,
+    canMinimize: true,
+    priority: PanelPriority.HIGH,
+    description: '传统日历视图'
+  },
+  [PanelType.TIME_FLOW]: {
+    id: PanelType.TIME_FLOW,
+    title: '3D时间流',
+    icon: Zap,
+    shortcut: 'Alt+F',
+    defaultSize: { width: 800, height: 600 },
+    minSize: { width: 400, height: 300 },
+    resizable: true,
+    draggable: true,
+    canPin: true,
+    canMinimize: true,
+    priority: PanelPriority.MEDIUM,
+    description: '3D时间流视图'
+  },
+  [PanelType.INBOX]: {
+    id: PanelType.INBOX,
+    title: '收件箱',
+    icon: Inbox,
+    shortcut: 'Alt+I',
+    defaultSize: { width: 500, height: 700 },
+    minSize: { width: 350, height: 400 },
+    resizable: true,
+    draggable: true,
+    canPin: true,
+    canMinimize: true,
+    priority: PanelPriority.HIGH,
+    description: '任务收件箱'
+  },
+  [PanelType.RELATIONSHIPS]: {
+    id: PanelType.RELATIONSHIPS,
+    title: '关系管理',
+    icon: Users,
+    shortcut: 'Alt+R',
+    defaultSize: { width: 600, height: 700 },
+    minSize: { width: 400, height: 500 },
+    resizable: true,
+    draggable: true,
+    canPin: true,
+    canMinimize: true,
+    priority: PanelPriority.MEDIUM,
+    description: '人际关系管理'
+  },
   [PanelType.AI_ASSISTANT]: {
     id: PanelType.AI_ASSISTANT,
     title: 'AI助手',
@@ -489,7 +546,7 @@ export function IconToolbar({ activePanelIds, onPanelClick, getSmartPriority, co
                   config={panelConfig}
                   isActive={isActive}
                   onClick={() => onPanelClick(panelType)}
-                  isCollapsed={isCollapsed}
+                  isCollapsed={isCollapsed || false}
                 />
               );
             })}

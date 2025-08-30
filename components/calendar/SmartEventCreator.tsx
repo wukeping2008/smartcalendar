@@ -165,7 +165,7 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
         await audioServiceRef.current.startTranscription()
       } else {
         // 浏览器API回退
-        const SpeechRecognition = (window as ExtendedWindow).webkitSpeechRecognition || (window as ExtendedWindow).SpeechRecognition
+        const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
         
         if (!SpeechRecognition) {
           // 浏览器不支持语音识别
@@ -177,7 +177,7 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
         recognition.interimResults = true
         recognition.lang = 'zh-CN'
 
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
+        recognition.onresult = (event: any) => {
           let finalTranscript = ''
           let interimTranscript = ''
 
@@ -273,7 +273,7 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
       const minuteNum = minute ? parseInt(minute.replace('分', '')) || 0 : 0
       
       const now = new Date()
-      let targetDate = new Date()
+      const targetDate = new Date()
       
       if (day === '明天') {
         targetDate.setDate(now.getDate() + 1)
@@ -613,7 +613,7 @@ export default function SmartEventCreator({ onEventCreated, className = '' }: Sm
             <span className="text-sm font-medium text-blue-300">语音识别完成</span>
           </div>
           <p className="text-xs text-blue-200 mb-2">
-            请检查并修改下方自动填写的内容，确认无误后点击"🚀 创建事件"
+            请检查并修改下方自动填写的内容，确认无误后点击&ldquo;🚀 创建事件&rdquo;
           </p>
           <div className="text-xs text-gray-300 bg-black/20 rounded p-2">
             原始语音：{voiceTranscript}

@@ -5,7 +5,7 @@ import { Button } from '../../src/components/ui/button'
 import { Card } from '../../src/components/ui/card'
 import { Badge } from '../../src/components/ui/badge'
 import { useEventStore } from '../../lib/stores/event-store'
-import { Event, EventCategory, Priority, EnergyLevel } from '../../types/event'
+import { Event, EventCategory, Priority, EnergyLevel, EventStatus } from '../../types/event'
 import { Clock, Calendar, AlertCircle, TrendingUp, Coffee } from 'lucide-react'
 
 interface WeekViewCompactProps {

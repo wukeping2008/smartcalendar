@@ -91,7 +91,7 @@ export default function CognitiveManagementPanel({
     // 显示成功提示
   }
 
-  const handleDecision = (decision: any) => {
+  const handleDecision = () => {
     // 处理ROI决策结果
     // 可以保存到历史记录或触发其他操作
   }

@@ -562,10 +562,10 @@ export default function InboxPanel({ className = '', onTaskSchedule }: InboxPane
                   </span>
                   {item.analysis && (
                     <div className="flex items-center space-x-1">
-                      {item.analysis.urgency > 70 && (
+                      {item.analysis.urgency && item.analysis.urgency > 70 && (
                         <AlertCircle className="h-3 w-3 text-red-500" />
                       )}
-                      {item.analysis.importance > 70 && (
+                      {item.analysis.importance && item.analysis.importance > 70 && (
                         <Target className="h-3 w-3 text-orange-500" />
                       )}
                     </div>

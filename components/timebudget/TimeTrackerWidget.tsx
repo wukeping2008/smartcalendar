@@ -60,12 +60,13 @@ export default function TimeTrackerWidget({
     let interval = setInterval(updateTimerState, getInterval())
 
     // 监听追踪状态变化，动态调整更新频率
+    let currentIntervalTime = getInterval()
     const checkInterval = setInterval(() => {
       const newInterval = getInterval()
-      if ((newInterval === 1000 && interval._idleTimeout !== 1000) ||
-          (newInterval === 5000 && interval._idleTimeout !== 5000)) {
+      if (newInterval !== currentIntervalTime) {
         clearInterval(interval)
         interval = setInterval(updateTimerState, newInterval)
+        currentIntervalTime = newInterval
       }
     }, 1000)
 

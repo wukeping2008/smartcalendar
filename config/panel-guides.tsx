@@ -20,7 +20,9 @@ import {
   Calculator,
   Target,
   Heart,
-  Gift
+  Gift,
+  Calendar,
+  Activity
 } from 'lucide-react'
 import { PanelType } from '../types/floating-panel'
 import type { GuideSection } from '../components/ui/panel-guide'
@@ -393,6 +395,83 @@ export const PANEL_GUIDES: Record<PanelType, PanelGuideConfig> = {
       '认知带宽基于海马体研究',
       '每天清理低优先级承诺',
       'Trading时间拒绝一切新承诺'
+    ]
+  },
+
+  // 添加缺失的面板配置
+  [PanelType.CALENDAR]: {
+    title: '传统日历',
+    description: '传统月视图日历界面',
+    sections: [
+      {
+        title: '日历功能',
+        icon: <Calendar className="w-4 h-4 text-blue-400" />,
+        items: [
+          '月视图显示',
+          '事件快速创建',
+          '拖拽调整时间'
+        ]
+      }
+    ],
+    shortcuts: [
+      { key: 'Alt+C', action: '切换到日历视图' }
+    ]
+  },
+
+  [PanelType.TIME_FLOW]: {
+    title: '3D时间流',
+    description: '创新的3D时间轴可视化',
+    sections: [
+      {
+        title: '3D交互',
+        icon: <Activity className="w-4 h-4 text-purple-400" />,
+        items: [
+          '时间轴3D导航',
+          '事件立体显示',
+          '时间流动效果'
+        ]
+      }
+    ],
+    shortcuts: [
+      { key: 'Alt+F', action: '切换到时间流视图' }
+    ]
+  },
+
+  [PanelType.INBOX]: {
+    title: '收件箱',
+    description: '快速收集和处理信息',
+    sections: [
+      {
+        title: '收集处理',
+        icon: <Inbox className="w-4 h-4 text-green-400" />,
+        items: [
+          '快速输入',
+          '智能分类',
+          '批量处理'
+        ]
+      }
+    ],
+    shortcuts: [
+      { key: 'Alt+I', action: '打开收件箱' }
+    ]
+  },
+
+  [PanelType.RELATIONSHIPS]: {
+    title: '关系管理',
+    description: '人际关系网络管理',
+    sections: [
+      {
+        title: '关系网络',
+        icon: <Users className="w-4 h-4 text-pink-400" />,
+        items: [
+          '联系人管理',
+          '互动记录',
+          '关系强度分析'
+        ]
+      }
+    ],
+    shortcuts: [
+      { key: 'Alt+R', action: '打开关系管理' }
     ]
   }
 }
