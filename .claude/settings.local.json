@@ -23,7 +23,8 @@
       "Bash(move:*)",
       "Bash(npx depcheck:*)",
       "Bash(npm run lint:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(start http://localhost:3000)"
     ],
     "deny": []
   }
